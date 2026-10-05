@@ -3,7 +3,7 @@
 **Show what you shipped.**
 
 [![Status: Beta](https://img.shields.io/badge/status-beta-orange)](https://github.com/Soe-Moe/showship/issues)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.1-blue)](https://www.npmjs.com/package/showship)
+[![Version](https://img.shields.io/badge/version-0.1.0--beta.2-blue)](https://www.npmjs.com/package/showship)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933)](https://nodejs.org)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-Claude%20Code%20·%20Codex%20·%20Antigravity-D97757)](#install)
@@ -17,6 +17,9 @@ Works with **Claude Code**, plus **Codex** and **Antigravity** _(experimental)_ 
 ```bash
 npx showship
 ```
+
+> [!TIP]
+> **Use `npx`, not `npm i`.** Showship isn't a library you import — `npx showship` runs the installer, which copies the skill into your agent's skills folder (`~/.claude/skills/showship`, …). Prefer a global command? `npm i -g showship`, then run `showship`.
 
 > [!NOTE]
 > **Beta.** Slide templates, config keys and installer options may still change between releases. The Jira, Linear, Asana and ClickUp integrations and the Codex / Antigravity installs have not yet been tested against many real setups. Please [open an issue](https://github.com/Soe-Moe/showship/issues) with feedback or bugs.

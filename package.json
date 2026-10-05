@@ -1,6 +1,6 @@
 {
   "name": "showship",
-  "version": "0.1.0-beta.1",
+  "version": "0.1.0-beta.2",
   "description": "Showship — show what you shipped. An agent skill for Claude Code, Codex and Antigravity that turns git commits, pull requests, code reviews and tasks (Jira, Linear, Asana, ClickUp, Lark) into a polished progress deck — weekly, sprint or monthly — for managers, clients and the business.",
   "bin": {
     "showship": "bin/install.js"
