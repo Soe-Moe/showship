@@ -1,0 +1,18 @@
+# dependencies
+node_modules/
+
+# personal configuration — never commit (team names, Lark ids, paths)
+skill/config.json
+config.json
+
+# generated reports and decks
+Showship/
+*.pptx
+*.pdf
+!docs/example-deck.pptx
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

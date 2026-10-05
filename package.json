@@ -1,0 +1,57 @@
+{
+  "name": "showship",
+  "version": "0.1.0-beta.1",
+  "description": "Showship — show what you shipped. An agent skill for Claude Code, Codex and Antigravity that turns git commits, pull requests, code reviews and tasks (Jira, Linear, Asana, ClickUp, Lark) into a polished progress deck — weekly, sprint or monthly — for managers, clients and the business.",
+  "bin": {
+    "showship": "bin/install.js"
+  },
+  "files": [
+    "bin/",
+    "skill/",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "showship",
+    "agent-skills",
+    "skill",
+    "claude",
+    "claude-code",
+    "claude-skill",
+    "codex",
+    "antigravity",
+    "gemini",
+    "weekly-report",
+    "sprint-report",
+    "monthly-report",
+    "status-report",
+    "progress-report",
+    "pptx",
+    "powerpoint",
+    "slides",
+    "github",
+    "pull-requests",
+    "code-review",
+    "jira",
+    "linear",
+    "asana",
+    "clickup",
+    "lark",
+    "engineering-management",
+    "team-lead",
+    "freelancer"
+  ],
+  "author": "Soe Moe Oo (https://github.com/Soe-Moe)",
+  "license": "MIT",
+  "homepage": "https://github.com/Soe-Moe/showship#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Soe-Moe/showship.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Soe-Moe/showship/issues"
+  }
+}

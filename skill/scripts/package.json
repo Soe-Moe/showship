@@ -1,0 +1,17 @@
+{
+  "name": "showship-deck",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Builds the Showship progress deck from a JSON spec",
+  "main": "build_deck.js",
+  "dependencies": {
+    "pptxgenjs": "^3.12.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-icons": "^5.3.0",
+    "sharp": "^0.35.5"
+  },
+  "overrides": {
+    "image-size": "^2.0.3"
+  }
+}

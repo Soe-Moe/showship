@@ -1,0 +1,78 @@
+{
+  "role": "lead",
+  "audience": "business",
+  "period": "weekly",
+  "_period_comment": "weekly | biweekly | sprint | monthly | custom — sets the default date range, folder rhythm and deck title",
+  "sprintDays": 14,
+  "company": "Acme Digital Co., Ltd.",
+  "presenter": "Maya Lin @Maya",
+  "closingPresenter": "Maya Lin",
+  "logo": "~/path/to/company-logo.png",
+  "style": "classic",
+  "theme": {
+    "_comment": "Optional hex colours that override the style's palette (dark, accent, accentLight, warning)",
+    "dark": "141412",
+    "accent": "A8CC3A",
+    "accentLight": "D6E6A0",
+    "warning": "E0A33A"
+  },
+  "deckLanguage": "English",
+  "reportsDir": "~/Showship",
+  "leadLogins": [
+    "maya-lin",
+    "Maya Lin"
+  ],
+  "team": {
+    "_comment": "Map BOTH git author names AND GitHub logins to the display names used in the deck",
+    "Leo Park": "Leo Park @Leo",
+    "leo-park": "Leo Park @Leo",
+    "nina-dev": "Nina Rao @Nina",
+    "Maya Lin": "Maya Lin @Maya",
+    "maya-lin": "Maya Lin @Maya"
+  },
+  "projects": {
+    "_comment": "Map local repo folder names to project/service names (optional; the skill asks when a repo is missing)",
+    "clinicbook-api": "Booking Service - ClinicBook",
+    "clinicbook-mobile": "Patient App - ClinicBook",
+    "pulseboard-web": "Web App - PulseBoard"
+  },
+  "tasks": {
+    "_comment": "Your project/task tool: provider = none | lark | jira | linear | asana | clickup. Tokens go in environment variables, never here.",
+    "provider": "none",
+    "jira": {
+      "baseUrl": "https://your-team.atlassian.net",
+      "projects": [
+        "CLINIC"
+      ],
+      "jql": ""
+    },
+    "linear": {
+      "teams": [
+        "ENG"
+      ]
+    },
+    "asana": {
+      "projects": [
+        "1201234567890123"
+      ]
+    },
+    "clickup": {
+      "lists": [
+        "901234567890"
+      ],
+      "_comment": "Or use { \"workspaceId\": \"9012345\", \"spaces\": [\"90123\"] } for a whole workspace"
+    },
+    "lark": {
+      "tasklists": []
+    }
+  },
+  "taskUsers": {
+    "_comment": "Map task-tool user ids, emails or names to display names",
+    "nina@acme.io": "Nina Rao @Nina",
+    "ou_xxxxxxxx": "Name @Nickname"
+  },
+  "exclude": {
+    "_comment": "People left out of the report: task-tool ids/names/emails, git author names or GitHub logins",
+    "people": []
+  }
+}

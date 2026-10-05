@@ -1,0 +1,264 @@
+{
+  "_comment": "Reference example in plain business language. All companies, people, products and numbers are fictional.",
+  "date": "October 9, 2026",
+  "presenter": "Maya Lin @Maya",
+  "closingPresenter": "Maya Lin",
+  "slides": [
+    {
+      "type": "dashboard",
+      "eyebrow": "Executive Summary",
+      "title": "This Week at a Glance",
+      "cards": [
+        {
+          "label": "App Store Release",
+          "metric": "100%",
+          "state": "done",
+          "status": "COMPLETED",
+          "headline": "Developer Account Verified",
+          "desc": "Apple approved our company account; the app is now in TestFlight."
+        },
+        {
+          "label": "ClinicBook · Patient & Clinic",
+          "metric": "65%",
+          "state": "progress",
+          "status": "ON TRACK",
+          "headline": "4 of 8 Phases Complete",
+          "desc": "Patient app and clinic dashboard are being built in parallel."
+        },
+        {
+          "label": "PulseBoard Analytics",
+          "metric": "1 / 2",
+          "state": "progress",
+          "status": "ON TRACK",
+          "headline": "Workstreams Complete",
+          "desc": "Data transfer to the new system finished; usage tracking is being rolled out."
+        }
+      ],
+      "keyUpdate": "One decision is needed this week: can patients turn off SMS reminders and keep email only? (see Decisions Needed)"
+    },
+    {
+      "type": "timeline",
+      "eyebrow": "Mobile · App Store Release",
+      "title": "App Store: Developer Account Verified",
+      "badge": {
+        "text": "BLOCKER RESOLVED",
+        "state": "done"
+      },
+      "steps": [
+        {
+          "tag": "Last week",
+          "title": "Blocked",
+          "state": "blocked",
+          "desc": "Waiting for the company's D-U-N-S business number."
+        },
+        {
+          "tag": "This week",
+          "title": "Number Received",
+          "state": "done",
+          "desc": "Operations provided the D-U-N-S number."
+        },
+        {
+          "tag": "This week",
+          "title": "Account Verified",
+          "state": "done",
+          "desc": "Apple verified the company developer account."
+        },
+        {
+          "tag": "This week",
+          "title": "In TestFlight",
+          "state": "done",
+          "desc": "First build available to internal testers."
+        }
+      ],
+      "impact": "The app is published under the company's own verified account, ready for beta testers."
+    },
+    {
+      "type": "rings",
+      "eyebrow": "ClinicBook · Progress Overview",
+      "title": "ClinicBook: Patient App & Clinic Dashboard Progress",
+      "rings": [
+        {
+          "label": "Combined Progress",
+          "sub": "Patient app + Clinic dashboard · 8 phases",
+          "pct": 65,
+          "dark": true
+        },
+        {
+          "label": "Patient App",
+          "sub": "Owner: Leo Park @Leo",
+          "pct": 60
+        },
+        {
+          "label": "Clinic Dashboard",
+          "sub": "Owner: Nina Rao @Nina",
+          "pct": 70
+        }
+      ],
+      "stats": [
+        {
+          "value": 4,
+          "label": "Phases Completed",
+          "state": "done"
+        },
+        {
+          "value": 2,
+          "label": "Phases In Progress",
+          "state": "progress"
+        },
+        {
+          "value": 2,
+          "label": "Phases Not Started",
+          "state": "next"
+        }
+      ],
+      "footnote": "Progress = average completion of each track's four phases."
+    },
+    {
+      "type": "phase_bars",
+      "eyebrow": "ClinicBook · Phase Breakdown",
+      "title": "ClinicBook: Status of Each Phase",
+      "tracks": [
+        {
+          "title": "Patient App",
+          "owner": "Leo Park @Leo",
+          "phases": [
+            {
+              "name": "P1 · Accounts & Sign-in",
+              "pct": 100
+            },
+            {
+              "name": "P2 · Clinic Search & Maps",
+              "pct": 100
+            },
+            {
+              "name": "P3 · Booking Calendar",
+              "pct": 40
+            },
+            {
+              "name": "P4 · Payments & Receipts",
+              "pct": 0
+            }
+          ],
+          "note": "Booking calendar underway; payments are next."
+        },
+        {
+          "title": "Clinic Dashboard",
+          "owner": "Nina Rao @Nina",
+          "phases": [
+            {
+              "name": "P1 · Clinic Onboarding",
+              "pct": 100
+            },
+            {
+              "name": "P2 · Doctor Schedules",
+              "pct": 100
+            },
+            {
+              "name": "P3 · Reports & Exports",
+              "pct": 0
+            },
+            {
+              "name": "P4 · Reminders & Notifications",
+              "pct": 80
+            }
+          ],
+          "note": "Reminders are in final review; 4 of 5 parts verified."
+        }
+      ]
+    },
+    {
+      "type": "review_insights",
+      "eyebrow": "Quality · Code Review",
+      "title": "Quality Check: Issues Caught Before Release",
+      "stats": [
+        {
+          "value": "3",
+          "label": "Features reviewed this week"
+        },
+        {
+          "value": "2",
+          "label": "Approved for release"
+        },
+        {
+          "value": "212",
+          "label": "Automated tests passing (100%)"
+        }
+      ],
+      "findings": [
+        {
+          "area": "Appointment Reminders",
+          "text": "Clinics can send SMS and email reminders 24 hours and 2 hours before each appointment.",
+          "state": "done",
+          "status": "VERIFIED"
+        },
+        {
+          "area": "Reliability",
+          "text": "A patient could receive the same reminder twice if sending is retried. Small fix identified.",
+          "state": "progress",
+          "status": "FIX BEFORE RELEASE"
+        },
+        {
+          "area": "Privacy",
+          "text": "Patient phone numbers are hidden in system logs and only visible to clinic staff.",
+          "state": "done",
+          "status": "VERIFIED"
+        }
+      ],
+      "note": "Source: lead's code reviews this week."
+    },
+    {
+      "type": "attention",
+      "eyebrow": "Needs Attention",
+      "title": "Blockers & Decisions Needed",
+      "blockers": [
+        {
+          "title": "Reminders release waiting on one fix",
+          "text": "Duplicate reminders must be prevented before release. Fix is small and already tested.",
+          "meta": "Owner: Nina Rao @Nina · Expected: next week"
+        }
+      ],
+      "decisions": [
+        {
+          "title": "Can patients turn off SMS reminders and keep email only?",
+          "text": "Today every patient with a phone number receives SMS reminders; some clinics report complaints.",
+          "meta": "Options: allow opt-out · clinic decides per patient · keep as today"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "eyebrow": "Looking Ahead",
+      "title": "Next Week's Plan",
+      "rows": [
+        {
+          "project": "ClinicBook · Patient App",
+          "owner": "Leo Park @Leo",
+          "focus": "Finish the booking calendar, then start payments and receipts.",
+          "current": "P3 · 40%",
+          "state": "progress"
+        },
+        {
+          "project": "ClinicBook · Clinic Dashboard",
+          "owner": "Nina Rao @Nina",
+          "focus": "Apply the duplicate-reminder fix and release reminders; start reports and exports.",
+          "current": "P4 · 80%",
+          "state": "progress"
+        },
+        {
+          "project": "PulseBoard · Usage Tracking",
+          "owner": "Maya Lin @Maya",
+          "focus": "Finish adding usage tracking to the web app, then open the first dashboard to managers.",
+          "current": "IN PROGRESS",
+          "state": "progress"
+        },
+        {
+          "project": "App Store Release",
+          "owner": "Maya Lin @Maya",
+          "focus": "Invite the first 20 clinic staff to TestFlight.",
+          "current": "DONE",
+          "state": "done"
+        }
+      ]
+    }
+  ]
+}

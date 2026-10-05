@@ -1,0 +1,7 @@
+node_modules/
+skill/config.json
+skill/scripts/package-lock.json
+docs/
+*.pptx
+*.pdf
+.DS_Store
