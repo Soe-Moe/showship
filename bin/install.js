@@ -99,7 +99,8 @@ const AUDIENCES = [
 
 // Deck designs (see skill/scripts/build_deck.js STYLES)
 const STYLES = [
-  { id: "classic",   label: "Classic",   hint: "dark title slides · lime accent · serif headings" },
+  { id: "classic",   label: "Classic",   hint: "black & white editorial · serif headings · hairline rules" },
+  { id: "modern",    label: "Modern",    hint: "dark title slides · lime accent · serif headings" },
   { id: "corporate", label: "Corporate", hint: "white · navy & blue · sans-serif · page numbers" },
   { id: "vivid",     label: "Vivid",     hint: "teal header bands · orange accent · rounded cards" },
 ];
@@ -199,7 +200,7 @@ async function main() {
   if (major < 18) { console.error(red(`Node.js 18 or newer is required (found ${process.versions.node}).`)); process.exit(1); }
 
   const interactive = process.stdin.isTTY && tty && !has("-y") && !has("--yes");
-  console.log(`\n${bold("Showship")} ${dim("v" + PKG.version)}  ${dim("— show what you shipped: GitHub activity → a deck your audience understands")}\n`);
+  console.log(`\n${bold("Showship")} ${dim("v" + PKG.version)}  ${dim("— show what you shipped: GitHub activity + project management tools → a deck your audience understands")}\n`);
 
   // 1. agent
   let agent;

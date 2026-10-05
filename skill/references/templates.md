@@ -12,14 +12,16 @@ A full working example lives in `examples/report.example.json`.
   "period": "sprint",                          // optional: weekly | biweekly | sprint | monthly | custom (default from config)
   "sprint": 14,                                // optional: sprint number → "Sprint 14 Progress Report"
   "title": "Weekly Development\nProgress Report", // optional — overrides the period's default title
-  "style": "corporate",                        // optional: classic | corporate | vivid (default from config)
+  "style": "corporate",                        // optional: classic | modern | corporate | vivid (default from config)
   "slides": [ /* content slides, in order; title + closing are added automatically */ ]
 }
 ```
 
-Every content slide has `type`, `eyebrow` (small lime label, auto-uppercased) and `title` (one line).
+All styles read the same JSON. `classic` renders it with its own editorial layouts (e.g. `rings` as large figures, `phase_bars` as phase lists, `timeline` vertically); `modern`, `corporate` and `vivid` share the card layouts.
 
-**States** used across templates: `done` (lime), `progress` (light lime), `blocked` (amber), `next` (grey / not started).
+Every content slide has `type`, `eyebrow` (small label, auto-uppercased) and `title` (one line).
+
+**States** used across templates: `done` (accent colour), `progress` (light accent), `blocked` (warning colour), `next` (grey / not started). Colours depend on the style.
 
 **Icons** are Lucide names without the `Lu` prefix, in PascalCase: `Database`, `Smartphone`, `FileText`, `Users`, `UserRound`, `Briefcase`, `RefreshCw`, `ShieldCheck`, `TrendingUp`, `Code`, `FlaskConical`, `Rocket`, `Target`, `ListChecks`, `Workflow`, `Component`, `Landmark`, `CalendarClock`, `Headset`, `LayoutDashboard`, `CircleCheckBig`, … (any name from react-icons/lu works).
 
@@ -154,7 +156,7 @@ Two columns: Blockers & Risks (amber) and Decisions Needed (dark). 0–4 items e
 
 ## `tracker` — developer task track (from the task tracker + reviews)
 
-One card per person (2–4). `done` / `open` = task counts for the week from the tracker (Jira, Linear, Asana, ClickUp, Lark); `pct` = progress confirmed by the lead; `items` = their tasks/phases with state (`done` lime dot, `progress` light-lime, `next` grey). Keep items ≤ 6 per card and ≤ 55 chars; add "(3/5)" subtask counts and "in PR review" where useful.
+One card per person (2–4). `done` / `open` = task counts for the week from the tracker (Jira, Linear, Asana, ClickUp, Lark); `pct` = progress confirmed by the lead; `items` = their tasks/phases with state (`done` accent dot, `progress` light accent, `next` grey). Keep items ≤ 6 per card and ≤ 55 chars; add "(3/5)" subtask counts and "in PR review" where useful.
 
 ```json
 { "type": "tracker", "eyebrow": "Team · Task Tracker", "title": "Developer Task Track",

@@ -62,7 +62,7 @@ If the user just says "make this week's report" (or this sprint's / month's) ins
   - `period` — `weekly`, `biweekly`, `sprint`, `monthly` or `custom`; `sprintDays` — sprint length in days (default 14). See **Reporting period**. Ask on first setup if it isn't set.
   - `presenter` (title slide), `closingPresenter` (closing slide), `company`
   - `logo` — path to the company logo (PNG/JPG, `~` allowed; borders are trimmed automatically; `false` for none). Default: the placeholder in `assets/`.
-  - `style` — the deck design: `classic` (dark bookends, lime accent, serif headings), `corporate` (white, navy & blue, sans-serif, page numbers), or `vivid` (teal header bands, orange accent, rounded cards). The user chooses it — in the installer, in config, or per report via `report.json` → `"style"`. All slide types work in every style. Ask on first setup if it isn't set.
+  - `style` — the deck design: `classic` (black & white editorial with its own layouts — lede column, large serif figures, numbered lists, vertical timeline, no boxes), `modern` (dark bookends, lime accent, serif headings), `corporate` (white, navy & blue, sans-serif, page numbers), or `vivid` (teal header bands, orange accent, rounded cards). The user chooses it — in the installer, in config, or per report via `report.json` → `"style"`. All slide types work in every style. Ask on first setup if it isn't set.
   - `theme` — optional colours (hex) that override the style's palette: `dark`, `accent`, `accentLight`, `warning`.
   - `deckLanguage` — language of the slides (default `English`).
   - `role` — `lead` (whole team) or `member` (own work only); `audience` — `business` or `engineering`. See **Who this is for**.
