@@ -30,7 +30,7 @@ npx showship
 
 ![Example deck](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/preview-grid.png)
 
-<sub>All names and data above are fictional. Download the [example deck](https://github.com/Soe-Moe/showship/raw/master/docs/example-deck.pptx).</sub>
+<sub>Shown in the Showship signature style. All names and data are fictional. Download the example deck: [Showship](https://github.com/Soe-Moe/showship/raw/master/docs/example-deck-showship.pptx) · [Classic](https://github.com/Soe-Moe/showship/raw/master/docs/example-deck.pptx).</sub>
 
 ---
 
@@ -423,7 +423,7 @@ Set it once in `config.json` (`"style": "vivid"`), in the installer (`--style vi
 
 ## Slide templates
 
-<sub>Shown in the Classic style.</sub>
+<sub>Shown in the Showship style.</sub>
 
 | Template          | Use it for                                               |                                                                                               |
 | ----------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
