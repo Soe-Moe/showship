@@ -7,7 +7,7 @@
 **Show what you shipped.**
 
 [![Status: Beta](https://img.shields.io/badge/status-beta-orange)](https://github.com/Soe-Moe/showship/issues)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.4-blue)](https://www.npmjs.com/package/showship)
+[![Version](https://img.shields.io/badge/version-0.1.0--beta.5-blue)](https://www.npmjs.com/package/showship)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933)](https://nodejs.org)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-Claude%20Code%20·%20Codex%20·%20Antigravity-D97757)](#install)
@@ -67,7 +67,7 @@ The installer asks these questions; you can change them in `config.json` at any 
 - **Plain language by default, technical when you want it** — set `audience` to `business` or `engineering`. A built-in jargon check (`lint_report.js`) flags terms like _endpoint, schema, payload, JSON, 500 error, N+1_ and suggests business wording before the deck is built.
 - **Never invents numbers** — percentages, owners, dates and blockers come from your data or from you. The agent asks one consolidated question for anything GitHub can't tell it.
 - **12 slide templates, chosen to fit the data** — KPI dashboard, milestone timeline, doughnut progress, phase bar charts, workstreams, icon rows with generated illustrations, screenshot gallery, code-review insights, blockers & decisions, developer task tracker, team activity chart, next-steps table. Consecutive slides never reuse the same layout.
-- **5 deck designs** — the colourful _Showship_ signature style, plus _Classic_, _Modern_, _Corporate_ and _Vivid_; every slide type works in all five.
+- **6 deck designs** — the colourful _Showship_ signature style, plus _Paper_, _Classic_, _Modern_, _Corporate_ and _Vivid_; every slide type works in all six.
 - **Your branding** — company name, logo (auto-trimmed) and colour overrides from one config file.
 - **Works across changing repos** — collect per repo, build once. The set of repos can change every period.
 - **Task tracker integrations** — pull tasks, subtasks, assignees and due dates from **Jira, Linear, Asana, ClickUp or Lark** for "who is doing what", progress evidence and overdue risks.
@@ -145,6 +145,7 @@ The installer asks a few questions (use ↑/↓ and Enter):
   Corporate     white · navy & blue · sans-serif · page numbers
   Vivid         teal header bands · orange accent · rounded cards
   Showship      signature · colour-coded projects · gauges · ship-trail ribbons
+  Paper         printed annual report · paper and ink · one colour per project
 ```
 
 Then it copies the skill, records your choices in `config.json` (keeping anything already there), installs the deck builder's dependencies, checks for `git`, `gh` and LibreOffice, and prints the setup steps for the tracker you picked.
@@ -170,7 +171,7 @@ npx showship --yes --period sprint --tasks jira --style corporate
 | `--global` / `--project` | install for your user / for the current project only               |
 | `--period <p>`           | `weekly`, `biweekly`, `sprint`, `monthly`, `custom`                |
 | `--tasks <tool>`         | task tracker: `none`, `lark`, `jira`, `linear`, `asana`, `clickup` |
-| `--style <name>`         | deck design: `showship`, `classic`, `modern`, `corporate`, `vivid` |
+| `--style <name>`         | deck design: `showship`, `paper`, `classic`, `modern`, `corporate`, `vivid` |
 | `--role <role>`          | `lead` (whole team) or `member` (your own work)                    |
 | `--audience <a>`         | `business` (plain language) or `engineering`                       |
 | `--dir <path>`           | install into a custom skill folder                                 |
@@ -313,7 +314,7 @@ Only your own commits, the PRs you authored or reviewed, and your tasks are coll
   "presenter": "Maya Lin @Maya", // title slide
   "closingPresenter": "Maya Lin", // closing slide
   "logo": "~/Pictures/acme-logo.png", // PNG/JPG; borders trimmed automatically; false = none
-  "style": "corporate", // deck design: showship | classic | modern | corporate | vivid
+  "style": "corporate", // deck design: showship | paper | classic | modern | corporate | vivid
   "theme": {
     "dark": "141412",
     "accent": "A8CC3A",
@@ -400,12 +401,17 @@ Standing instructions (people to exclude, how to count progress, environments) c
 
 ## Deck styles
 
-Five designs, chosen to read well in a business meeting. Every slide type works in every style, from the same `report.json`.
+Six designs, chosen to read well in a business meeting. Every slide type works in every style, from the same `report.json`.
 
-**Showship** — the signature style. Every project gets its own colour, carried from the dashboard to the phase tracks, task tracker and next-steps table, so the audience can follow a project by colour alone. Semicircle gauges, pill-track phase charts, a waffle of done/open tasks, a milestone trail for timelines, and the ship-trail ribbons on title slides. Uses the free [Poppins](https://fonts.google.com/specimen/Poppins) font (PowerPoint substitutes it if it isn't installed). A small "Shipped with Showship" mark sits in the footer; turn it off with `"signature": false` in `config.json` or `report.json`.
+**Showship**: the signature style. Every project gets its own colour, carried from the dashboard to the phase tracks, task tracker and next-steps table, so the audience can follow a project by colour alone. Semicircle gauges, pill-track phase charts, a waffle of done/open tasks, a milestone trail for timelines, and the ship-trail ribbons on title slides. Uses the free [Poppins](https://fonts.google.com/specimen/Poppins) font (PowerPoint substitutes it if it isn't installed). A small "Shipped with Showship" mark sits in the footer; turn it off with `"signature": false` in `config.json` or `report.json`.
 ![Showship](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/style-showship.png)
 
 <sub>All Showship slides: [preview](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/showship-grid.png) · [example deck](https://github.com/Soe-Moe/showship/raw/master/docs/example-deck-showship.pptx)</sub>
+
+**Paper**: set like a printed annual report. Paper background and navy ink, rules instead of cards, one big figure leading every slide, one colour per project, coral red kept for risks only. Every slide type has its own composition. Design brief: [`DESIGN.md`](https://github.com/Soe-Moe/showship/blob/master/DESIGN.md).
+![Paper](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/style-paper.png)
+
+<sub>All Paper slides: [preview](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/paper-grid.png) · [example deck](https://github.com/Soe-Moe/showship/raw/master/docs/example-deck-paper.pptx)</sub>
 
 **Classic** — black & white editorial with its own layouts: no boxes, a lede column for the key message, large serif figures, numbered entries, a vertical timeline, phase lists instead of bar charts, heavy and hairline rules, one deep green accent
 ![Classic](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/style-classic.png)

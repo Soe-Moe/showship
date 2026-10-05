@@ -11,6 +11,7 @@ Showship/
 *.pdf
 !docs/example-deck.pptx
 !docs/example-deck-showship.pptx
+!docs/example-deck-paper.pptx
 
 # OS / editor
 .DS_Store

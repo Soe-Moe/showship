@@ -47,6 +47,17 @@ const STYLES = {
     pillRadius: 0.15, pillChar: 0.095, header: "classic", bookend: "signature", footer: false, layouts: "signature",
     projectColors: ["6C4CF5", "10A6A0", "FF6B4A", "F5A524", "E5487F", "2F7CF6"],
   },
+  paper: {
+    label: "Paper: printed annual report, paper and ink, one colour per project",
+    // DARK = ink, LIME = Showship violet (the brand accent), AMBER = risk only (coral red)
+    palette: { DARK: "17153A", LIME: "6C4CF5", LIGHT_LIME: "D9D1FF", AMBER: "D9472B", CARD: "FFFFFF", BODY: "48465C", TRACK: "E6E1D6", GRID: "D6D0C3", BG: "F7F4EE", GRAY: "68667A", ON_ACCENT: "FFFFFF", ON_WARN: "FFFFFF", ON_DARK: "FFFFFF" },
+    inks: { done: "5B3FE0", progress: "5B3FE0", blocked: "B83A22", next: "68667A" },
+    fonts: { head: "Poppins", body: "Arial" },
+    card: { radius: 0, shadow: null, border: "D6D0C3" },
+    pillRadius: 0, pillChar: 0.095, header: "classic", bookend: "paper", footer: false, layouts: "paper",
+    // project colours are a categorical legend; coral is not among them because it means risk
+    projectColors: ["6C4CF5", "10A6A0", "E0A21B", "2F7CF6"],
+  },
   modern: {
     label: "Modern — dark bookends, lime accent, serif headings",
     palette: { DARK: "141412", LIME: "A8CC3A", LIGHT_LIME: "D6E6A0", AMBER: "E0A33A", CARD: "F6F7F1", BODY: "58584F", TRACK: "E6E8DF", GRID: "E3E5DC", BG: "FFFFFF", ON_ACCENT: "141412", ON_WARN: "141412" },
@@ -896,7 +907,7 @@ TE.workstreams = async (pres, d) => {
   });
   if (f.next) {
     hl(s, rx, E.BOT - 0.75, rw);
-    s.addText([{ text: "Next — ", options: { italic: true, color: C.DARK } }, { text: f.next, options: { color: C.BODY } }],
+    s.addText([{ text: "Next: ", options: { italic: true, color: C.DARK } }, { text: f.next, options: { color: C.BODY } }],
       { x: rx, y: E.BOT - 0.65, w: rw, h: 0.55, fontFace: F.H, fontSize: 13, margin: 0, valign: "middle" });
   }
 };
@@ -967,7 +978,7 @@ TE.gallery = async (pres, d) => {
     s.addImage({ path: p, x, y: fy, w: fw, h: fh });
     s.addShape("rect", { x, y: fy, w: fw, h: fh, fill: { type: "none" }, line: { color: C.GRID, width: 0.75 } });
     const lbl = (d.labels && d.labels[i]) || `Step ${i + 1}`;
-    s.addText([{ text: `Fig. ${i + 1} — `, options: { italic: true, color: C.GRAY } }, { text: lbl, options: { italic: true, color: C.DARK } }],
+    s.addText([{ text: `Fig. ${i + 1}: `, options: { italic: true, color: C.GRAY } }, { text: lbl, options: { italic: true, color: C.DARK } }],
       { x, y: fy + fh + 0.1, w: fw, h: 0.32, fontFace: F.H, fontSize: n > 4 ? 10 : 12, margin: 0 });
   });
 };
@@ -1129,7 +1140,6 @@ async function trailArt(kind) {
     const ribbons = TRAIL.map((c, i) => `<path d="M ${120 + i * 50} ${H + 20} C ${520 + i * 20} ${250 - i * 15}, ${700} ${120 + i * 25}, ${W + 40} ${30 + i * 32}" fill="none" stroke="#${c}" stroke-opacity="${0.55 - i * 0.07}" stroke-width="${[14, 10, 7, 5][i]}" stroke-linecap="round"/>`).join("");
     svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${ribbons}</svg>`;
   } else {
-    // the Showship mark (same geometry as brand/showship-mark-light.svg)
     svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.86) translate(-63.5 -71.9)"><path d="M24.0 96.0 C48.0 94.0 70.0 74.0 92.0 40.0" fill="none" stroke="#6C4CF5" stroke-width="14" stroke-linecap="round"/><path d="M36.1 110.7 C60.1 108.7 82.1 88.7 100.8 59.7" fill="none" stroke="#10A6A0" stroke-width="10" stroke-linecap="round"/><path d="M45.6 122.2 C69.6 120.2 91.6 100.2 106.6 77.2" fill="none" stroke="#FF6B4A" stroke-width="7" stroke-linecap="round"/><circle cx="100" cy="27" r="9" fill="#F5A524"/></g></svg>`;
   }
   await sharp(Buffer.from(svg)).png().toFile(file);
@@ -1603,6 +1613,392 @@ TS.tracker = async (pres, d) => {
   if (d.footnote) s.addText(d.footnote, { x: 0.7, y: top + h + 0.08, w: 11.93, h: 0.28, fontFace: F.H, fontSize: 9.5, italic: true, color: C.GRAY, margin: 0 });
 };
 
+// ---------- Paper layouts (printed annual report) ----------
+// Direction: DESIGN.md (the "paper" style). Paper and ink, one project colour per slide as the accent, rules instead of
+// floating cards, big figures as the focal point, coral red reserved for risk. Every slide type has
+// its own composition (RHYTHM 3) so consecutive slides never look alike.
+const TP = {};
+function lum(hex) {
+  const n = parseInt(hex, 16), ch = (v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  return 0.2126 * ch(n >> 16) + 0.7152 * ch((n >> 8) & 255) + 0.0722 * ch(n & 255);
+}
+function contrast(a, b) { const x = lum(a), y = lum(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+// darken a colour until it reads as text on the paper (WCAG AA 4.5:1)
+function ink(col, bg = C.BG) { let c = col, t = 0; while (contrast(c, bg) < 4.5 && t < 0.9) { t += 0.05; c = shade(col, t); } return c; }
+const sentence = (t) => { const s = String(t || "").trim(); return s === s.toUpperCase() ? s.charAt(0) + s.slice(1).toLowerCase() : s; };
+const RIBBONS = ["6C4CF5", "10A6A0", "FF6B4A", "F5A524"];
+
+async function paperArt(kind) {
+  const file = path.join(CACHE, `paper_${kind}.png`);
+  if (fs.existsSync(file)) return file;
+  let svg;
+  if (kind === "cover") {
+    // printed ribbons: solid strokes, no glow, no fades, no orbs
+    const W = 1200, H = 1080;
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">` + RIBBONS.map((c, i) =>
+      `<path d="M ${-60 + i * 46} ${1140} C ${520 + i * 24} ${980 - i * 30}, ${640 - i * 10} ${430 + i * 40}, ${1260} ${150 + i * 74}" fill="none" stroke="#${c}" stroke-width="${[30, 20, 13, 8][i]}" stroke-linecap="round"/>`).join("") + `</svg>`;
+  } else {
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">${MARK_SVG}</svg>`;
+  }
+  await sharp(Buffer.from(svg)).png().toFile(file);
+  return file;
+}
+const MARK_SVG = `<g transform="translate(64 64) scale(0.86) translate(-63.5 -71.9)"><path d="M24.0 96.0 C48.0 94.0 70.0 74.0 92.0 40.0" fill="none" stroke="#6C4CF5" stroke-width="14" stroke-linecap="round"/><path d="M36.1 110.7 C60.1 108.7 82.1 88.7 100.8 59.7" fill="none" stroke="#10A6A0" stroke-width="10" stroke-linecap="round"/><path d="M45.6 122.2 C69.6 120.2 91.6 100.2 106.6 77.2" fill="none" stroke="#FF6B4A" stroke-width="7" stroke-linecap="round"/><circle cx="100" cy="27" r="9" fill="#F5A524"/></g>`;
+
+function pRule(s, x, y, w, color = C.GRID, pt = 0.75) { s.addShape("line", { x, y, w, h: 0, line: { color, width: pt } }); }
+// status: a small marker + sentence-case word. Filled = done, ring = in progress, grey ring = not started, red = risk
+function pStatus(s, state, text, x, y, w, col, align = "left") {
+  const label = sentence(text || st(state).label), r = 0.13;
+  const tw = Math.min(w, 0.35 + label.length * 0.08), bx = align === "right" ? x + w - tw : x;
+  const risk = state === "blocked", c = risk ? C.AMBER : state === "next" ? C.GRAY : col;
+  s.addShape("ellipse", { x: bx, y: y + 0.07, w: r, h: r, fill: { color: state === "done" || risk ? c : C.BG }, line: { color: c, width: state === "done" || risk ? 0 : 1.5 } });
+  s.addText(label, { x: bx + 0.22, y, w: tw, h: 0.28, fontFace: F.H, fontSize: 10.5, bold: true, color: risk ? ink(C.AMBER) : state === "next" ? C.GRAY : ink(c), margin: 0, valign: "middle" });
+  return tw + 0.22;
+}
+function pBar(s, x, y, w, pct, col, h = 0.08) {
+  const p = Math.max(0, Math.min(100, pct || 0));
+  s.addShape("rect", { x, y, w, h, fill: { color: C.TRACK }, line: { type: "none" } });
+  if (p) s.addShape("rect", { x, y, w: w * p / 100, h, fill: { color: col }, line: { type: "none" } });
+}
+async function paperSlide(pres, eyebrow, title, col, size) {
+  const s = pres.addSlide();
+  SLIDE_NO++;
+  s.background = { color: C.BG };
+  s.addText(sentence(eyebrow || ""), { x: 0.7, y: 0.5, w: 11, h: 0.3, fontFace: F.H, fontSize: 12, bold: true, color: ink(col || C.LIME), margin: 0, valign: "middle" });
+  s.addText(title || "", { x: 0.7, y: 0.8, w: 11.93, h: 0.7, fontFace: F.H, fontSize: Math.min(size || 28, 28), bold: true, color: C.DARK, margin: 0, fit: "shrink", valign: "middle" });
+  pRule(s, 0.7, 1.62, 11.93, C.DARK, 1);
+  s.addText(FOOTER_TEXT, { x: 0.7, y: 7.05, w: 7, h: 0.26, fontFace: F.B, fontSize: 9, color: C.GRAY, margin: 0, valign: "middle" });
+  if (STYLE.signature !== false) {
+    s.addImage({ path: await paperArt("mark"), x: 10.62, y: 7.07, w: 0.22, h: 0.22 });
+    s.addText([{ text: "Shipped with ", options: { color: C.GRAY } }, { text: "Showship", options: { color: C.DARK, bold: true } }],
+      { x: 10.9, y: 7.05, w: 1.5, h: 0.26, fontFace: F.H, fontSize: 9, margin: 0, valign: "middle" });
+  }
+  s.addText(String(SLIDE_NO), { x: 12.33, y: 7.05, w: 0.3, h: 0.26, fontFace: F.H, fontSize: 9, bold: true, color: C.DARK, align: "right", margin: 0, valign: "middle" });
+  return s;
+}
+
+async function paperBookend(pres, r, kind) {
+  const s = pres.addSlide();
+  s.background = { color: C.BG };
+  s.addImage({ path: await paperArt("cover"), x: 7.78, y: 0, w: 5.556, h: 7.5 });
+  if (LOGO) { let lw = 0.62, lh = lw * LOGO.aspect; if (lh > 0.62) { lh = 0.62; lw = lh / LOGO.aspect; } s.addImage({ path: LOGO.path, x: 0.7, y: 0.62, w: lw, h: lh }); }
+  s.addText(r.company, { x: LOGO ? 1.5 : 0.7, y: 0.62, w: 6, h: 0.62, fontFace: F.H, fontSize: 13, bold: true, color: C.DARK, valign: "middle", margin: 0 });
+  if (kind === "title") {
+    s.addText(sentence(r.eyebrow), { x: 0.7, y: 2.45, w: 7, h: 0.4, fontFace: F.H, fontSize: 15, bold: true, color: ink(C.LIME), margin: 0 });
+    s.addText(r.title, { x: 0.7, y: 2.9, w: 7.4, h: 2.3, fontFace: F.H, fontSize: 44, bold: true, color: C.DARK, lineSpacingMultiple: 1.0, margin: 0, valign: "top", fit: "shrink" });
+  } else {
+    s.addText("Thank you", { x: 0.7, y: 2.7, w: 7, h: 1.2, fontFace: F.H, fontSize: 60, bold: true, color: C.DARK, margin: 0 });
+    s.addText("Questions and discussion", { x: 0.7, y: 3.9, w: 7, h: 0.6, fontFace: F.H, fontSize: 22, color: ink(C.LIME), margin: 0 });
+  }
+  pRule(s, 0.7, 5.95, 6.6, C.DARK, 1);
+  const presenter = kind === "title" ? r.presenter : (r.closingPresenter || r.presenter);
+  [["Presenter", presenter, 0.7], ["Date", r.date, 4.2]].forEach(([k, v, x]) => {
+    s.addText(k, { x, y: 6.1, w: 3.2, h: 0.28, fontFace: F.H, fontSize: 10, color: C.GRAY, margin: 0 });
+    s.addText(v || "", { x, y: 6.38, w: 3.4, h: 0.4, fontFace: F.H, fontSize: 15, bold: true, color: C.DARK, margin: 0 });
+  });
+  if (STYLE.signature !== false && kind === "title") {
+    s.addText([{ text: "Shipped with ", options: { color: C.GRAY } }, { text: "Showship", options: { color: C.DARK, bold: true } }],
+      { x: 0.7, y: 6.95, w: 3, h: 0.3, fontFace: F.H, fontSize: 9.5, margin: 0, valign: "middle" });
+  }
+}
+
+// dashboard: lede column with the key update + a ruled list of projects, each led by its figure
+TP.dashboard = async (pres, d) => {
+  d.cards.forEach((c) => projColor(c.label, c.color));
+  const s = await paperSlide(pres, d.eyebrow || "Executive summary", d.title || "At a glance", C.LIME, 30);
+  let x0 = 0.7;
+  if (d.keyUpdate) {
+    s.addText("Key update", { x: 0.7, y: 1.95, w: 3.6, h: 0.3, fontFace: F.H, fontSize: 11, bold: true, color: ink(C.LIME), margin: 0 });
+    s.addText(d.keyUpdate, { x: 0.7, y: 2.3, w: 3.6, h: 4.4, fontFace: F.H, fontSize: 20, color: C.DARK, valign: "top", margin: 0, lineSpacingMultiple: 1.15, fit: "shrink" });
+    x0 = 4.9;
+  }
+  const n = d.cards.length, top = 1.95, rh = (6.85 - top) / n, w = 12.63 - x0;
+  d.cards.forEach((c, i) => {
+    const y = top + i * rh, col = projColor(c.label, c.color);
+    if (i) pRule(s, x0, y, w);
+    s.addText(c.metric, { x: x0, y: y + 0.12, w: 2.3, h: rh - 0.24, fontFace: F.H, fontSize: n > 3 ? 34 : 44, bold: true, color: ink(col), margin: 0, valign: "middle", fit: "shrink" });
+    s.addText(c.label, { x: x0 + 2.5, y: y + 0.16, w: w - 4.6, h: 0.28, fontFace: F.H, fontSize: 10.5, bold: true, color: ink(col), margin: 0, valign: "middle" });
+    pStatus(s, c.state, c.status, x0 + w - 2.2, y + 0.16, 2.2, col, "right");
+    s.addText(c.headline, { x: x0 + 2.5, y: y + 0.45, w: w - 2.5, h: 0.4, fontFace: F.H, fontSize: 15, bold: true, color: C.DARK, margin: 0, valign: "middle", fit: "shrink" });
+    s.addText(c.desc || "", { x: x0 + 2.5, y: y + 0.86, w: w - 2.5, h: rh - 0.98, fontFace: F.B, fontSize: 11.5, color: C.BODY, margin: 0, valign: "top", lineSpacingMultiple: 1.15, fit: "shrink" });
+  });
+};
+
+// timeline: the impact as a lede sentence, then the trail itself, travelled part solid
+TP.timeline = async (pres, d, idx) => {
+  const col = projFor([d.title, d.eyebrow]);
+  const s = await paperSlide(pres, d.eyebrow, d.title, col);
+  if (d.badge) pStatus(s, d.badge.state || "done", d.badge.text, 9.63, 1.95, 3.0, col, "right");
+  if (d.impact) s.addText(d.impact, { x: 0.7, y: 1.95, w: 8.6, h: 1.0, fontFace: F.H, fontSize: 19, color: C.DARK, valign: "top", margin: 0, lineSpacingMultiple: 1.15, fit: "shrink" });
+  const steps = d.steps, n = steps.length, X0 = 0.95, X1 = 12.35, sw = (X1 - X0) / Math.max(n - 1, 1), Y = 3.75;
+  let last = -1; steps.forEach((p, i) => { if (p.state === "done" || p.state === "progress") last = i; });
+  const PX = 150, W = Math.round(11.93 * PX), H = Math.round(0.6 * PX), cy = H / 2;
+  const px = (x) => Math.round((x - 0.7) * PX);
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">
+    <line x1="${px(X0)}" y1="${cy}" x2="${px(X1)}" y2="${cy}" stroke="#${C.GRID}" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 16"/>
+    ${last > 0 ? `<line x1="${px(X0)}" y1="${cy}" x2="${px(X0 + last * sw)}" y2="${cy}" stroke="#${col}" stroke-width="8" stroke-linecap="round"/>` : ""}</svg>`;
+  const file = path.join(CACHE, `paper_tl_${idx}.png`);
+  await sharp(Buffer.from(svg)).png().toFile(file);
+  s.addImage({ path: file, x: 0.7, y: Y - 0.3, w: 11.93, h: 0.6 });
+  steps.forEach((p, i) => {
+    const cx = X0 + i * sw, r = 0.17, risk = p.state === "blocked", on = p.state === "done";
+    s.addShape("ellipse", { x: cx - r, y: Y - r, w: 2 * r, h: 2 * r, fill: { color: on ? col : risk ? C.AMBER : C.BG }, line: { color: risk ? C.AMBER : p.state === "next" ? C.GRAY : col, width: on || risk ? 0 : 2 } });
+    const tw = Math.min(2.6, sw - 0.15), tx = i === n - 1 ? cx - tw + r : i === 0 ? cx - r : cx - tw / 2, al = i === n - 1 ? "right" : i === 0 ? "left" : "center";
+    s.addText(sentence(p.tag || ""), { x: tx, y: Y + 0.4, w: tw, h: 0.26, fontFace: F.H, fontSize: 10, bold: true, color: risk ? ink(C.AMBER) : C.GRAY, align: al, margin: 0 });
+    s.addText(p.title, { x: tx, y: Y + 0.68, w: tw, h: 0.4, fontFace: F.H, fontSize: 15, bold: true, color: C.DARK, align: al, margin: 0, fit: "shrink" });
+    s.addText(p.desc || "", { x: tx, y: Y + 1.1, w: tw, h: 0.9, fontFace: F.B, fontSize: 11, color: C.BODY, align: al, valign: "top", margin: 0, lineSpacingMultiple: 1.15, fit: "shrink" });
+  });
+};
+
+// rings: one semicircle for the combined figure, then a ruled table of tracks, phases as a sentence
+TP.rings = async (pres, d) => {
+  const col = projFor([d.eyebrow, d.title]);
+  const s = await paperSlide(pres, d.eyebrow, d.title, col);
+  const rings = d.rings || [], li = Math.max(0, rings.findIndex((r) => r.dark)), lead = rings[li], others = rings.filter((_, i) => i !== li);
+  if (lead) {
+    const cx = 3.0, cy = 4.55, R = 1.9, box = { x: cx - R, y: cy - R, w: 2 * R, h: 2 * R };
+    s.addShape("blockArc", { ...box, angleRange: [180, 0], arcThicknessRatio: 0.12, fill: { color: C.TRACK }, line: { type: "none" } });
+    if (lead.pct > 0) s.addShape("blockArc", { ...box, angleRange: [180, (180 + 180 * Math.min(100, lead.pct) / 100) % 360], arcThicknessRatio: 0.12, fill: { color: col }, line: { type: "none" } });
+    s.addText(`${lead.pct}%`, { x: cx - 1.6, y: cy - 1.25, w: 3.2, h: 1.15, fontFace: F.H, fontSize: 54, bold: true, color: C.DARK, align: "center", valign: "bottom", margin: 0 });
+    s.addText(lead.label, { x: 0.7, y: cy + 0.15, w: 4.6, h: 0.4, fontFace: F.H, fontSize: 16, bold: true, color: C.DARK, align: "center", margin: 0 });
+    s.addText(lead.sub || "", { x: 0.7, y: cy + 0.55, w: 4.6, h: 0.32, fontFace: F.B, fontSize: 11, color: C.GRAY, align: "center", margin: 0 });
+  }
+  const tx = 6.1, tw = 12.63 - tx;
+  s.addText([{ text: "Track", options: {} }], { x: tx, y: 1.95, w: 3, h: 0.3, fontFace: F.H, fontSize: 10.5, bold: true, color: C.GRAY, margin: 0 });
+  s.addText("Progress", { x: tx + tw - 1.5, y: 1.95, w: 1.5, h: 0.3, fontFace: F.H, fontSize: 10.5, bold: true, color: C.GRAY, align: "right", margin: 0 });
+  pRule(s, tx, 2.3, tw, C.DARK, 0.75);
+  others.forEach((r, i) => {
+    const y = 2.4 + i * 1.05, c = i === 0 ? col : shade(col, 0.3 * i);
+    s.addText(r.label, { x: tx, y, w: tw - 1.6, h: 0.4, fontFace: F.H, fontSize: 16, bold: true, color: C.DARK, margin: 0, valign: "middle" });
+    s.addText(r.sub || "", { x: tx, y: y + 0.38, w: tw - 1.6, h: 0.3, fontFace: F.B, fontSize: 10.5, color: C.GRAY, margin: 0 });
+    s.addText(`${r.pct}%`, { x: tx + tw - 1.5, y, w: 1.5, h: 0.6, fontFace: F.H, fontSize: 26, bold: true, color: ink(c), align: "right", margin: 0, valign: "middle" });
+    pBar(s, tx, y + 0.78, tw, r.pct, c, 0.07);
+    pRule(s, tx, y + 1.0, tw);
+  });
+  const stats = d.stats || [];
+  if (stats.length) {
+    const y = 2.4 + Math.max(others.length, 1) * 1.05 + 0.25;
+    const runs = [];
+    stats.forEach((k, j) => {
+      if (j) runs.push({ text: "     ", options: {} });
+      runs.push({ text: "●  ", options: { color: k.state === "done" ? col : k.state === "progress" ? tint(col, 0.5) : C.GRID } });
+      runs.push({ text: String(k.value), options: { bold: true, color: C.DARK, fontSize: 18 } });
+      runs.push({ text: " " + sentence(k.label).toLowerCase(), options: { color: C.BODY } });
+    });
+    s.addText(runs, { x: tx, y, w: tw, h: 0.5, fontFace: F.H, fontSize: 12, margin: 0, valign: "middle", fit: "shrink" });
+  }
+  if (d.footnote) s.addText(d.footnote, { x: tx, y: 6.45, w: tw, h: 0.3, fontFace: F.B, fontSize: 10, italic: true, color: C.GRAY, margin: 0 });
+};
+
+// phase_bars: each track is a printed progress strip, segments sized equally, figures above
+TP.phase_bars = async (pres, d) => {
+  const base = d.color ? projColor("", d.color) : projFor([d.project, d.eyebrow, d.title]);
+  const s = await paperSlide(pres, d.eyebrow, d.title, base);
+  const tracks = d.tracks, n = tracks.length, top = 1.95, th = (6.85 - top) / n;
+  tracks.forEach((t, i) => {
+    const y = top + i * th, c = t.color ? projColor("", t.color) : (i === 0 ? base : shade(base, 0.3 * i));
+    if (i) pRule(s, 0.7, y - 0.05, 11.93);
+    const avg = Math.round(t.phases.reduce((a, p) => a + (p.pct || 0), 0) / t.phases.length);
+    s.addText(t.title, { x: 0.7, y: y + 0.12, w: 7, h: 0.45, fontFace: F.H, fontSize: 19, bold: true, color: C.DARK, margin: 0, valign: "middle" });
+    if (t.owner) s.addText(`Owner: ${t.owner}`, { x: 0.7, y: y + 0.55, w: 7, h: 0.3, fontFace: F.B, fontSize: 11, color: C.GRAY, margin: 0 });
+    s.addText([{ text: `${avg}%`, options: { fontSize: 30, bold: true, color: ink(c) } }, { text: "  of the track", options: { fontSize: 11, color: C.GRAY } }],
+      { x: 8.6, y: y + 0.1, w: 4.03, h: 0.7, fontFace: F.H, align: "right", valign: "middle", margin: 0 });
+    const ph = t.phases, g = 0.12, sw = (11.93 - (ph.length - 1) * g) / ph.length, py = y + 1.45;
+    ph.forEach((p, k) => {
+      const x = 0.7 + k * (sw + g), pct = Math.max(0, Math.min(100, p.pct || 0)), ns = !pct;
+      s.addText(p.name, { x, y: py - 0.5, w: sw - 0.9, h: 0.4, fontFace: F.B, fontSize: 11, color: ns ? C.GRAY : C.DARK, margin: 0, valign: "bottom", fit: "shrink" });
+      s.addText(ns ? "Not started" : `${pct}%`, { x: x + sw - 1.0, y: py - 0.5, w: 1.0, h: 0.4, fontFace: F.H, fontSize: ns ? 10 : 13, bold: !ns, italic: ns, color: ns ? C.GRAY : ink(c), align: "right", margin: 0, valign: "bottom" });
+      pBar(s, x, py, sw, pct, c, 0.16);
+    });
+    if (t.note) s.addText(t.note, { x: 0.7, y: py + 0.3, w: 11.93, h: 0.35, fontFace: F.B, fontSize: 11, italic: true, color: C.BODY, margin: 0, valign: "middle" });
+  });
+};
+
+// workstreams: a finished workstream as one big figure, the next one as a numbered vertical list
+TP.workstreams = async (pres, d) => {
+  const col = projFor([d.eyebrow, d.title]), h = d.hero, f = d.flow;
+  const s = await paperSlide(pres, d.eyebrow, d.title, col, 26);
+  s.addText(h.label || "Workstream 1", { x: 0.7, y: 1.95, w: 4.6, h: 0.3, fontFace: F.H, fontSize: 11, bold: true, color: C.GRAY, margin: 0 });
+  s.addText(h.metric, { x: 0.7, y: 2.3, w: 4.6, h: 1.4, fontFace: F.H, fontSize: 80, bold: true, color: ink(col), margin: 0, valign: "middle" });
+  s.addText(h.title, { x: 0.7, y: 3.8, w: 4.6, h: 0.5, fontFace: F.H, fontSize: 18, bold: true, color: C.DARK, margin: 0, valign: "top", fit: "shrink" });
+  pStatus(s, h.state || "done", h.status, 0.7, 4.38, 4.6, col);
+  s.addText(h.desc || "", { x: 0.7, y: 4.8, w: 4.6, h: 1.8, fontFace: F.B, fontSize: 12, color: C.BODY, valign: "top", margin: 0, lineSpacingMultiple: 1.2, fit: "shrink" });
+  const rx = 6.1, rw = 12.63 - rx;
+  pRule(s, 5.7, 1.95, 0, C.GRID); s.addShape("line", { x: 5.7, y: 1.95, w: 0, h: 4.9, line: { color: C.GRID, width: 0.75 } });
+  s.addText(f.label || "Workstream 2", { x: rx, y: 1.95, w: 3, h: 0.3, fontFace: F.H, fontSize: 11, bold: true, color: C.GRAY, margin: 0 });
+  pStatus(s, f.state || "progress", f.status, rx + rw - 2.4, 1.95, 2.4, col, "right");
+  s.addText(f.title, { x: rx, y: 2.3, w: rw, h: 0.5, fontFace: F.H, fontSize: 19, bold: true, color: C.DARK, margin: 0 });
+  const steps = f.steps, avail = (f.next ? 5.9 : 6.75) - 3.0, rh = Math.min(1.0, avail / steps.length);
+  steps.forEach((p, i) => {
+    const y = 3.0 + i * rh, on = p.state === "done";
+    pRule(s, rx, y, rw);
+    s.addText(String(i + 1).padStart(2, "0"), { x: rx, y: y + 0.1, w: 0.8, h: 0.5, fontFace: F.H, fontSize: 22, bold: true, color: p.state === "next" ? C.GRAY : ink(col), margin: 0, valign: "top" });
+    s.addText(p.title, { x: rx + 0.9, y: y + 0.12, w: rw - 3.2, h: 0.36, fontFace: F.H, fontSize: 14, bold: true, color: C.DARK, margin: 0, valign: "middle" });
+    s.addText(p.desc || "", { x: rx + 0.9, y: y + 0.48, w: rw - 3.2, h: rh - 0.55, fontFace: F.B, fontSize: 11, color: C.BODY, margin: 0, valign: "top", fit: "shrink" });
+    pStatus(s, p.state, { done: "Done", progress: "In progress", next: "Next", blocked: "Blocked" }[p.state], rx + rw - 2.2, y + 0.16, 2.2, col, "right");
+  });
+  if (f.next) s.addText([{ text: "Next: ", options: { bold: true, color: ink(col) } }, { text: f.next, options: { color: C.DARK } }],
+    { x: rx, y: 6.2, w: rw, h: 0.5, fontFace: F.H, fontSize: 13, margin: 0, valign: "middle", fit: "shrink" });
+};
+
+// rows: numbered paragraphs; a screenshot sits beside them. Generated icon illustrations are not used
+// in this style (no generic icons); the text takes the full width instead.
+TP.rows = async (pres, d) => {
+  const col = projFor([d.eyebrow, d.title], C.LIME);
+  const s = await paperSlide(pres, d.eyebrow, d.title, col, 27);
+  let img = null, aspect = 1;
+  if (d.image) { img = path.resolve(d.image); const m = await sharp(img).metadata(); aspect = m.height / m.width; }
+  const n = d.rows.length, two = !img && n >= 2 && n <= 4, cols = two ? 2 : 1, perCol = Math.ceil(n / cols); // reads left to right
+  const areaW = img ? 6.6 : 11.93, cw = (areaW - (cols - 1) * 0.6) / cols, rh = (6.85 - 1.95) / perCol;
+  if (img) {
+    const colX = 7.8, colW = 12.63 - colX; let fw = colW, fh = fw * aspect;
+    if (fh > 4.7) { fh = 4.7; fw = fh / aspect; }
+    s.addImage({ path: img, x: colX + (colW - fw) / 2, y: 1.95, w: fw, h: fh });
+    s.addShape("rect", { x: colX + (colW - fw) / 2, y: 1.95, w: fw, h: fh, fill: { type: "none" }, line: { color: C.GRID, width: 0.75 } });
+  }
+  d.rows.forEach((r, i) => {
+    const ci = i % cols, ri = Math.floor(i / cols), x = 0.7 + ci * (cw + 0.6), y = 1.95 + ri * rh;
+    if (ri) pRule(s, x, y, cw);
+    s.addText(String(i + 1).padStart(2, "0"), { x, y: y + 0.15, w: 0.9, h: 0.6, fontFace: F.H, fontSize: 28, bold: true, color: ink(col), margin: 0, valign: "top" });
+    s.addText(r.header, { x: x + 1.0, y: y + 0.18, w: cw - 1.0, h: 0.42, fontFace: F.H, fontSize: 16, bold: true, color: C.DARK, margin: 0, valign: "middle" });
+    s.addText(richDesc(r.desc), { x: x + 1.0, y: y + 0.65, w: cw - 1.0, h: rh - 0.8, fontFace: F.B, fontSize: 12, valign: "top", margin: 0, lineSpacingMultiple: 1.2, fit: "shrink" });
+  });
+};
+
+// table: a ruled table; the project name carries the project colour, nothing else does
+TP.table = async (pres, d) => {
+  const s = await paperSlide(pres, d.eyebrow || "Looking ahead", d.title || "Next steps", C.LIME, 30);
+  const cols = [{ k: "Project / track", w: 3.3 }, { k: "Owner", w: 2.2 }, { k: "Next focus", w: 4.43 }, { k: "Status", w: 2.0 }];
+  let x = 0.7; const xs = cols.map((c) => { const v = x; x += c.w; return v; });
+  cols.forEach((c, i) => s.addText(c.k, { x: xs[i], y: 1.9, w: c.w - 0.2, h: 0.3, fontFace: F.H, fontSize: 10.5, bold: true, color: C.GRAY, margin: 0, align: i === 3 ? "right" : "left" }));
+  pRule(s, 0.7, 2.25, 11.93, C.DARK, 0.75);
+  const n = d.rows.length, rh = Math.min(1.0, 4.5 / n);
+  d.rows.forEach((r, i) => {
+    const y = 2.3 + i * rh, c = projFor([r.project]);
+    s.addText(r.project, { x: xs[0], y, w: cols[0].w - 0.25, h: rh, fontFace: F.H, fontSize: 13, bold: true, color: ink(c), margin: 0, valign: "middle", fit: "shrink" });
+    s.addText(r.owner || "", { x: xs[1], y, w: cols[1].w - 0.25, h: rh, fontFace: F.B, fontSize: 11.5, color: C.BODY, margin: 0, valign: "middle", fit: "shrink" });
+    s.addText(r.focus, { x: xs[2], y, w: cols[2].w - 0.3, h: rh, fontFace: F.B, fontSize: 11.5, color: C.DARK, margin: 0, valign: "middle", fit: "shrink" });
+    pStatus(s, r.state, r.current, xs[3], y + rh / 2 - 0.14, cols[3].w, c, "right");
+    pRule(s, 0.7, y + rh, 11.93);
+  });
+};
+
+TP.gallery = async (pres, d) => {
+  const col = projFor([d.eyebrow, d.title], C.LIME);
+  const s = await paperSlide(pres, d.eyebrow, d.title, col, 27);
+  const imgs = d.images.map((p) => path.resolve(p));
+  const metas = await Promise.all(imgs.map((p) => sharp(p).metadata()));
+  const aspect = metas[0].height / metas[0].width, n = imgs.length, gap = n > 4 ? 0.2 : 0.35;
+  let fw = (11.93 - (n - 1) * gap) / n, fh = fw * aspect;
+  if (fh > 4.0) { fh = 4.0; fw = fh / aspect; }
+  const x0 = 0.7 + (11.93 - (n * fw + (n - 1) * gap)) / 2, fy = 2.0;
+  imgs.forEach((p, i) => {
+    const x = x0 + i * (fw + gap);
+    s.addImage({ path: p, x, y: fy, w: fw, h: fh });
+    s.addShape("rect", { x, y: fy, w: fw, h: fh, fill: { type: "none" }, line: { color: C.GRID, width: 0.75 } });
+    s.addText([{ text: `${i + 1}  `, options: { bold: true, color: ink(col) } }, { text: (d.labels && d.labels[i]) || `Step ${i + 1}`, options: { color: C.DARK } }],
+      { x, y: fy + fh + 0.12, w: fw, h: 0.35, fontFace: F.H, fontSize: n > 4 ? 10.5 : 12, margin: 0, fit: "shrink" });
+  });
+};
+
+// activity: the figures first (lede column), the chart after them
+TP.activity = async (pres, d) => {
+  const s = await paperSlide(pres, d.eyebrow || "Engineering activity", d.title || "Team delivery activity", C.LIME);
+  const kpis = d.kpis || [], lw = kpis.length ? 3.0 : 0, cx = kpis.length ? 4.2 : 0.7, cw = 12.63 - cx;
+  const kh = 4.9 / Math.max(kpis.length, 1);
+  kpis.forEach((k, i) => {
+    const y = 1.95 + i * kh;
+    if (i) pRule(s, 0.7, y, lw);
+    s.addText(String(k.value), { x: 0.7, y: y + 0.1, w: lw, h: kh * 0.58, fontFace: F.H, fontSize: i === 0 ? 54 : 36, bold: true, color: i === 0 ? ink(C.LIME) : C.DARK, margin: 0, valign: "bottom" });
+    s.addText(k.label, { x: 0.7, y: y + 0.1 + kh * 0.6, w: lw, h: kh * 0.32, fontFace: F.H, fontSize: 12, color: C.BODY, margin: 0, valign: "top" });
+  });
+  const labels = d.people.map((p) => p.name);
+  const data = d.series.map((name, i) => ({ name, labels, values: d.people.map((p) => p.values[i] || 0) }));
+  s.addChart(pres.charts.BAR, data, {
+    x: cx, y: 1.9, w: cw, h: 4.9 - (d.note ? 0.4 : 0), barDir: "col", barGrouping: "clustered", barGapWidthPct: 70,
+    chartColors: [C.LIME, C.DARK, tint(C.LIME, 0.55), "A9A6B8"].slice(0, d.series.length),
+    catAxisLabelFontFace: F.H, catAxisLabelFontSize: 11, catAxisLabelColor: C.DARK, catAxisLineShow: true,
+    valAxisHidden: true, valGridLine: { style: "none" },
+    showValue: true, dataLabelFontFace: F.H, dataLabelFontSize: 10.5, dataLabelFontBold: true, dataLabelColor: C.DARK, dataLabelPosition: "outEnd",
+    showLegend: true, legendPos: "t", legendFontSize: 10.5, legendFontFace: F.H,
+  });
+  if (d.note) s.addText(d.note, { x: cx, y: 6.45, w: cw, h: 0.3, fontFace: F.B, fontSize: 10, italic: true, color: C.GRAY, margin: 0 });
+};
+
+// review_insights: the figures run across the top like a results line, findings below as a ruled list
+TP.review_insights = async (pres, d) => {
+  const s = await paperSlide(pres, d.eyebrow || "Quality and code review", d.title || "Code review insights", C.LIME);
+  const stats = d.stats || [], sw = 11.93 / Math.max(stats.length, 1);
+  stats.forEach((k, i) => {
+    const x = 0.7 + i * sw;
+    s.addText(String(k.value), { x, y: 1.9, w: sw - 0.3, h: 0.85, fontFace: F.H, fontSize: 44, bold: true, color: i === 0 ? ink(C.LIME) : C.DARK, margin: 0, valign: "middle" });
+    s.addText(k.label, { x, y: 2.72, w: sw - 0.3, h: 0.32, fontFace: F.H, fontSize: 11.5, color: C.BODY, margin: 0 });
+  });
+  const f = d.findings || [], top = 3.25, avail = 6.85 - top - (d.note ? 0.35 : 0), rh = avail / Math.max(f.length, 1);
+  const lbl = { done: "Resolved", progress: "In progress", blocked: "Open risk", next: "Planned" };
+  pRule(s, 0.7, top, 11.93, C.DARK, 0.75);
+  f.forEach((it, i) => {
+    const y = top + i * rh;
+    if (i) pRule(s, 0.7, y, 11.93);
+    s.addText(it.area || "", { x: 0.7, y: y + 0.12, w: 3.0, h: rh - 0.2, fontFace: F.H, fontSize: 13, bold: true, color: C.DARK, margin: 0, valign: "top" });
+    s.addText(it.text, { x: 3.9, y: y + 0.12, w: 6.2, h: rh - 0.2, fontFace: F.B, fontSize: 12, color: C.DARK, margin: 0, valign: "top", lineSpacingMultiple: 1.15, fit: "shrink" });
+    pStatus(s, it.state, it.status || lbl[it.state], 10.33, y + 0.12, 2.3, it.state === "progress" ? C.LIME : C.LIME, "right");
+  });
+  if (d.note) s.addText(d.note, { x: 0.7, y: 6.5, w: 11.93, h: 0.3, fontFace: F.B, fontSize: 10, italic: true, color: C.GRAY, margin: 0 });
+};
+
+// attention: two columns of numbered items under a heavy rule; red only on the risk side
+TP.attention = async (pres, d) => {
+  const s = await paperSlide(pres, d.eyebrow || "Needs attention", d.title || "Blockers and decisions needed", C.AMBER);
+  const gap = 0.8, cw = (11.93 - gap) / 2;
+  const cols = [
+    { x: 0.7, head: d.blockersTitle || "Blockers and risks", items: d.blockers || [], c: C.AMBER, empty: d.noBlockers || "No open blockers." },
+    { x: 0.7 + cw + gap, head: d.decisionsTitle || "Decisions needed", items: d.decisions || [], c: C.DARK, empty: "No decisions needed." },
+  ];
+  cols.forEach((col) => {
+    pRule(s, col.x, 1.95, cw, col.c, 3);
+    s.addText([{ text: col.head, options: { bold: true, color: col.c === C.DARK ? C.DARK : ink(col.c) } }, { text: `   ${col.items.length}`, options: { color: C.GRAY } }],
+      { x: col.x, y: 2.05, w: cw, h: 0.45, fontFace: F.H, fontSize: 16, margin: 0, valign: "middle" });
+    if (!col.items.length) { s.addText(col.empty, { x: col.x, y: 2.7, w: cw, h: 0.5, fontFace: F.H, fontSize: 14, italic: true, color: C.GRAY, margin: 0 }); return; }
+    const ih = Math.min(1.7, 4.2 / col.items.length);
+    col.items.forEach((it, i) => {
+      const y = 2.7 + i * ih;
+      if (i) pRule(s, col.x, y - 0.08, cw);
+      s.addText(`${i + 1}.`, { x: col.x, y, w: 0.5, h: 0.45, fontFace: F.H, fontSize: 18, bold: true, color: col.c === C.DARK ? C.DARK : ink(col.c), margin: 0, valign: "top" });
+      const runs = [{ text: it.title, options: { bold: true, fontSize: 15, color: C.DARK, breakLine: true } }];
+      if (it.text) runs.push({ text: it.text, options: { fontSize: 12, color: C.BODY, breakLine: !!it.meta } });
+      if (it.meta) runs.push({ text: it.meta, options: { fontSize: 10.5, italic: true, color: C.GRAY } });
+      s.addText(runs, { x: col.x + 0.55, y, w: cw - 0.55, h: ih - 0.15, fontFace: F.H, valign: "top", margin: 0, lineSpacingMultiple: 1.12, paraSpaceAfter: 4, fit: "shrink" });
+    });
+  });
+};
+
+// tracker: one row per person (not cards), so the team reads like a ledger
+TP.tracker = async (pres, d) => {
+  const s = await paperSlide(pres, d.eyebrow || "Team and task tracker", d.title || "Developer task track", C.LIME);
+  const devs = d.devs || [], bottom = d.footnote ? 6.5 : 6.85, rh = (bottom - 1.95) / Math.max(devs.length, 1);
+  devs.forEach((v, i) => {
+    const y = 1.95 + i * rh, c = projFor([v.project]);
+    if (i) pRule(s, 0.7, y, 11.93);
+    s.addText(v.name, { x: 0.7, y: y + 0.12, w: 3.4, h: 0.38, fontFace: F.H, fontSize: 15, bold: true, color: C.DARK, margin: 0, valign: "middle", fit: "shrink" });
+    s.addText(v.project || "", { x: 0.7, y: y + 0.48, w: 3.4, h: 0.28, fontFace: F.H, fontSize: 10.5, bold: true, color: ink(c), margin: 0, valign: "middle", fit: "shrink" });
+    s.addText(v.focus || "", { x: 0.7, y: y + 0.8, w: 3.4, h: rh - 0.9, fontFace: F.B, fontSize: 10.5, italic: true, color: C.BODY, margin: 0, valign: "top", fit: "shrink" });
+    const mx = 4.4, mw = 2.6, dn = v.done ?? 0, op = v.open ?? 0, tot = Math.max(dn + op, 1), cs = Math.min(0.24, (mw - (tot - 1) * 0.06) / tot);
+    for (let k = 0; k < tot; k++) s.addShape("rect", { x: mx + k * (cs + 0.06), y: y + 0.2, w: cs, h: cs, fill: { color: k < dn ? c : C.BG }, line: { color: c, width: 1 } });
+    s.addText(`${dn} done, ${op} open`, { x: mx, y: y + 0.52, w: mw, h: 0.28, fontFace: F.H, fontSize: 10.5, color: C.BODY, margin: 0 });
+    s.addText(`${v.pct ?? 0}%`, { x: mx, y: y + 0.82, w: mw, h: 0.45, fontFace: F.H, fontSize: 22, bold: true, color: ink(c), margin: 0, valign: "middle" });
+    pBar(s, mx, y + 1.3, mw, v.pct, c, 0.06);
+    const items = v.items || [], ix = 7.5, iw = 12.63 - ix, half = Math.ceil(items.length / 2), ih = Math.min(0.36, (rh - 0.3) / Math.max(half, 1));
+    items.forEach((it, k) => {
+      const colI = Math.floor(k / half), row = k % half, x = ix + colI * (iw / 2), yy = y + 0.18 + row * ih;
+      const on = it.state === "done", pr = it.state === "progress";
+      s.addShape("ellipse", { x, y: yy + 0.08, w: 0.12, h: 0.12, fill: { color: on ? c : C.BG }, line: { color: it.state === "next" ? C.GRAY : c, width: on ? 0 : 1.25 } });
+      s.addText(it.text, { x: x + 0.22, y: yy, w: iw / 2 - 0.3, h: ih, fontFace: F.B, fontSize: 10.5, color: it.state === "next" ? C.GRAY : C.DARK, margin: 0, valign: "top", fit: "shrink" });
+    });
+  });
+  if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.55, w: 11.93, h: 0.28, fontFace: F.B, fontSize: 10, italic: true, color: C.GRAY, margin: 0 });
+};
+
 // ---------- Main ----------
 (async () => {
   const [, , inFile, outFile] = process.argv;
@@ -1633,16 +2029,16 @@ TS.tracker = async (pres, d) => {
   const pres = new pptxgen();
   pres.layout = "LAYOUT_WIDE";
   if (r.signature !== undefined) STYLE.signature = r.signature; else if (cfg.signature !== undefined) STYLE.signature = cfg.signature;
-  if (STYLE.bookend === "signature") await sigBookend(pres, r, "title"); else bookend(pres, r, "title");
+  if (STYLE.bookend === "signature") await sigBookend(pres, r, "title"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "title"); else bookend(pres, r, "title");
   SLIDE_NO = 1;
   FOOTER_TEXT = [r.company, r.date].filter(Boolean).join("  ·  ");
   for (let i = 0; i < r.slides.length; i++) {
     const sl = r.slides[i];
     if (!T[sl.type]) throw new Error(`Unknown slide type "${sl.type}" (slide ${i + 2})`);
-    const tpl = (STYLE.layouts === "editorial" && TE[sl.type]) || (STYLE.layouts === "signature" && TS[sl.type]) || T[sl.type];
+    const tpl = (STYLE.layouts === "editorial" && TE[sl.type]) || (STYLE.layouts === "signature" && TS[sl.type]) || (STYLE.layouts === "paper" && TP[sl.type]) || T[sl.type];
     await tpl(pres, sl, i);
   }
-  if (STYLE.bookend === "signature") await sigBookend(pres, r, "closing"); else bookend(pres, r, "closing");
+  if (STYLE.bookend === "signature") await sigBookend(pres, r, "closing"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "closing"); else bookend(pres, r, "closing");
   await pres.writeFile({ fileName: outPath });
   console.log(`Wrote ${outFile} (${r.slides.length + 2} slides)`);
 })().catch((e) => { console.error(e.message); process.exit(1); });

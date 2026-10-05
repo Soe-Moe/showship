@@ -104,6 +104,7 @@ const STYLES = [
   { id: "corporate", label: "Corporate", hint: "white · navy & blue · sans-serif · page numbers" },
   { id: "vivid",     label: "Vivid",     hint: "teal header bands · orange accent · rounded cards" },
   { id: "showship",  label: "Showship",  hint: "signature · colour-coded projects · gauges · ship-trail ribbons" },
+  { id: "paper",     label: "Paper",     hint: "printed annual report · paper and ink · one colour per project" },
 ];
 
 const args = process.argv.slice(2);

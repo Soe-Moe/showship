@@ -19,6 +19,7 @@ const fs = require("fs");
 
 // [regex, level, suggestion]
 const RULES = [
+  [/\u2014/, "fix", "no em dash on slides: use a comma, colon, period or parentheses"],
   [/\beloquent\b/i, "fix", "drop it — say 'data models' or just describe the data (e.g. 'appointment data structure')"],
   [/\bmigrations?\b/i, "fix", "'database setup' / 'database changes'"],
   [/\bschemas?\b/i, "check", "'data structure' (keep 'schema' only in brackets for the CTO)"],
@@ -67,7 +68,7 @@ function walk(node, path, out) {
 const file = process.argv[2];
 const ai = process.argv.indexOf("--audience");
 const audience = (ai > 0 ? process.argv[ai + 1] : "business") || "business";
-const ENGINEERING_KEEP = new Set(["remove code formatting / code identifiers", "remove file names"]);
+const ENGINEERING_KEEP = new Set(["remove code formatting / code identifiers", "remove file names", "no em dash on slides: use a comma, colon, period or parentheses"]);
 if (!file) { console.error("Usage: node lint_report.js <report.json>"); process.exit(2); }
 const r = JSON.parse(fs.readFileSync(file, "utf8"));
 const strings = [];

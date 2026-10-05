@@ -12,12 +12,12 @@ A full working example lives in `examples/report.example.json`.
   "period": "sprint",                          // optional: weekly | biweekly | sprint | monthly | custom (default from config)
   "sprint": 14,                                // optional: sprint number → "Sprint 14 Progress Report"
   "title": "Weekly Development\nProgress Report", // optional — overrides the period's default title
-  "style": "corporate",                        // optional: showship | classic | modern | corporate | vivid (default from config)
+  "style": "corporate",                        // optional: showship | paper | classic | modern | corporate | vivid (default from config)
   "slides": [ /* content slides, in order; title + closing are added automatically */ ]
 }
 ```
 
-All styles read the same JSON. `classic` renders it with its own editorial layouts (e.g. `rings` as large figures, `phase_bars` as phase lists, `timeline` vertically); `showship` has its own signature layouts (colour per project, gauges, pill tracks, milestone trail); `modern`, `corporate` and `vivid` share the card layouts. Optional `"color"` on a dashboard card or `phase_bars` slide pins a project colour (hex); `"signature": false` hides the "Shipped with Showship" mark.
+All styles read the same JSON. `classic` renders it with its own editorial layouts (e.g. `rings` as large figures, `phase_bars` as phase lists, `timeline` vertically); `showship` has its own signature layouts (colour per project, gauges, pill tracks, milestone trail); `paper` has its own printed-report layouts (ruled lists, big figures, a single trail line for timelines; `rows` ignores `illustration`); `modern`, `corporate` and `vivid` share the card layouts. Optional `"color"` on a dashboard card or `phase_bars` slide pins a project colour (hex); `"signature": false` hides the "Shipped with Showship" mark.
 
 Every content slide has `type`, `eyebrow` (small label, auto-uppercased) and `title` (one line).
 
@@ -165,7 +165,7 @@ One card per person (2–4). `done` / `open` = task counts for the week from the
       "focus": "Onboarding and Doctor Schedules closed; Reminders in review.",
       "items": [
         { "text": "Phase 2 · Doctor Schedules (5/5)", "state": "done" },
-        { "text": "Phase 4 · Reminders & Notifications — in review (5/5)", "state": "progress" },
+        { "text": "Phase 4 · Reminders & Notifications, in review (5/5)", "state": "progress" },
         { "text": "Phase 3 · Reports & Exports (0/3)", "state": "next" } ] }
   ],
   "footnote": "Done/Open = Jira issues, Sep 26 – Oct 2; work in review stays open until merged. Progress % confirmed by the lead." }
