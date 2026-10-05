@@ -103,6 +103,7 @@ const STYLES = [
   { id: "modern",    label: "Modern",    hint: "dark title slides · lime accent · serif headings" },
   { id: "corporate", label: "Corporate", hint: "white · navy & blue · sans-serif · page numbers" },
   { id: "vivid",     label: "Vivid",     hint: "teal header bands · orange accent · rounded cards" },
+  { id: "showship",  label: "Showship",  hint: "signature · colour-coded projects · gauges · ship-trail ribbons" },
 ];
 
 const args = process.argv.slice(2);

@@ -61,8 +61,8 @@ If the user just says "make this week's report" (or this sprint's / month's) ins
   - `reportsDir` — where report folders live (any path, `~` allowed; default `~/Showship`). `<reports>` below means this path, expanded.
   - `period` — `weekly`, `biweekly`, `sprint`, `monthly` or `custom`; `sprintDays` — sprint length in days (default 14). See **Reporting period**. Ask on first setup if it isn't set.
   - `presenter` (title slide), `closingPresenter` (closing slide), `company`
-  - `logo` — path to the company logo (PNG/JPG, `~` allowed; borders are trimmed automatically; `false` for none). Default: the placeholder in `assets/`.
-  - `style` — the deck design: `classic` (black & white editorial with its own layouts — lede column, large serif figures, numbered lists, vertical timeline, no boxes), `modern` (dark bookends, lime accent, serif headings), `corporate` (white, navy & blue, sans-serif, page numbers), or `vivid` (teal header bands, orange accent, rounded cards). The user chooses it — in the installer, in config, or per report via `report.json` → `"style"`. All slide types work in every style. Ask on first setup if it isn't set.
+  - `logo` — path to the company logo (PNG/JPG, `~` allowed; borders are trimmed automatically; `false` for none). Default: the Showship mark in `assets/logo.png` (used until the user sets their own logo).
+  - `style` — the deck design: `showship` (signature: one colour per project across all slides, gauges, pill-track phases, ship-trail ribbons; `"signature": false` hides the footer mark), `classic` (black & white editorial with its own layouts — lede column, large serif figures, numbered lists, vertical timeline, no boxes), `modern` (dark bookends, lime accent, serif headings), `corporate` (white, navy & blue, sans-serif, page numbers), or `vivid` (teal header bands, orange accent, rounded cards). The user chooses it — in the installer, in config, or per report via `report.json` → `"style"`. All slide types work in every style. Ask on first setup if it isn't set.
   - `theme` — optional colours (hex) that override the style's palette: `dark`, `accent`, `accentLight`, `warning`.
   - `deckLanguage` — language of the slides (default `English`).
   - `role` — `lead` (whole team) or `member` (own work only); `audience` — `business` or `engineering`. See **Who this is for**.
@@ -220,6 +220,7 @@ Skip `tracker` and `activity` in `member` mode unless the user asks — they are
 - Progress for a track = average of its phase percentages; say so in a footnote.
 - Names: use the display names from config `team` / `taskUsers` / `larkUsers` exactly, everywhere, including drafts (e.g. `Nina Rao @Nina`). Never show excluded people. Title slide presenter = `presenter`; closing slide = `closingPresenter`.
 - Scope wording precisely: if only part of a product is being built (e.g. only the Patient App and Clinic Dashboard of ClinicBook), say so.
+- In the `showship` style, a project keeps one colour on every slide. The colour is matched by the product name, so start every label, eyebrow and table row for a project with the same name (e.g. "ClinicBook · Patient App", "ClinicBook: Status of Each Phase").
 - Status words the business understands: Completed, Released, Approved — ready to release, In review, In progress, Not started, Blocked, At risk.
 
 ## Editing an existing report

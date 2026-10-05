@@ -12,12 +12,12 @@ A full working example lives in `examples/report.example.json`.
   "period": "sprint",                          // optional: weekly | biweekly | sprint | monthly | custom (default from config)
   "sprint": 14,                                // optional: sprint number → "Sprint 14 Progress Report"
   "title": "Weekly Development\nProgress Report", // optional — overrides the period's default title
-  "style": "corporate",                        // optional: classic | modern | corporate | vivid (default from config)
+  "style": "corporate",                        // optional: showship | classic | modern | corporate | vivid (default from config)
   "slides": [ /* content slides, in order; title + closing are added automatically */ ]
 }
 ```
 
-All styles read the same JSON. `classic` renders it with its own editorial layouts (e.g. `rings` as large figures, `phase_bars` as phase lists, `timeline` vertically); `modern`, `corporate` and `vivid` share the card layouts.
+All styles read the same JSON. `classic` renders it with its own editorial layouts (e.g. `rings` as large figures, `phase_bars` as phase lists, `timeline` vertically); `showship` has its own signature layouts (colour per project, gauges, pill tracks, milestone trail); `modern`, `corporate` and `vivid` share the card layouts. Optional `"color"` on a dashboard card or `phase_bars` slide pins a project colour (hex); `"signature": false` hides the "Shipped with Showship" mark.
 
 Every content slide has `type`, `eyebrow` (small label, auto-uppercased) and `title` (one line).
 
