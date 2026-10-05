@@ -8,11 +8,11 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933)](https://nodejs.org)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-Claude%20Code%20·%20Codex%20·%20Antigravity-D97757)](#install)
 
-**Turn your git commits, pull requests and code reviews into a progress deck your audience actually understands — weekly, per sprint, monthly or for any date range.**
+**Turns GitHub activity plus Jira, Linear, Asana, ClickUp & Lark tasks into a plain-language progress deck (PPTX) for your boss or client to understand weekly, per sprint, monthly or for any date range.**
 
 Showship is an Agent Skill (a `SKILL.md` folder) for anyone who has to report what they built — **team leads** reporting the whole team to management, and **individuals** (developers, freelancers, contractors, founders) reporting their own work to a manager, tech lead or client. Run it in each repo you touched; your AI coding agent reads the commits, PRs, reviews and replies, translates them into plain business language (or keeps it technical for engineers), and builds a polished slide deck — with charts, owners, progress, blockers and the plan for next period.
 
-Works with **Claude Code**, plus **Codex** and **Antigravity** *(experimental)* and other agents that read `SKILL.md` folders.
+Works with **Claude Code**, plus **Codex** and **Antigravity** _(experimental)_ and other agents that read `SKILL.md` folders.
 
 ```bash
 npx showship
@@ -42,25 +42,25 @@ Showship does the translation for you. The deck answers the questions every audi
 
 ## Who it's for
 
-| You are… | Set | You get |
-|---|---|---|
-| **Team lead** reporting to business / management | `role: lead`, `audience: business` | the whole team's progress in plain language: owners, percentages, blockers, decisions needed, what's next |
-| **Team lead** reporting to a CTO or engineering org | `role: lead`, `audience: engineering` | the same, with technical detail kept (architecture, test status, review findings) |
-| **Developer** reporting to a tech lead or manager | `role: member`, `audience: engineering` | only *your* commits, PRs you authored/reviewed and *your* tasks — what you shipped, what's in review, what you need |
-| **Freelancer / contractor** reporting to a client | `role: member`, `audience: business` | a client-ready update of your work, in their language, with your logo |
-| **Solo founder / indie dev** updating investors or a co-founder | `role: member`, `audience: business` | a short, polished progress deck from your repos |
+| You are…                                                        | Set                                     | You get                                                                                                             |
+| --------------------------------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Team lead** reporting to business / management                | `role: lead`, `audience: business`      | the whole team's progress in plain language: owners, percentages, blockers, decisions needed, what's next           |
+| **Team lead** reporting to a CTO or engineering org             | `role: lead`, `audience: engineering`   | the same, with technical detail kept (architecture, test status, review findings)                                   |
+| **Developer** reporting to a tech lead or manager               | `role: member`, `audience: engineering` | only _your_ commits, PRs you authored/reviewed and _your_ tasks — what you shipped, what's in review, what you need |
+| **Freelancer / contractor** reporting to a client               | `role: member`, `audience: business`    | a client-ready update of your work, in their language, with your logo                                               |
+| **Solo founder / indie dev** updating investors or a co-founder | `role: member`, `audience: business`    | a short, polished progress deck from your repos                                                                     |
 
 The installer asks these questions; you can change them in `config.json` at any time.
 
 ## Features
 
-- **Any reporting rhythm** — `weekly`, `biweekly`, `sprint`, `monthly` or `custom`. The period sets the default date range, the deck title ("Sprint 14 Progress Report") and the "next…" slide. Any request can override it: *"the last two weeks"*, *"September"*, *"Oct 1 to Oct 9"*.
+- **Any reporting rhythm** — `weekly`, `biweekly`, `sprint`, `monthly` or `custom`. The period sets the default date range, the deck title ("Sprint 14 Progress Report") and the "next…" slide. Any request can override it: _"the last two weeks"_, _"September"_, _"Oct 1 to Oct 9"_.
 - **Reads everything that matters** — commits on all branches, every PR with activity in the period, full PR descriptions, reviews (approved / changes requested), conversation and inline review comments, in chronological order. Bots are filtered out.
 - **Understands your reviews** — comments from the lead's GitHub account are tagged `(LEAD)` and treated as the most authoritative source. Structured reviews (summary, subtask coverage, blockers, decisions, verdict) map straight onto progress, status, risks and "decisions needed".
-- **Plain language by default, technical when you want it** — set `audience` to `business` or `engineering`. A built-in jargon check (`lint_report.js`) flags terms like *endpoint, schema, payload, JSON, 500 error, N+1* and suggests business wording before the deck is built.
+- **Plain language by default, technical when you want it** — set `audience` to `business` or `engineering`. A built-in jargon check (`lint_report.js`) flags terms like _endpoint, schema, payload, JSON, 500 error, N+1_ and suggests business wording before the deck is built.
 - **Never invents numbers** — percentages, owners, dates and blockers come from your data or from you. The agent asks one consolidated question for anything GitHub can't tell it.
 - **12 slide templates, chosen to fit the data** — KPI dashboard, milestone timeline, doughnut progress, phase bar charts, workstreams, icon rows with generated illustrations, screenshot gallery, code-review insights, blockers & decisions, developer task tracker, team activity chart, next-steps table. Consecutive slides never reuse the same layout.
-- **3 deck designs** — *Classic*, *Corporate* and *Vivid*; every slide type works in all three.
+- **3 deck designs** — _Classic_, _Corporate_ and _Vivid_; every slide type works in all three.
 - **Your branding** — company name, logo (auto-trimmed) and colour overrides from one config file.
 - **Works across changing repos** — collect per repo, build once. The set of repos can change every period.
 - **Task tracker integrations** — pull tasks, subtasks, assignees and due dates from **Jira, Linear, Asana, ClickUp or Lark** for "who is doing what", progress evidence and overdue risks.
@@ -83,14 +83,14 @@ Everything for one report lives in one folder, e.g. `~/Showship/2026-10-09/`. Th
 
 ## Requirements
 
-| Tool | Why | Install |
-|---|---|---|
-| An AI coding agent | runs the skill | [Claude Code](https://docs.claude.com/en/docs/claude-code), Codex or Antigravity |
-| Node.js ≥ 18 | installer and deck builder | [nodejs.org](https://nodejs.org) |
-| git | reads commits | — |
-| [GitHub CLI](https://cli.github.com) (`gh`) | reads PRs, reviews, comments | `brew install gh && gh auth login` |
-| LibreOffice *(optional)* | lets the agent render slides to images and check the layout | `brew install --cask libreoffice` |
-| A task tracker *(optional)* | Jira Cloud, Linear, Asana, ClickUp or Lark | see [Task tracker integrations](#task-tracker-integrations) |
+| Tool                                        | Why                                                         | Install                                                                          |
+| ------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------- |
+| An AI coding agent                          | runs the skill                                              | [Claude Code](https://docs.claude.com/en/docs/claude-code), Codex or Antigravity |
+| Node.js ≥ 18                                | installer and deck builder                                  | [nodejs.org](https://nodejs.org)                                                 |
+| git                                         | reads commits                                               | —                                                                                |
+| [GitHub CLI](https://cli.github.com) (`gh`) | reads PRs, reviews, comments                                | `brew install gh && gh auth login`                                               |
+| LibreOffice _(optional)_                    | lets the agent render slides to images and check the layout | `brew install --cask libreoffice`                                                |
+| A task tracker _(optional)_                 | Jira Cloud, Linear, Asana, ClickUp or Lark                  | see [Task tracker integrations](#task-tracker-integrations)                      |
 
 `gh auth login` with **your own** account is enough — you can read your teammates' PRs just as you do in the browser. If your organisation uses SAML SSO, authorise the token for the org when GitHub asks.
 
@@ -140,12 +140,12 @@ The installer asks a few questions (use ↑/↓ and Enter):
 
 Then it copies the skill, records your choices in `config.json` (keeping anything already there), installs the deck builder's dependencies, checks for `git`, `gh` and LibreOffice, and prints the setup steps for the tracker you picked.
 
-| Agent | Global folder | Project folder |
-|---|---|---|
-| Claude Code | `~/.claude/skills/showship` | `./.claude/skills/showship` |
-| Codex *(experimental)* | `~/.codex/skills/showship` | `./.agents/skills/showship` |
-| Antigravity *(experimental)* | `~/.gemini/config/skills/showship` | `./.agents/skills/showship` |
-| Other agents *(experimental)* | `~/.agents/skills/showship` | `./.agents/skills/showship` |
+| Agent                         | Global folder                      | Project folder              |
+| ----------------------------- | ---------------------------------- | --------------------------- |
+| Claude Code                   | `~/.claude/skills/showship`        | `./.claude/skills/showship` |
+| Codex _(experimental)_        | `~/.codex/skills/showship`         | `./.agents/skills/showship` |
+| Antigravity _(experimental)_  | `~/.gemini/config/skills/showship` | `./.agents/skills/showship` |
+| Other agents _(experimental)_ | `~/.agents/skills/showship`        | `./.agents/skills/showship` |
 
 **Without prompts** (CI, scripts, or if you already know what you want):
 
@@ -155,19 +155,19 @@ npx showship --agent codex --project                 # Codex, this project
 npx showship --yes --period sprint --tasks jira --style corporate
 ```
 
-| Option | Effect |
-|---|---|
-| `--agent <id>` | `claude`, `codex`, `antigravity` or `agents` |
-| `--global` / `--project` | install for your user / for the current project only |
-| `--period <p>` | `weekly`, `biweekly`, `sprint`, `monthly`, `custom` |
-| `--tasks <tool>` | task tracker: `none`, `lark`, `jira`, `linear`, `asana`, `clickup` |
-| `--style <name>` | deck design: `classic`, `corporate`, `vivid` |
-| `--role <role>` | `lead` (whole team) or `member` (your own work) |
-| `--audience <a>` | `business` (plain language) or `engineering` |
-| `--dir <path>` | install into a custom skill folder |
-| `-y`, `--yes` | don't ask; defaults for anything not given |
-| `--skip-deps` | skip `npm install` for the deck builder |
-| `--uninstall` | remove the skill (backs up `config.json` first) |
+| Option                   | Effect                                                             |
+| ------------------------ | ------------------------------------------------------------------ |
+| `--agent <id>`           | `claude`, `codex`, `antigravity` or `agents`                       |
+| `--global` / `--project` | install for your user / for the current project only               |
+| `--period <p>`           | `weekly`, `biweekly`, `sprint`, `monthly`, `custom`                |
+| `--tasks <tool>`         | task tracker: `none`, `lark`, `jira`, `linear`, `asana`, `clickup` |
+| `--style <name>`         | deck design: `classic`, `corporate`, `vivid`                       |
+| `--role <role>`          | `lead` (whole team) or `member` (your own work)                    |
+| `--audience <a>`         | `business` (plain language) or `engineering`                       |
+| `--dir <path>`           | install into a custom skill folder                                 |
+| `-y`, `--yes`            | don't ask; defaults for anything not given                         |
+| `--skip-deps`            | skip `npm install` for the deck builder                            |
+| `--uninstall`            | remove the skill (backs up `config.json` first)                    |
 
 **Updating** is the same command. Your `config.json` and `node_modules` are kept, and the previous skill files are backed up to `~/.showship/backups/<timestamp>/`.
 
@@ -181,6 +181,7 @@ git clone https://github.com/Soe-Moe/showship.git
 cp -r showship/skill ~/.claude/skills/showship        # or your agent's skills folder
 cd ~/.claude/skills/showship/scripts && npm install
 ```
+
 </details>
 
 ## Quick start
@@ -198,7 +199,7 @@ On first use the agent creates `config.json` and asks for anything the installer
 
 The agent merges the drafts, asks one consolidated question (progress percentages, blockers outside GitHub, non-code work), runs the jargon check and writes the `.pptx` into the report folder.
 
-You can talk to it in any language — e.g. *"ဒီတစ်ပတ် report အတွက် collect လုပ်ပေး"* works just as well.
+You can talk to it in any language — e.g. _"ဒီတစ်ပတ် report အတွက် collect လုပ်ပေး"_ works just as well.
 
 ## Usage examples
 
@@ -295,37 +296,45 @@ Only your own commits, the PRs you authored or reviewed, and your tasks are coll
 
 ```jsonc
 {
-  "role": "lead",                          // lead = whole team · member = your own work
-  "audience": "business",                  // business = plain language · engineering = technical OK
-  "period": "sprint",                      // weekly | biweekly | sprint | monthly | custom
-  "sprintDays": 14,                        // sprint length (period "sprint")
+  "role": "lead", // lead = whole team · member = your own work
+  "audience": "business", // business = plain language · engineering = technical OK
+  "period": "sprint", // weekly | biweekly | sprint | monthly | custom
+  "sprintDays": 14, // sprint length (period "sprint")
   "company": "Acme Digital Co., Ltd.",
-  "presenter": "Maya Lin @Maya",          // title slide
-  "closingPresenter": "Maya Lin",         // closing slide
-  "logo": "~/Pictures/acme-logo.png",     // PNG/JPG; borders trimmed automatically; false = none
-  "style": "corporate",                   // deck design: classic | corporate | vivid
-  "theme": { "dark": "141412", "accent": "A8CC3A", "accentLight": "D6E6A0", "warning": "E0A33A" },
+  "presenter": "Maya Lin @Maya", // title slide
+  "closingPresenter": "Maya Lin", // closing slide
+  "logo": "~/Pictures/acme-logo.png", // PNG/JPG; borders trimmed automatically; false = none
+  "style": "corporate", // deck design: classic | corporate | vivid
+  "theme": {
+    "dark": "141412",
+    "accent": "A8CC3A",
+    "accentLight": "D6E6A0",
+    "warning": "E0A33A",
+  },
   "deckLanguage": "English",
   "reportsDir": "~/Showship",
 
   "leadLogins": ["maya-lin", "Maya Lin"], // YOUR git name(s) + GitHub login: your reviews are tagged (LEAD);
-                                          // in member mode they also select your commits, PRs and tasks
-  "team": {                               // git author names AND GitHub logins → display names
+  // in member mode they also select your commits, PRs and tasks
+  "team": {
+    // git author names AND GitHub logins → display names
     "Leo Park": "Leo Park @Leo",
     "leo-park": "Leo Park @Leo",
     "nina-dev": "Nina Rao @Nina",
-    "maya-lin": "Maya Lin @Maya"
+    "maya-lin": "Maya Lin @Maya",
   },
-  "projects": {                           // local repo folder name → project/service name
+  "projects": {
+    // local repo folder name → project/service name
     "clinicbook-api": "Booking Service - ClinicBook",
-    "pulseboard-web": "Web App - PulseBoard"
+    "pulseboard-web": "Web App - PulseBoard",
   },
-  "tasks": {                              // your task tracker — see "Task tracker integrations"
-    "provider": "jira",                   // none | lark | jira | linear | asana | clickup
-    "jira": { "baseUrl": "https://acme.atlassian.net", "projects": ["CLINIC"] }
+  "tasks": {
+    // your task tracker — see "Task tracker integrations"
+    "provider": "jira", // none | lark | jira | linear | asana | clickup
+    "jira": { "baseUrl": "https://acme.atlassian.net", "projects": ["CLINIC"] },
   },
-  "taskUsers": { "nina@acme.io": "Nina Rao @Nina" },     // tracker ids / emails / names → display names
-  "exclude": { "people": ["former-member", "ou_yyyy"] } // left out of every count and slide
+  "taskUsers": { "nina@acme.io": "Nina Rao @Nina" }, // tracker ids / emails / names → display names
+  "exclude": { "people": ["former-member", "ou_yyyy"] }, // left out of every count and slide
 }
 ```
 
@@ -339,18 +348,18 @@ Tips:
 
 ## Task tracker integrations
 
-Commits and PRs show what was *built*; the task tracker shows what was *planned* — phases, subtasks, owners, due dates. With a tracker configured, the agent collects it once per report into `<report>/tasks.md` and uses it for "who is doing what", subtask-based progress ("4 of 5 parts done"), overdue risks and the Developer Task Track slide. The digest looks the same whichever tool you use.
+Commits and PRs show what was _built_; the task tracker shows what was _planned_ — phases, subtasks, owners, due dates. With a tracker configured, the agent collects it once per report into `<report>/tasks.md` and uses it for "who is doing what", subtask-based progress ("4 of 5 parts done"), overdue risks and the Developer Task Track slide. The digest looks the same whichever tool you use.
 
 Pick the tool in the installer, or set `tasks.provider` in `config.json` yourself at any time:
 
-| Tool | `provider` | Settings in `config.json` | Credentials (environment) |
-|---|---|---|---|
-| **Jira Cloud** | `jira` | `tasks.jira.baseUrl`, `tasks.jira.projects` (keys), optional `tasks.jira.jql` | `JIRA_EMAIL`, `JIRA_API_TOKEN` — [create a token](https://id.atlassian.com/manage-profile/security/api-tokens) |
-| **Linear** | `linear` | optional `tasks.linear.teams` (team keys) | `LINEAR_API_KEY` — Settings → Security & access → Personal API keys |
-| **Asana** | `asana` | `tasks.asana.projects` (project gids from the URL) | `ASANA_TOKEN` — Settings → Apps → Developer apps → Personal access tokens |
-| **ClickUp** | `clickup` | `tasks.clickup.lists` (list ids from the URL), or `tasks.clickup.workspaceId` + optional `spaces` | `CLICKUP_TOKEN` — Settings → Apps → API Token |
-| **Lark** | `lark` | optional `tasks.lark.tasklists` | `lark-cli` signed in as you |
-| — | `none` | | git + GitHub only |
+| Tool           | `provider` | Settings in `config.json`                                                                         | Credentials (environment)                                                                                      |
+| -------------- | ---------- | ------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Jira Cloud** | `jira`     | `tasks.jira.baseUrl`, `tasks.jira.projects` (keys), optional `tasks.jira.jql`                     | `JIRA_EMAIL`, `JIRA_API_TOKEN` — [create a token](https://id.atlassian.com/manage-profile/security/api-tokens) |
+| **Linear**     | `linear`   | optional `tasks.linear.teams` (team keys)                                                         | `LINEAR_API_KEY` — Settings → Security & access → Personal API keys                                            |
+| **Asana**      | `asana`    | `tasks.asana.projects` (project gids from the URL)                                                | `ASANA_TOKEN` — Settings → Apps → Developer apps → Personal access tokens                                      |
+| **ClickUp**    | `clickup`  | `tasks.clickup.lists` (list ids from the URL), or `tasks.clickup.workspaceId` + optional `spaces` | `CLICKUP_TOKEN` — Settings → Apps → API Token                                                                  |
+| **Lark**       | `lark`     | optional `tasks.lark.tasklists`                                                                   | `lark-cli` signed in as you                                                                                    |
+| —              | `none`     |                                                                                                   | git + GitHub only                                                                                              |
 
 ```bash
 # ~/.zshrc (or ~/.bashrc) — so your agent sees them; never put tokens in config.json
@@ -371,12 +380,12 @@ Want another tool (Trello, GitHub Projects, Notion, Monday…)? Add a file in `s
 
 ## The workflow
 
-| Step | You say | The agent does |
-|---|---|---|
-| 1 | *"Collect this week's commits and PRs for the report"* (in each repo) | runs `collect_commits.sh` + `collect_prs.sh`, analyzes PRs and reviews, writes `<report>/<repo>.md`, shows a summary and questions |
-| 2 | answers, extra info ("Phase 3 is at 40%", "waiting on the SMS provider") | records it in `<report>/notes.md` |
-| 3 | *"Build the report"* | plans slides, writes `report.json`, runs the jargon check, builds and visually checks the deck |
-| 4 | *"Change the title on slide 4"*, *"add a decision about X"* | edits `report.json`, rebuilds |
+| Step | You say                                                                  | The agent does                                                                                                                     |
+| ---- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | _"Collect this week's commits and PRs for the report"_ (in each repo)    | runs `collect_commits.sh` + `collect_prs.sh`, analyzes PRs and reviews, writes `<report>/<repo>.md`, shows a summary and questions |
+| 2    | answers, extra info ("Phase 3 is at 40%", "waiting on the SMS provider") | records it in `<report>/notes.md`                                                                                                  |
+| 3    | _"Build the report"_                                                     | plans slides, writes `report.json`, runs the jargon check, builds and visually checks the deck                                     |
+| 4    | _"Change the title on slide 4"_, _"add a decision about X"_              | edits `report.json`, rebuilds                                                                                                      |
 
 Standing instructions (people to exclude, how to count progress, environments) can go in `notes.md`; the agent re-reads the previous report's notes.
 
@@ -399,14 +408,14 @@ Set it once in `config.json` (`"style": "vivid"`), in the installer (`--style vi
 
 <sub>Shown in the Classic style.</sub>
 
-| Template | Use it for | |
-|---|---|---|
-| `dashboard` | executive summary: one KPI card per project + key update | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-dashboard.png) |
-| `phase_bars` | phase-by-phase completion per track, with owners | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-phase-bars.png) |
-| `review_insights` | what code review verified and caught before release | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-review-insights.png) |
-| `attention` | blockers & risks + decisions needed from the business | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-attention.png) |
-| `tracker` | developer task track: done/open, progress, focus | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-tracker.png) |
-| `table` | next period's plan with owners and status | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-next-steps.png) |
+| Template          | Use it for                                               |                                                                                               |
+| ----------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `dashboard`       | executive summary: one KPI card per project + key update | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-dashboard.png)       |
+| `phase_bars`      | phase-by-phase completion per track, with owners         | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-phase-bars.png)      |
+| `review_insights` | what code review verified and caught before release      | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-review-insights.png) |
+| `attention`       | blockers & risks + decisions needed from the business    | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-attention.png)       |
+| `tracker`         | developer task track: done/open, progress, focus         | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-tracker.png)         |
+| `table`           | next period's plan with owners and status                | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-next-steps.png)      |
 
 Also: `timeline`, `rings` (doughnut charts), `workstreams`, `rows` (with generated hub-and-spoke illustrations or screenshots), `gallery` (UI screenshots), `activity` (team throughput chart). Full JSON schema: [`skill/references/templates.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/templates.md).
 
@@ -423,12 +432,18 @@ Showship is at its best when the lead writes structured reviews. Any format work
 
 ```markdown
 # Code Review: clinicbook-api PR #12 — CB-88, Phase 4: Appointment Reminders
-## Summary            → what the feature does (business value)
-## Verification       → "all 212 automated tests pass"
-## Subtask Coverage   → ✅ 4 / ⚠️ 1  → "4 of 5 parts verified", suggested ~80%
+
+## Summary → what the feature does (business value)
+
+## Verification → "all 212 automated tests pass"
+
+## Subtask Coverage → ✅ 4 / ⚠️ 1 → "4 of 5 parts verified", suggested ~80%
+
 ## Critical / Blocker → "fix needed before release" (described by user impact)
+
 ## Product/Policy Decision Needed → "Decisions Needed" slide
-## Verdict            → APPROVED / NEEDS WORK → status
+
+## Verdict → APPROVED / NEEDS WORK → status
 ```
 
 Code, file paths, error codes and raw comments never reach the slides, and problems are attributed to the work, not to people. See the worked example in [`skill/references/translation_guide.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/translation_guide.md).
@@ -442,18 +457,18 @@ Code, file paths, error codes and raw comments never reach the slides, and probl
 
 ## Troubleshooting
 
-| Problem | Fix |
-|---|---|
-| "PR data skipped" | install `gh` and run `gh auth login`; check `gh pr list` works inside the repo |
-| Teammates' commits missing | they need to push their branches; the collector reads all remote branches after `git fetch --all` |
-| Your review comments not tagged `(LEAD)` | add your GitHub login to `leadLogins` |
-| A name shows as a raw login | add it to `team` (git/GitHub) or `taskUsers` (tracker) |
-| "Task digest — Not collected" | the digest says what's missing: a token in your environment, or `tasks.<tool>` settings in `config.json` |
-| Jira returns HTTP 401/403 | check `JIRA_EMAIL` matches the token's account and that you can see the projects in the browser |
+| Problem                                                   | Fix                                                                                                                                                                              |
+| --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "PR data skipped"                                         | install `gh` and run `gh auth login`; check `gh pr list` works inside the repo                                                                                                   |
+| Teammates' commits missing                                | they need to push their branches; the collector reads all remote branches after `git fetch --all`                                                                                |
+| Your review comments not tagged `(LEAD)`                  | add your GitHub login to `leadLogins`                                                                                                                                            |
+| A name shows as a raw login                               | add it to `team` (git/GitHub) or `taskUsers` (tracker)                                                                                                                           |
+| "Task digest — Not collected"                             | the digest says what's missing: a token in your environment, or `tasks.<tool>` settings in `config.json`                                                                         |
+| Jira returns HTTP 401/403                                 | check `JIRA_EMAIL` matches the token's account and that you can see the projects in the browser                                                                                  |
 | The agent doesn't pick up the skill (Codex / Antigravity) | check the folder in the [install table](#install), restart the agent, and ask it "what skills are available?" — then [open an issue](https://github.com/Soe-Moe/showship/issues) |
-| `npm audit` warning about `image-size` | the package pins a patched version via `overrides`; delete `node_modules` and `package-lock.json` in `scripts/` and run `npm install` again |
-| Fonts look different | decks use Cambria / Calibri; install them or let PowerPoint substitute |
-| `sharp` fails to install | `cd <skills folder>/showship/scripts && npm rebuild sharp` |
+| `npm audit` warning about `image-size`                    | the package pins a patched version via `overrides`; delete `node_modules` and `package-lock.json` in `scripts/` and run `npm install` again                                      |
+| Fonts look different                                      | decks use Cambria / Calibri; install them or let PowerPoint substitute                                                                                                           |
+| `sharp` fails to install                                  | `cd <skills folder>/showship/scripts && npm rebuild sharp`                                                                                                                       |
 
 ## Repository layout
 
