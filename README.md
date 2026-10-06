@@ -14,6 +14,12 @@
 
 **Turns GitHub activity plus Jira, Linear, Asana, ClickUp & Lark tasks into a plain-language progress deck (PPTX) for your boss or client to understand weekly, per sprint, monthly or for any date range.**
 
+
+
+https://github.com/user-attachments/assets/29e9b05b-637f-4db9-9bdb-6ad82487b57e
+
+
+
 Showship is an Agent Skill (a `SKILL.md` folder) for anyone who has to report what they built — **team leads** reporting the whole team to management, and **individuals** (developers, freelancers, contractors, founders) reporting their own work to a manager, tech lead or client. Run it in each repo you touched; your AI coding agent reads the commits, PRs, reviews and replies, translates them into plain business language (or keeps it technical for engineers), and builds a polished slide deck — with charts, owners, progress, blockers and the plan for next period.
 
 Works with **Claude Code**, plus **Codex** and **Antigravity** _(experimental)_ and other agents that read `SKILL.md` folders.
