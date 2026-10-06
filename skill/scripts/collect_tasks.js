@@ -2,10 +2,11 @@
 // Collect this week's tasks from your project-management tool as a markdown digest, grouped by person.
 //
 // Usage:
-//   node collect_tasks.js <since YYYY-MM-DD> <until YYYY-MM-DD> [--json out.json] [--provider lark|jira|linear|asana|clickup]
+//   node collect_tasks.js <since YYYY-MM-DD> <until YYYY-MM-DD> [--json out.json] [--provider lark|jira|linear|asana|clickup|mcp]
+//                         [--input tasks.mcp.json]                # provider "mcp": tasks the agent fetched through an MCP server
 //                         [--people "Name @Nick,Other @Nick"]   # only these people (e.g. just you)
 //
-// Supported: Lark, Jira Cloud, Linear, Asana, ClickUp. The tool comes from config.json "tasks.provider" (or --provider). Output is the same for every
+// Supported: Lark, Jira Cloud, Linear, Asana, ClickUp, and any other tool through MCP (provider "mcp"). The tool comes from config.json "tasks.provider" (or --provider). Output is the same for every
 // tool: open tasks + tasks completed in the range, per assignee, with nested subtasks, subtask
 // counts and overdue flags. Assignees are mapped to display names via config "taskUsers"
 // (ids, emails or names → "Name @Nick"; "larkUsers" and "team" are also used); people in
@@ -22,6 +23,7 @@ const PROVIDERS = {
   linear: () => require("./tasks/linear"),
   asana: () => require("./tasks/asana"),
   clickup: () => require("./tasks/clickup"),
+  mcp: () => require("./tasks/mcp"),
 };
 
 (async () => {
@@ -29,7 +31,7 @@ const PROVIDERS = {
   const opt = (f) => { const i = argv.indexOf(f); return i >= 0 ? argv[i + 1] : undefined; };
   const [since, until] = argv.filter((a, i) => !a.startsWith("--") && !(i > 0 && argv[i - 1].startsWith("--")));
   if (!since || !until) {
-    console.error("Usage: node collect_tasks.js <since YYYY-MM-DD> <until YYYY-MM-DD> [--json out.json] [--provider lark|jira|linear|asana|clickup]");
+    console.error("Usage: node collect_tasks.js <since YYYY-MM-DD> <until YYYY-MM-DD> [--json out.json] [--provider lark|jira|linear|asana|clickup|mcp] [--input tasks.mcp.json]");
     process.exit(1);
   }
   const cfg = common.loadConfig();

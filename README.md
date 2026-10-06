@@ -7,7 +7,7 @@
 **Show what you shipped.**
 
 [![Status: Beta](https://img.shields.io/badge/status-beta-orange)](https://github.com/Soe-Moe/showship/issues)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.5-blue)](https://www.npmjs.com/package/showship)
+[![Version](https://img.shields.io/badge/version-0.1.0--beta.6-blue)](https://www.npmjs.com/package/showship)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933)](https://nodejs.org)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-Claude%20Code%20·%20Codex%20·%20Antigravity-D97757)](#install)
@@ -70,7 +70,7 @@ The installer asks these questions; you can change them in `config.json` at any 
 - **6 deck designs** — the colourful _Showship_ signature style, plus _Paper_, _Classic_, _Modern_, _Corporate_ and _Vivid_; every slide type works in all six.
 - **Your branding** — company name, logo (auto-trimmed) and colour overrides from one config file.
 - **Works across changing repos** — collect per repo, build once. The set of repos can change every period.
-- **Task tracker integrations** — pull tasks, subtasks, assignees and due dates from **Jira, Linear, Asana, ClickUp or Lark** for "who is doing what", progress evidence and overdue risks.
+- **Task tracker integrations** — pull tasks, subtasks, assignees and due dates from **Jira, Linear, Asana, ClickUp or Lark**, or any other tool your agent reaches through **MCP** for "who is doing what", progress evidence and overdue risks.
 - **Any language in chat** — talk to the agent in your own language; the deck is written in your configured deck language (English by default).
 - **Local-first** — data stays on your machine; your personal config is never shipped.
 
@@ -107,7 +107,7 @@ Everything for one report lives in one folder, e.g. `~/Showship/2026-10-09/`. Th
 npx showship
 ```
 
-The installer asks a few questions (use ↑/↓ and Enter):
+The installer asks a few questions (↑/↓ to choose, Enter to confirm, ← or Esc to go back a step and change an earlier answer):
 
 ```
 ? Which agent do you want to install for?
@@ -137,7 +137,7 @@ The installer asks a few questions (use ↑/↓ and Enter):
 
 ? Which project / task management tool does your team use?
 ❯ None          git commits + GitHub PRs only
-  Lark · Jira Cloud · Linear · Asana · ClickUp
+  Lark · Jira Cloud · Linear · Asana · ClickUp · Custom (MCP)
 
 ? Which deck design do you want?
 ❯ Classic       black & white editorial · serif headings · hairline rules
@@ -170,7 +170,8 @@ npx showship --yes --period sprint --tasks jira --style corporate
 | `--agent <id>`           | `claude`, `codex`, `antigravity` or `agents`                       |
 | `--global` / `--project` | install for your user / for the current project only               |
 | `--period <p>`           | `weekly`, `biweekly`, `sprint`, `monthly`, `custom`                |
-| `--tasks <tool>`         | task tracker: `none`, `lark`, `jira`, `linear`, `asana`, `clickup` |
+| `--tasks <tool>`         | task tracker: `none`, `lark`, `jira`, `linear`, `asana`, `clickup`, `mcp` |
+| `--mcp-server <name>`    | with `--tasks mcp`: the MCP server to read tasks from (plus `--mcp-name`, `--mcp-lists "A, B"`, `--mcp-instructions "…"`) |
 | `--style <name>`         | deck design: `showship`, `paper`, `classic`, `modern`, `corporate`, `vivid` |
 | `--role <role>`          | `lead` (whole team) or `member` (your own work)                    |
 | `--audience <a>`         | `business` (plain language) or `engineering`                       |
@@ -369,6 +370,7 @@ Pick the tool in the installer, or set `tasks.provider` in `config.json` yoursel
 | **Asana**      | `asana`    | `tasks.asana.projects` (project gids from the URL)                                                | `ASANA_TOKEN` — Settings → Apps → Developer apps → Personal access tokens                                      |
 | **ClickUp**    | `clickup`  | `tasks.clickup.lists` (list ids from the URL), or `tasks.clickup.workspaceId` + optional `spaces` | `CLICKUP_TOKEN` — Settings → Apps → API Token                                                                  |
 | **Lark**       | `lark`     | optional `tasks.lark.tasklists`                                                                   | `lark-cli` signed in as you                                                                                    |
+| **Any tool via MCP** | `mcp` | `tasks.mcp.name`, `tasks.mcp.server`, optional `lists` and `instructions` — see [below](#custom-tool-via-mcp) | the MCP server's own connection                                                                    |
 | —              | `none`     |                                                                                                   | git + GitHub only                                                                                              |
 
 ```bash
@@ -386,7 +388,40 @@ node ~/.claude/skills/showship/scripts/collect_tasks.js 2026-10-03 2026-10-09
 node ~/.claude/skills/showship/scripts/collect_tasks.js 2026-10-03 2026-10-09 --provider linear
 ```
 
-Want another tool (Trello, GitHub Projects, Notion, Monday…)? Add a file in `skill/scripts/tasks/` that returns the normalized rows described in [`tasks/common.js`](https://github.com/Soe-Moe/showship/blob/master/skill/scripts/tasks/common.js), register it in `collect_tasks.js` — PRs welcome.
+### Custom tool via MCP
+
+Using Notion, Monday, GitHub Projects, Trello, Jira Server or an in-house tracker? If your agent can reach it through an MCP server, pick **Custom (MCP)** in the installer. It then asks (all optional, Enter to skip) which MCP server holds your tasks (with Claude Code it lists the servers you already have), the tool's name for the report, which boards or databases to read, and how to read status and assignee in that tool. Without prompts:
+
+```bash
+npx showship --yes --tasks mcp --mcp-server notion --mcp-name Notion --mcp-lists "Sprint board"
+```
+
+It writes this to `config.json`, which you can also edit by hand:
+
+```jsonc
+"tasks": {
+  "provider": "mcp",
+  "mcp": {
+    "name": "Notion",                       // shown in the report
+    "server": "notion",                     // the MCP server your agent has connected
+    "lists": ["Sprint board"],              // optional: boards / databases / projects to read
+    "instructions": "Status 'Done' means done; the 'Owner' property is the assignee."   // optional
+  }
+}
+```
+
+1. Connect the tool's MCP server to your agent (Claude Code: `claude mcp add …`; Codex and Antigravity: their MCP settings).
+2. Collect as usual. The agent reads open tasks and the tasks completed in the period through MCP (read-only: it never creates or edits anything), saves them to `<report>/tasks.mcp.json`, and runs the collector on that file:
+
+   ```bash
+   node ~/.claude/skills/showship/scripts/collect_tasks.js 2026-10-03 2026-10-09 --provider mcp --input tasks.mcp.json
+   ```
+
+3. From there it works like every other tracker: the same digest, `taskUsers` mapping, exclusions and Developer Task Track slide.
+
+The file format (forgiving about field names) is documented in [`tasks/mcp.js`](https://github.com/Soe-Moe/showship/blob/master/skill/scripts/tasks/mcp.js), so you can also export tasks from any tool yourself and pass them with `--input`.
+
+Want a built-in collector for another tool instead? Add a file in `skill/scripts/tasks/` that returns the normalized rows described in [`tasks/common.js`](https://github.com/Soe-Moe/showship/blob/master/skill/scripts/tasks/common.js), register it in `collect_tasks.js` — PRs welcome.
 
 ## The workflow
 

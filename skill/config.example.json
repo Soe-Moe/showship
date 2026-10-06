@@ -37,7 +37,7 @@
     "pulseboard-web": "Web App - PulseBoard"
   },
   "tasks": {
-    "_comment": "Your project/task tool: provider = none | lark | jira | linear | asana | clickup. Tokens go in environment variables, never here.",
+    "_comment": "Your project/task tool: provider = none | lark | jira | linear | asana | clickup | mcp. Tokens go in environment variables, never here.",
     "provider": "none",
     "jira": {
       "baseUrl": "https://your-team.atlassian.net",
@@ -64,6 +64,15 @@
     },
     "lark": {
       "tasklists": []
+    },
+    "mcp": {
+      "_comment": "Custom tool through an MCP server the agent can use (Notion, Monday, GitHub Projects, Trello…). The agent fetches tasks read-only.",
+      "name": "Notion",
+      "server": "notion",
+      "lists": [
+        "Sprint board"
+      ],
+      "instructions": "Status 'Done' means done; the 'Owner' property is the assignee."
     }
   },
   "taskUsers": {

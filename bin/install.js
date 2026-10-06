@@ -79,6 +79,9 @@ const TRACKERS = [
   { id: "clickup", label: "ClickUp",    hint: "REST API · CLICKUP_TOKEN",
     skeleton: { lists: ["list id"] },
     setup: ["export CLICKUP_TOKEN=pk_…   (ClickUp → Settings → Apps → API Token)", "Set tasks.clickup.lists (list ids from the URL) — or tasks.clickup.workspaceId (+ optional spaces) — in config.json."] },
+  { id: "mcp",    label: "Custom (MCP)", hint: "any tool your agent reaches through an MCP server: Notion, Monday, GitHub Projects, Trello…",
+    skeleton: { name: "", server: "", lists: [], instructions: "" },
+    setup: ["Connect the tool's MCP server to your agent first (Claude Code: claude mcp add …; Codex / Antigravity: their MCP settings).", "Set tasks.mcp.name (shown in the report) and tasks.mcp.server (the MCP server name) in config.json; optional: tasks.mcp.lists and tasks.mcp.instructions (how to read status and assignee).", "The agent reads the tasks through MCP, read-only; no token goes into config.json."] },
 ];
 
 const ROLES = [
@@ -127,6 +130,10 @@ Without options it asks which agent to install for, where, how you'll use it, ho
 Options:
   --agent <id>     Agent to install for: ${AGENTS.map((a) => a.id).join(", ")}
   --tasks <tool>   Task tracker to read: ${TRACKERS.map((t) => t.id).join(", ")}
+  --mcp-server <n> With --tasks mcp: the MCP server the agent should use (e.g. notion)
+  --mcp-name <n>   With --tasks mcp: the tool's name shown in the report (e.g. Notion)
+  --mcp-lists <a,b> With --tasks mcp: boards / databases / projects to read (comma-separated)
+  --mcp-instructions <text>  With --tasks mcp: how to read status, assignee and dates in that tool
   --style <name>   Deck design: ${STYLES.map((t) => t.id).join(", ")}
   --role <role>    Whose work: lead (whole team) or member (your own work)
   --audience <a>   Who reads it: business (plain language) or engineering
@@ -141,8 +148,11 @@ Options:
 `);
 }
 
-// ---------- interactive select (no dependencies) ----------
-function select(question, options, initial = 0) {
+// ---------- interactive prompts (no dependencies) ----------
+const BACK = Symbol("back");
+
+// Arrow-key list. With canBack, ← / Esc / Backspace returns BACK.
+function select(question, options, initial = 0, canBack = false) {
   return new Promise((resolve) => {
     let i = initial;
     const out = process.stdout, inp = process.stdin;
@@ -153,7 +163,7 @@ function select(question, options, initial = 0) {
     const lines = options.length + 2;
     const render = (first) => {
       if (!first) out.write(`\x1b[${lines}A`);
-      out.write(`\x1b[2K${cyan("?")} ${bold(question)} ${dim("(↑/↓, Enter)")}\n`);
+      out.write(`\x1b[2K${cyan("?")} ${bold(question)} ${dim(canBack ? "(↑/↓, Enter · ← back)" : "(↑/↓, Enter)")}\n`);
       options.forEach((o, k) => {
         const sel = k === i;
         const label = sel ? cyan(`❯ ${o.label}`) : `  ${o.label}`;
@@ -161,28 +171,69 @@ function select(question, options, initial = 0) {
       });
       out.write("\x1b[2K\n");
     };
-    const done = (val) => {
+    const finish = (value, answer) => {
       inp.removeListener("keypress", onKey);
       if (inp.isTTY) inp.setRawMode(false);
       inp.pause();
-      out.write(`\x1b[${lines}A`);
-      for (let k = 0; k < lines; k++) out.write("\x1b[2K\n");
-      out.write(`\x1b[${lines}A`);
-      out.write(`${green("✔")} ${bold(question)} ${cyan(options[val].label)}\n`);
+      out.write(`\x1b[${lines}A\x1b[0J`);
+      if (answer !== undefined) out.write(`${green("✔")} ${bold(question)} ${cyan(answer)}\n`);
       out.write("\x1b[?25h");
-      resolve(options[val].value);
+      resolve(value);
     };
     const onKey = (_s, key = {}) => {
       if (key.ctrl && key.name === "c") { out.write("\x1b[?25h\n"); process.exit(130); }
+      if (canBack && (key.name === "left" || key.name === "escape" || key.name === "backspace")) return finish(BACK);
       if (key.name === "up" || key.name === "k") i = (i - 1 + options.length) % options.length;
       else if (key.name === "down" || key.name === "j" || key.name === "tab") i = (i + 1) % options.length;
-      else if (key.name === "return" || key.name === "enter") return done(i);
+      else if (key.name === "return" || key.name === "enter") return finish(options[i].value, options[i].label);
       else return;
       render(false);
     };
     inp.on("keypress", onKey);
     render(true);
   });
+}
+
+// One-line text answer. Enter keeps the default (or skips); with canBack, Esc returns BACK.
+function ask(question, def = "", canBack = false) {
+  return new Promise((resolve) => {
+    const out = process.stdout, inp = process.stdin;
+    let buf = "";
+    readline.emitKeypressEvents(inp);
+    if (inp.isTTY) inp.setRawMode(true);
+    inp.resume();
+    const hint = dim(`${def ? `(${def})` : "(Enter to skip)"}${canBack ? " · Esc back" : ""}`);
+    const render = () => out.write(`\r\x1b[2K${cyan("?")} ${bold(question)} ${hint} ${buf}`);
+    const finish = (value) => {
+      inp.removeListener("keypress", onKey);
+      if (inp.isTTY) inp.setRawMode(false);
+      inp.pause();
+      out.write("\r\x1b[2K");
+      if (value !== BACK) out.write(`${green("✔")} ${bold(question)} ${cyan(value || dim("skipped"))}\n`);
+      resolve(value);
+    };
+    const onKey = (s, key = {}) => {
+      if (key.ctrl && key.name === "c") { out.write("\n"); process.exit(130); }
+      if (canBack && key.name === "escape") return finish(BACK);
+      if (key.name === "return" || key.name === "enter") return finish(buf.trim() || def);
+      if (key.name === "backspace") buf = buf.slice(0, -1);
+      else if (s && !key.ctrl && !key.meta && s >= " " && s.length === 1) buf += s;
+      else if (s && s.length > 1 && !/[\x00-\x1f]/.test(s)) buf += s; // pasted text
+      else return;
+      render();
+    };
+    inp.on("keypress", onKey);
+    render();
+  });
+}
+
+// MCP servers the agent already knows about, so the user can pick one instead of typing it.
+// Only Claude Code has a listing command we can rely on; anything else falls back to typing.
+function mcpServers(agent) {
+  if (agent.id !== "claude") return [];
+  const r = spawnSync("claude", ["mcp", "list"], { encoding: "utf8", timeout: 20000 });
+  if (r.status !== 0 || !r.stdout) return [];
+  return [...new Set(r.stdout.split("\n").map((l) => (l.match(/^([A-Za-z0-9_.-]+):\s/) || [])[1]).filter(Boolean))];
 }
 
 function copyDir(from, to, { skip = () => false } = {}) {
@@ -204,76 +255,146 @@ async function main() {
   const interactive = process.stdin.isTTY && tty && !has("-y") && !has("--yes");
   console.log(`\n${bold("Showship")} ${dim("v" + PKG.version)}  ${dim("— show what you shipped: GitHub activity + project management tools → a deck your audience understands")}\n`);
 
-  // 1. agent
-  let agent;
-  if (val("--agent")) {
-    agent = AGENTS.find((a) => a.id === val("--agent"));
-    if (!agent) { console.error(red(`Unknown agent "${val("--agent")}". Supported: ${AGENTS.map((a) => a.id).join(", ")}`)); process.exit(1); }
-  } else if (interactive) {
-    agent = await select("Which agent do you want to install for?", AGENTS.map((a) => ({ label: a.label, hint: a.hint, value: a })));
-  } else {
-    agent = AGENTS[0];
-  }
-
-  // 2. scope / target folder
-  let target;
-  if (val("--dir")) {
-    target = path.resolve(val("--dir").replace(/^~(?=$|\/|\\)/, HOME));
-  } else {
-    let scope = has("--project") ? "project" : has("--global") ? "global" : null;
-    if (!scope && interactive && !has("--uninstall")) {
-      scope = await select("Where do you want to install it?", [
-        { label: "Global", hint: `all projects  ${agent.globalDir.replace(HOME, "~")}/${SKILL_NAME}`, value: "global" },
-        { label: "This project", hint: `this folder only  ${agent.projectDir(process.cwd()).replace(HOME, "~")}/${SKILL_NAME}`, value: "project" },
-      ]);
-    }
-    target = scope === "project"
-      ? path.join(agent.projectDir(process.cwd()), SKILL_NAME)
-      : path.join(agent.globalDir, SKILL_NAME);
-  }
-
-  // 2b. role and audience
-  const pick = async (flag, list, question, cfgKey) => {
-    if (val(flag)) {
-      const v = list.find((t) => t.id === String(val(flag)).toLowerCase());
-      if (!v) { console.error(red(`Unknown ${flag.slice(2)} "${val(flag)}". Supported: ${list.map((t) => t.id).join(", ")}`)); process.exit(1); }
-      return v;
-    }
-    if (!interactive || has("--uninstall")) return null;
-    let cur = null; try { cur = JSON.parse(fs.readFileSync(path.join(target, "config.json"), "utf8"))[cfgKey]; } catch {}
-    return select(question, list.map((t) => ({ label: t.label + (t.id === cur ? " (current)" : ""), hint: t.hint, value: t })),
-      Math.max(0, list.findIndex((t) => t.id === (cur || list[0].id))));
+  // ---------- questions: a small wizard; ← / Esc goes back one step ----------
+  const fromFlag = (flag, list, what) => {
+    if (!val(flag)) return undefined;
+    const v = list.find((t) => t.id === String(val(flag)).toLowerCase());
+    if (!v) { console.error(red(`Unknown ${what} "${val(flag)}". Supported: ${list.map((t) => t.id).join(", ")}`)); process.exit(1); }
+    return v;
   };
-  const role = await pick("--role", ROLES, "How will you use it?", "role");
-  const audience = await pick("--audience", AUDIENCES, "Who will read the report?", "audience");
-  const period = await pick("--period", PERIODS, "How often do you report?", "period");
+  const S = {
+    agent: fromFlag("--agent", AGENTS, "agent"),
+    scope: val("--dir") ? "dir" : has("--project") ? "project" : has("--global") ? "global" : null,
+    role: fromFlag("--role", ROLES, "role") ?? null,
+    audience: fromFlag("--audience", AUDIENCES, "audience") ?? null,
+    period: fromFlag("--period", PERIODS, "period") ?? null,
+    tracker: fromFlag("--tasks", TRACKERS, "task tracker") ?? null,
+    style: fromFlag("--style", STYLES, "style") ?? null,
+    mcp: null,
+  };
+  const targetOf = () => S.scope === "dir"
+    ? path.resolve(val("--dir").replace(/^~(?=$|\/|\\)/, HOME))
+    : path.join(S.scope === "project" ? (S.agent || AGENTS[0]).projectDir(process.cwd()) : (S.agent || AGENTS[0]).globalDir, SKILL_NAME);
+  const readCfgAt = () => { try { return JSON.parse(fs.readFileSync(path.join(targetOf(), "config.json"), "utf8")); } catch { return null; } };
+  const listPick = (question, list, cfgKey, key) => ({
+    when: () => !S[key] && !has("--uninstall"),
+    run: (back) => {
+      const cur = (readCfgAt() || {})[cfgKey];
+      const ix = list.findIndex((t) => t.id === (S[key + "Last"] ? S[key + "Last"].id : cur));
+      return select(question, list.map((t) => ({ label: t.label + (t.id === cur ? " (current)" : ""), hint: t.hint, value: t })), Math.max(0, ix), back);
+    },
+    set: (v) => { S[key] = v; S[key + "Last"] = v; },
+    clear: () => { S[key] = null; },
+  });
+  const mcpCur = () => (((readCfgAt() || {}).tasks || {}).mcp || {});
+  const isMcp = () => S.tracker && S.tracker.id === "mcp";
+  let foundServers = null;
+  const steps = [
+    { when: () => !S.agent,
+      run: (back) => select("Which agent do you want to install for?", AGENTS.map((a) => ({ label: a.label, hint: a.hint, value: a })), Math.max(0, AGENTS.indexOf(S.agentLast)), back),
+      set: (v) => { S.agent = v; S.agentLast = v; foundServers = null; }, clear: () => { S.agent = null; } },
+    { when: () => !S.scope && !has("--uninstall"),
+      run: (back) => select("Where do you want to install it?", [
+        { label: "Global", hint: `all projects  ${S.agent.globalDir.replace(HOME, "~")}/${SKILL_NAME}`, value: "global" },
+        { label: "This project", hint: `this folder only  ${S.agent.projectDir(process.cwd()).replace(HOME, "~")}/${SKILL_NAME}`, value: "project" },
+      ], S.scopeLast === "project" ? 1 : 0, back),
+      set: (v) => { S.scope = v; S.scopeLast = v; }, clear: () => { S.scope = null; } },
+    listPick("How will you use it?", ROLES, "role", "role"),
+    listPick("Who will read the report?", AUDIENCES, "audience", "audience"),
+    listPick("How often do you report?", PERIODS, "period", "period"),
+    { when: () => !S.tracker && !has("--uninstall"),
+      run: (back) => {
+        const cur = readCfgAt();
+        const curId = cur && ((cur.tasks && cur.tasks.provider) || (cur.larkUsers ? "lark" : null));
+        const ix = TRACKERS.findIndex((t) => t.id === (S.trackerLast ? S.trackerLast.id : curId));
+        return select("Which project / task management tool does your team use?",
+          TRACKERS.map((t) => ({ label: t.label + (t.id === curId ? " (current)" : ""), hint: t.hint, value: t })), Math.max(0, ix), back);
+      },
+      set: (v) => { S.tracker = v; S.trackerLast = v; }, clear: () => { S.tracker = null; } },
+    // custom tool via MCP (all optional: Enter skips, config.json can be filled later)
+    { when: () => isMcp() && val("--mcp-server") === undefined,
+      run: async (back) => {
+        const cur = S.mcpServer ?? mcpCur().server ?? "";
+        if (foundServers === null) {
+          process.stdout.write(dim("  Looking for MCP servers your agent already has…"));
+          foundServers = mcpServers(S.agent);
+          process.stdout.write("\r\x1b[2K");
+        }
+        if (!foundServers.length) return ask("MCP server name (as your agent knows it, e.g. notion):", cur, back);
+        for (;;) {
+          const v = await select("Which MCP server holds your tasks?", [
+            ...foundServers.map((n) => ({ label: n + (n === cur ? " (current)" : ""), hint: "", value: n })),
+            { label: "Type a name", hint: "a server you will add later", value: "__type" },
+            { label: "Skip for now", hint: "set tasks.mcp.server in config.json later", value: "__skip" },
+          ], Math.max(0, foundServers.indexOf(cur)), back);
+          if (v === BACK) return BACK;
+          if (v === "__skip") return cur;
+          if (v !== "__type") return v;
+          const typed = await ask("MCP server name:", cur, true);
+          if (typed === BACK) { process.stdout.write("\x1b[1A\x1b[2K"); continue; } // back to the list
+          return { value: typed, lines: 2 };
+        }
+      },
+      set: (v) => { S.mcpServer = v; }, clear: () => {} },
+    { when: () => isMcp() && val("--mcp-name") === undefined,
+      run: (back) => {
+        const srv = S.mcpServer ?? val("--mcp-server") ?? "";
+        return ask("Tool name to show in the report (e.g. Notion):", S.mcpName ?? mcpCur().name ?? (srv ? srv.charAt(0).toUpperCase() + srv.slice(1) : ""), back);
+      },
+      set: (v) => { S.mcpName = v; }, clear: () => {} },
+    { when: () => isMcp() && val("--mcp-lists") === undefined,
+      run: (back) => ask("Boards / databases / projects to read (comma-separated):", S.mcpLists ?? (mcpCur().lists || []).join(", "), back),
+      set: (v) => { S.mcpLists = v; }, clear: () => {} },
+    { when: () => isMcp() && val("--mcp-instructions") === undefined,
+      run: (back) => ask("How to read status / assignee in that tool:", S.mcpInstr ?? mcpCur().instructions ?? "", back),
+      set: (v) => { S.mcpInstr = v; }, clear: () => {} },
+    { when: () => !S.style && !has("--uninstall"),
+      run: (back) => {
+        const cur = readCfgAt();
+        const curId = (cur && cur.style) || "classic";
+        const ix = STYLES.findIndex((t) => t.id === (S.styleLast ? S.styleLast.id : curId));
+        return select("Which deck design do you want?",
+          STYLES.map((t) => ({ label: t.label + (cur && cur.style === t.id ? " (current)" : ""), hint: t.hint, value: t })), Math.max(0, ix), back);
+      },
+      set: (v) => { S.style = v; S.styleLast = v; }, clear: () => { S.style = null; } },
+  ];
+  if (interactive) {
+    console.log(dim("  ↑/↓ to choose · Enter to confirm · ← or Esc to go back a step\n"));
+    const history = [];
+    for (let i = 0; i < steps.length;) {
+      const st = steps[i];
+      if (!st.when()) { i++; continue; }
+      const r = await st.run(history.length > 0);
+      if (r === BACK) {
+        const prev = history.pop();
+        process.stdout.write(`\x1b[${prev.lines}A\x1b[0J`); // erase the previous answer
+        steps[prev.i].clear();
+        i = prev.i;
+        continue;
+      }
+      const v = r && typeof r === "object" && "lines" in r ? r.value : r;
+      st.set(v);
+      history.push({ i, lines: r && typeof r === "object" && "lines" in r ? r.lines : 1 });
+      i++;
+    }
+  }
+  const agent = S.agent || AGENTS[0];
+  if (!S.scope) S.scope = "global";
+  const target = targetOf();
+  const { role, audience, period, tracker, style } = S;
 
-  // 3. task tracker
   const cfgFile = path.join(target, "config.json");
   const readCfg = () => { try { return JSON.parse(fs.readFileSync(cfgFile, "utf8")); } catch { return null; } };
-  let tracker = null;
-  if (val("--tasks")) {
-    tracker = TRACKERS.find((t) => t.id === String(val("--tasks")).toLowerCase());
-    if (!tracker) { console.error(red(`Unknown task tracker "${val("--tasks")}". Supported: ${TRACKERS.map((t) => t.id).join(", ")}`)); process.exit(1); }
-  } else if (interactive && !has("--uninstall")) {
-    const cur = readCfg();
-    const curId = cur && ((cur.tasks && cur.tasks.provider) || (cur.larkUsers ? "lark" : null));
-    const init = Math.max(0, TRACKERS.findIndex((t) => t.id === curId));
-    tracker = await select("Which project / task management tool does your team use?",
-      TRACKERS.map((t) => ({ label: t.label + (t.id === curId ? " (current)" : ""), hint: t.hint, value: t })), init);
-  }
-
-  // 4. deck style
-  let style = null;
-  if (val("--style")) {
-    style = STYLES.find((t) => t.id === String(val("--style")).toLowerCase());
-    if (!style) { console.error(red(`Unknown style "${val("--style")}". Supported: ${STYLES.map((t) => t.id).join(", ")}`)); process.exit(1); }
-  } else if (interactive && !has("--uninstall")) {
-    const cur = readCfg();
-    const curId = (cur && cur.style) || "classic";
-    style = await select("Which deck design do you want?",
-      STYLES.map((t) => ({ label: t.label + (cur && cur.style === t.id ? " (current)" : ""), hint: t.hint, value: t })),
-      Math.max(0, STYLES.findIndex((t) => t.id === curId)));
+  let mcp = null;
+  if (isMcp()) {
+    const cur = mcpCur();
+    const lists = S.mcpLists ?? val("--mcp-lists");
+    mcp = {
+      name: S.mcpName ?? val("--mcp-name") ?? cur.name ?? "",
+      server: S.mcpServer ?? val("--mcp-server") ?? cur.server ?? "",
+      lists: lists !== undefined ? String(lists).split(",").map((x) => x.trim()).filter(Boolean) : (cur.lists || []),
+      instructions: S.mcpInstr ?? val("--mcp-instructions") ?? cur.instructions ?? "",
+    };
   }
 
   const stamp = new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19);
@@ -334,6 +455,7 @@ async function main() {
     const cfg = readCfg() || {};
     cfg.tasks = Object.assign({}, cfg.tasks || {}, { provider: tracker.id });
     if (tracker.skeleton && !cfg.tasks[tracker.id]) cfg.tasks[tracker.id] = tracker.skeleton;
+    if (mcp) cfg.tasks.mcp = mcp;
     fs.writeFileSync(cfgFile, JSON.stringify(cfg, null, 2) + "\n");
     console.log(`${green("✔")} Task tracker set to ${bold(tracker.label)} ${dim(`(config.json → tasks.provider = "${tracker.id}")`)}`);
     if (existing) console.log(`${green("✔")} Kept the rest of your config.json`);
@@ -367,8 +489,11 @@ async function main() {
   if (!which("soffice")) console.log(dim("  Optional: LibreOffice lets the agent render slides to images and check the layout."));
   if (tracker && tracker.setup) {
     console.log(`\n${bold(`${tracker.label} setup`)}`);
-    tracker.setup.forEach((l) => console.log(`  ${l}`));
-    if (tracker.id !== "lark") console.log(dim("  Put the export lines in ~/.zshrc (or ~/.bashrc) so the agent sees them; never store tokens in config.json."));
+    if (mcp && mcp.server) {
+      console.log(`${green("✔")} MCP server ${bold(mcp.server)}${mcp.name ? ` · shown as ${bold(mcp.name)}` : ""}${mcp.lists.length ? ` · ${mcp.lists.join(", ")}` : ""} ${dim("(config.json → tasks.mcp)")}`);
+      console.log(`  The agent reads tasks through that server, read-only. Keep it connected to ${agent.label}; no token goes into config.json.`);
+    } else tracker.setup.forEach((l) => console.log(`  ${l}`));
+    if (!["lark", "mcp"].includes(tracker.id)) console.log(dim("  Put the export lines in ~/.zshrc (or ~/.bashrc) so the agent sees them; never store tokens in config.json."));
     if (tracker.id === "lark" && !which("lark-cli")) console.log(`${yellow("!")} lark-cli not found on PATH`);
   }
 

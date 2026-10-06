@@ -69,10 +69,10 @@ If the user just says "make this week's report" (or this sprint's / month's) ins
   - `leadLogins` — the user's own git author names and GitHub logins (e.g. `"maya-lin"`, `"Maya Lin"`, `"maya@acme.io"`). In `lead` mode their comments are tagged `(LEAD)` as the reviewer; in `member` mode they also select which commits, PRs and tasks are the user's.
   - `team` — maps **both** git author names **and** GitHub logins to display names (e.g. `"nina-dev": "Nina Rao @Nina"`). When you meet an unmapped name, ask once and add it.
   - `projects` — maps local repo folder names to project/service names (e.g. `"clinicbook-api": "Booking Service - ClinicBook"`). On slides, group by product and track (e.g. "ClinicBook · Clinic Dashboard"), not by repo.
-  - `tasks` — the team's project/task management tool (see **Task tracker**): `provider` is `none`, `lark`, `jira`, `linear`, `asana` or `clickup`, plus that tool's settings (e.g. `tasks.jira.baseUrl`, `tasks.jira.projects`). The user chooses it — in the installer or by editing config. If `tasks` is absent but `larkUsers` exists, Lark is assumed.
+  - `tasks` — the team's project/task management tool (see **Task tracker**): `provider` is `none`, `lark`, `jira`, `linear`, `asana`, `clickup` or `mcp` (any other tool reached through an MCP server, see **Custom tool via MCP**), plus that tool's settings (e.g. `tasks.jira.baseUrl`, `tasks.jira.projects`). The user chooses it — in the installer or by editing config. If `tasks` is absent but `larkUsers` exists, Lark is assumed.
   - `taskUsers` — maps tracker user ids, emails or names → display names (`larkUsers` and `team` are also consulted). Unknown people fall back to their name in the tool; when that happens, ask whether to add them.
   - `exclude.people` — people left out of the report entirely: tracker ids/names/emails, git author names or GitHub logins. Apply it everywhere — tasks, commits, PRs, activity counts and slides.
-- Task tracker credentials come only from environment variables — `JIRA_EMAIL` + `JIRA_API_TOKEN`, `LINEAR_API_KEY`, `ASANA_TOKEN`, `CLICKUP_TOKEN`; Lark uses `lark-cli` signed in as the user. Never write tokens into config.json or any report file. If collection fails for setup reasons, tell the user what to set and continue without task data.
+- Task tracker credentials come only from environment variables — `JIRA_EMAIL` + `JIRA_API_TOKEN`, `LINEAR_API_KEY`, `ASANA_TOKEN`, `CLICKUP_TOKEN`; Lark uses `lark-cli` signed in as the user; `mcp` uses the MCP server's own connection. Never write tokens into config.json or any report file. If collection fails for setup reasons, tell the user what to set and continue without task data.
 
 ## Report folder
 
@@ -126,7 +126,7 @@ Range: <since> → <until> · <N> commits · <M> PRs with activity
 
 ## Task tracker (once per report)
 
-The team's project/task management tool holds the plan: projects, phases (tasks/issues/epics) and their subtasks, with assignees, due dates and completion dates. The tool is whatever the user configured in `tasks.provider` — Jira, Linear, Asana, ClickUp or Lark (or `none`). Collect it once per report; it covers the configured lists/projects/teams, not one repo:
+The team's project/task management tool holds the plan: projects, phases (tasks/issues/epics) and their subtasks, with assignees, due dates and completion dates. The tool is whatever the user configured in `tasks.provider`: Jira, Linear, Asana, ClickUp, Lark, a custom tool through MCP, or `none`. Collect it once per report; it covers the configured lists/projects/teams, not one repo:
 
 ```
 node <skill>/scripts/collect_tasks.js <since> <until> --json <dir>/tasks.json > <dir>/tasks.md
@@ -143,6 +143,22 @@ Every tool produces the same digest: tasks grouped by assignee (mapped through `
 | Linear | issue | sub-issues | completed (canceled is skipped) |
 | Asana | task in a project | subtasks (nested) | completed |
 | ClickUp | task in a list | subtasks (nested; earlier-closed ones kept for counts) | status type done / closed |
+| MCP (custom) | whatever the tool calls a task (page, item, card, issue) | nested `subtasks` you include | what `tasks.mcp.instructions` says, else the tool's done/closed state |
+
+### Custom tool via MCP (`provider: "mcp"`)
+
+For tools without a built-in collector (Notion, Monday, GitHub Projects, Trello, Jira Server, an in-house tracker), the script can't reach the tool, but you can through the user's MCP server. Config `tasks.mcp`: `name` (shown in the report), `server` (the MCP server to use), optional `lists` (boards / databases / projects to read) and `instructions` (how to read status, assignee and dates in that tool).
+
+1. Check that the MCP server named in `tasks.mcp.server` is connected (its tools are available to you). If it isn't, tell the user once how to connect it and carry on with GitHub data only.
+2. Use that server's tools **read-only**: never create, edit, move or comment on anything in the tool. Fetch every open task plus every task completed in `<since>…<until>` from `tasks.mcp.lists` (or all lists the user named), with assignee, status, completion date, start / due dates, URL and subtasks. Follow `tasks.mcp.instructions`. Page through results; don't stop at the first page.
+3. Save them, exactly as the tool reports them (never invent or guess a task, person, date or status), to `<dir>/tasks.mcp.json`: an array of `{ "project", "key", "title", "url", "status": "done"|"open", "completed_at", "start", "due", "assignees": ["Name" or {name, email, id}], "subtasks": [{ "title", "done", "completed_at", "subtasks": [] }] }`. Dates as ISO strings. Leave a field out when the tool doesn't have it.
+4. Run the collector on it, then use `tasks.md` like any other tracker's digest:
+
+```
+node <skill>/scripts/collect_tasks.js <since> <until> --provider mcp --input <dir>/tasks.mcp.json --json <dir>/tasks.json > <dir>/tasks.md
+```
+
+Map the tool's people to display names in `taskUsers` like any other tracker.
 
 How to use it:
 

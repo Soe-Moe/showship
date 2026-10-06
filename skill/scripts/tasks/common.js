@@ -1,4 +1,4 @@
-// Shared helpers for task-tracker collectors (Lark, Jira, Linear, Asana).
+// Shared helpers for task-tracker collectors (Lark, Jira, Linear, Asana, ClickUp, MCP).
 //
 // Every provider returns normalized rows:
 //   {
