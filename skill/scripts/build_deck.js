@@ -114,7 +114,7 @@ function st(s) {
 }
 
 const SKILL_DIR = path.resolve(__dirname, "..");
-const DEFAULT_LOGO = path.join(SKILL_DIR, "assets", "logo.png");
+const DEFAULT_LOGO = path.join(SKILL_DIR, "assets", "logo.svg");
 const expandHome = (p) => (typeof p === "string" && p.startsWith("~") ? path.join(os.homedir(), p.slice(1)) : p);
 let LOGO = null; // { path, aspect } after prepareLogo()
 const CACHE = fs.mkdtempSync(path.join(os.tmpdir(), "showship-deck-"));
@@ -246,7 +246,14 @@ async function prepareLogo(logo) {
   const src = expandHome(logo) || DEFAULT_LOGO;
   if (!fs.existsSync(src)) { console.warn(`Logo not found: ${src} — continuing without a logo`); return null; }
   const out = path.join(CACHE, "logo_trimmed.png");
-  try { await sharp(src).trim().png().toFile(out); } catch { await sharp(src).png().toFile(out); }
+  // SVG logos are rasterised at a high density (about 1600 px wide) so they stay sharp on a projector
+  let input = () => sharp(src);
+  if (/\.svg$/i.test(src)) {
+    const w = (await sharp(src).metadata()).width || 128;
+    const density = Math.min(2400, Math.max(72, Math.round(72 * 1600 / w)));
+    input = () => sharp(src, { density });
+  }
+  try { await input().trim().png().toFile(out); } catch { await input().png().toFile(out); }
   const m = await sharp(out).metadata();
   return { path: out, aspect: m.height / m.width, isDefault: src === DEFAULT_LOGO };
 }
@@ -1140,7 +1147,7 @@ async function trailArt(kind) {
     const ribbons = TRAIL.map((c, i) => `<path d="M ${120 + i * 50} ${H + 20} C ${520 + i * 20} ${250 - i * 15}, ${700} ${120 + i * 25}, ${W + 40} ${30 + i * 32}" fill="none" stroke="#${c}" stroke-opacity="${0.55 - i * 0.07}" stroke-width="${[14, 10, 7, 5][i]}" stroke-linecap="round"/>`).join("");
     svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">${ribbons}</svg>`;
   } else {
-    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.86) translate(-63.5 -71.9)"><path d="M24.0 96.0 C48.0 94.0 70.0 74.0 92.0 40.0" fill="none" stroke="#6C4CF5" stroke-width="14" stroke-linecap="round"/><path d="M36.1 110.7 C60.1 108.7 82.1 88.7 100.8 59.7" fill="none" stroke="#10A6A0" stroke-width="10" stroke-linecap="round"/><path d="M45.6 122.2 C69.6 120.2 91.6 100.2 106.6 77.2" fill="none" stroke="#FF6B4A" stroke-width="7" stroke-linecap="round"/><circle cx="100" cy="27" r="9" fill="#F5A524"/></g></svg>`;
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 128 128"><g transform="translate(64 64) scale(0.86) translate(-63.5 -71.9)"><path d="M24.0 96.0 C48.0 94.0 70.0 74.0 92.0 40.0" fill="none" stroke="#6C4CF5" stroke-width="14" stroke-linecap="round"/><path d="M36.1 110.7 C60.1 108.7 82.1 88.7 100.8 59.7" fill="none" stroke="#10A6A0" stroke-width="10" stroke-linecap="round"/><path d="M45.6 122.2 C69.6 120.2 91.6 100.2 106.6 77.2" fill="none" stroke="#FF6B4A" stroke-width="7" stroke-linecap="round"/><circle cx="100" cy="27" r="9" fill="#F5A524"/></g></svg>`;
   }
   await sharp(Buffer.from(svg)).png().toFile(file);
   return file;
@@ -1638,7 +1645,7 @@ async function paperArt(kind) {
     svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}">` + RIBBONS.map((c, i) =>
       `<path d="M ${-60 + i * 46} ${1140} C ${520 + i * 24} ${980 - i * 30}, ${640 - i * 10} ${430 + i * 40}, ${1260} ${150 + i * 74}" fill="none" stroke="#${c}" stroke-width="${[30, 20, 13, 8][i]}" stroke-linecap="round"/>`).join("") + `</svg>`;
   } else {
-    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">${MARK_SVG}</svg>`;
+    svg = `<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 128 128">${MARK_SVG}</svg>`;
   }
   await sharp(Buffer.from(svg)).png().toFile(file);
   return file;

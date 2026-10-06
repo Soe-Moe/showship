@@ -9,13 +9,13 @@ description: Showship — show what you shipped. Build a progress report deck (w
 
 Config `period` sets the default rhythm; the user can override it in any request ("last two weeks", "September", "Oct 1 to Oct 9", "sprint 14").
 
-| `period` | Default range when there is no earlier report | Deck title (default) | "Next …" slide |
-|---|---|---|---|
-| `weekly` *(default)* | last 7 days | Weekly Development Progress Report | Next Week's Plan |
-| `biweekly` | last 14 days | Biweekly Development Progress Report | Next Two Weeks |
-| `sprint` | last `sprintDays` days (default 14); ask the sprint number once and pass it as `report.json` → `"sprint"` | Sprint N Progress Report | Next Sprint's Plan |
-| `monthly` | the current calendar month to date — or the previous month if the report is made in its first 5 days | Monthly Development Progress Report | Next Month's Plan |
-| `custom` | ask the user for the dates | Development Progress Report | Next Steps |
+| `period`             | Default range when there is no earlier report                                                             | Deck title (default)                 | "Next …" slide     |
+| -------------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------ | ------------------ |
+| `weekly` _(default)_ | last 7 days                                                                                               | Weekly Development Progress Report   | Next Week's Plan   |
+| `biweekly`           | last 14 days                                                                                              | Biweekly Development Progress Report | Next Two Weeks     |
+| `sprint`             | last `sprintDays` days (default 14); ask the sprint number once and pass it as `report.json` → `"sprint"` | Sprint N Progress Report             | Next Sprint's Plan |
+| `monthly`            | the current calendar month to date — or the previous month if the report is made in its first 5 days      | Monthly Development Progress Report  | Next Month's Plan  |
+| `custom`             | ask the user for the dates                                                                                | Development Progress Report          | Next Steps         |
 
 When an earlier report exists, the range starts the day after the newest report folder's date. Wording on slides and in drafts follows the period ("this sprint", "this month", "next week"). Below, "period" means whichever of these applies.
 
@@ -24,11 +24,13 @@ When an earlier report exists, the range starts the day after the newest report 
 Two settings in config decide whose work is reported and how technical the deck may be. Ask on first setup if they aren't set.
 
 **`role`**
-- `lead` *(default)* — a team lead reporting **the whole team**: everyone's commits, PRs and tasks; owners per track; the lead's code reviews (`leadLogins`, tagged `(LEAD)`) are the most authoritative source.
-- `member` — an individual reporting **their own work** (developer, designer-developer, freelancer/contractor to a client, solo founder to investors). Collect only the user's own commits, PRs they're involved in, and their own tasks. Reviews they *received* explain status and fixes; reviews they *gave* count as their contribution. Present in the first person plural or neutral voice ("Delivered…", "In progress…"), never as a ranking against others.
+
+- `lead` _(default)_ — a team lead reporting **the whole team**: everyone's commits, PRs and tasks; owners per track; the lead's code reviews (`leadLogins`, tagged `(LEAD)`) are the most authoritative source.
+- `member` — an individual reporting **their own work** (developer, designer-developer, freelancer/contractor to a client, solo founder to investors). Collect only the user's own commits, PRs they're involved in, and their own tasks. Reviews they _received_ explain status and fixes; reviews they _gave_ count as their contribution. Present in the first person plural or neutral voice ("Delivered…", "In progress…"), never as a ranking against others.
 
 **`audience`**
-- `business` *(default)* — business people, PMs, management, clients. Write for the least technical person in the room; technical terms only in brackets when they add something.
+
+- `business` _(default)_ — business people, PMs, management, clients. Write for the least technical person in the room; technical terms only in brackets when they add something.
 - `engineering` — a tech lead, engineering manager or engineering team. Technical terms (API, schema, refactor, PR, test coverage) are fine and expected, but every item still states the outcome. Code, file paths and raw comments still never go on slides.
 
 Whatever the role, the deck answers the same questions — adapt the wording:
@@ -61,7 +63,7 @@ If the user just says "make this week's report" (or this sprint's / month's) ins
   - `reportsDir` — where report folders live (any path, `~` allowed; default `~/Showship`). `<reports>` below means this path, expanded.
   - `period` — `weekly`, `biweekly`, `sprint`, `monthly` or `custom`; `sprintDays` — sprint length in days (default 14). See **Reporting period**. Ask on first setup if it isn't set.
   - `presenter` (title slide), `closingPresenter` (closing slide), `company`
-  - `logo` — path to the company logo (PNG/JPG, `~` allowed; borders are trimmed automatically; `false` for none). Default: the Showship mark in `assets/logo.png` (used until the user sets their own logo).
+  - `logo` — path to the company logo (SVG, PNG or JPG, `~` allowed; borders are trimmed automatically; `false` for none). Default: the Showship mark in `assets/logo.svg` (used until the user sets their own logo). SVG logos are rendered at high resolution, so prefer SVG when the user has one.
   - `style` — the deck design: `showship` (signature: one colour per project across all slides, gauges, pill-track phases, ship-trail ribbons; `"signature": false` hides the footer mark), `paper` (printed annual report: paper and ink, one colour per project, coral red only for risks; `rows` illustrations are not drawn, so prefer a screenshot or plain rows), `classic` (black & white editorial with its own layouts — lede column, large serif figures, numbered lists, vertical timeline, no boxes), `modern` (dark bookends, lime accent, serif headings), `corporate` (white, navy & blue, sans-serif, page numbers), or `vivid` (teal header bands, orange accent, rounded cards). The user chooses it — in the installer, in config, or per report via `report.json` → `"style"`. All slide types work in every style. Ask on first setup if it isn't set.
   - `theme` — optional colours (hex) that override the style's palette: `dark`, `accent`, `accentLight`, `warning`.
   - `deckLanguage` — language of the slides (default `English`).
@@ -91,18 +93,21 @@ If the user just says "make this week's report" (or this sprint's / month's) ins
 2. Run both collectors and save the output, then read both files fully (in chunks — lead reviews are long):
    - `mkdir -p <dir>/raw && bash <skill>/scripts/collect_commits.sh <since> <until> > <dir>/raw/<repo>-commits.md`
    - `SHOWSHIP_LEAD_LOGINS="<leadLogins, comma-separated>" bash <skill>/scripts/collect_prs.sh <since> <until> > <dir>/raw/<repo>-prs.md`
-   In **`member`** mode, restrict both to the user: prefix the commit collector with `SHOWSHIP_AUTHORS="<the user's git names/emails from leadLogins>"` and the PR collector with `SHOWSHIP_INVOLVES="<the user's GitHub login>"` (PRs they authored, reviewed, commented on or were assigned).
-   The PR digest contains each PR's status, branch, size, full description and the period's discussion in chronological order, with the user's (lead's) comments tagged **(LEAD)**.
+     In **`member`** mode, restrict both to the user: prefix the commit collector with `SHOWSHIP_AUTHORS="<the user's git names/emails from leadLogins>"` and the PR collector with `SHOWSHIP_INVOLVES="<the user's GitHub login>"` (PRs they authored, reviewed, commented on or were assigned).
+     The PR digest contains each PR's status, branch, size, full description and the period's discussion in chronological order, with the user's (lead's) comments tagged **(LEAD)**.
 3. Map names with config. Map the repo to a project (config, else ask once).
 4. Analyze — see **Reading the lead's reviews** and `references/translation_guide.md`. PRs are the backbone (one PR ≈ one feature or phase); commits fill in work that has no PR yet.
 5. Write `<dir>/<repo>.md`:
 
 ```markdown
 # <Project name> (<repo>)
+
 Range: <since> → <until> · <N> commits · <M> PRs with activity
 
 ## Features this period
+
 ### <Phase / feature in plain words> — <Owner display name>
+
 - Plan reference: <tracker task id/key, phase name as in the plan>
 - What it does for users/business: <one or two plain sentences>
 - Status: Delivered | Approved, ready to release | In review — fix needed | In development
@@ -113,12 +118,15 @@ Range: <since> → <until> · <N> commits · <M> PRs with activity
 - Deferred / follow-up: <out-of-scope items, tech debt — usually not for the deck>
 
 ## Activity (for charts)
+
 | Person | Commits | PRs opened | PRs merged | Reviews given |
 
 ## Suggested status & percent
+
 - <feature>: <status>, suggested <x>% because <evidence> — lead to confirm
 
 ## Questions for the lead
+
 - <percent to confirm, blockers outside GitHub, anything unclear>
 ```
 
@@ -136,14 +144,14 @@ Run it during the first **collect** of the period if `<dir>/tasks.md` doesn't ex
 
 Every tool produces the same digest: tasks grouped by assignee (mapped through `taskUsers`, excluded people removed), completed-in-range and open tasks, nested subtasks with counts, and `OVERDUE` flags. How each tool maps:
 
-| Tool | "Task" | Subtasks | Done = |
-|---|---|---|---|
-| Lark | task in a tasklist | subtasks (nested) | completed |
-| Jira | issue (epic / story / task) | child issues & sub-tasks in the result set | status category Done |
-| Linear | issue | sub-issues | completed (canceled is skipped) |
-| Asana | task in a project | subtasks (nested) | completed |
-| ClickUp | task in a list | subtasks (nested; earlier-closed ones kept for counts) | status type done / closed |
-| MCP (custom) | whatever the tool calls a task (page, item, card, issue) | nested `subtasks` you include | what `tasks.mcp.instructions` says, else the tool's done/closed state |
+| Tool         | "Task"                                                   | Subtasks                                               | Done =                                                                |
+| ------------ | -------------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------- |
+| Lark         | task in a tasklist                                       | subtasks (nested)                                      | completed                                                             |
+| Jira         | issue (epic / story / task)                              | child issues & sub-tasks in the result set             | status category Done                                                  |
+| Linear       | issue                                                    | sub-issues                                             | completed (canceled is skipped)                                       |
+| Asana        | task in a project                                        | subtasks (nested)                                      | completed                                                             |
+| ClickUp      | task in a list                                           | subtasks (nested; earlier-closed ones kept for counts) | status type done / closed                                             |
+| MCP (custom) | whatever the tool calls a task (page, item, card, issue) | nested `subtasks` you include                          | what `tasks.mcp.instructions` says, else the tool's done/closed state |
 
 ### Custom tool via MCP (`provider: "mcp"`)
 
@@ -171,22 +179,22 @@ How to use it:
 
 ## Reading the lead's reviews
 
-*(In `member` mode the same structure applies to reviews the user **received** from their lead — use them for status, fixes needed and decisions — and to reviews the user **gave**, which count as their contribution.)*
+_(In `member` mode the same structure applies to reviews the user **received** from their lead — use them for status, fixes needed and decisions — and to reviews the user **gave**, which count as their contribution.)_
 
 The lead's review comments are structured, verified write-ups and the most authoritative source in the digest. A typical review contains these sections — map each one:
 
-| Review section | Use it for |
-|---|---|
-| Title line: repo, PR number, **task id/key**, **phase name** (e.g. "Phase 4: Appointment Reminders") | Which project, track and phase this is. Keep the task id in the draft as a reference, not on slides. |
-| Header facts: author, branch, scope (files/lines), task/subtask status in the tracker, review date | Owner (map the GitHub author via config), size of the change. |
-| **Summary** | What the feature does → rewrite as user/business value. |
-| **Verification** (test suite result, probe tables) | Quality evidence: "all 212 automated tests pass", "permissions verified". Drop the technical cases. |
-| **Subtask Coverage** table (✅ / ⚠️ / ❌ per subtask) | **Progress evidence.** Count verified subtasks: 4 of 5 ✅ → suggest ~80% and "4 of 5 parts verified". Confirm the percent with the lead. |
-| **Critical / Blocker** | "Fix needed before release": describe the **effect on users** and the **size** of the fix ("a damaged image upload shows an error instead of a clear message; small fix, already tested"). Goes on the Blockers side of the `attention` slide if it delays release. |
-| **Optional Follow-up Refactoring** | Usually omit from the deck. At most "minor improvements planned". |
-| **Product/Policy Decision Needed** | **Decisions Needed** on the `attention` slide: the business question, why it matters, the options. This is high value for the meeting. |
-| Items the PR leaves open on purpose / already decided | Omit unless they change scope. |
-| **Verdict** (APPROVED / NEEDS WORK / …) | Status: APPROVED → "Approved, ready to release" (or Delivered if merged); NEEDS WORK → "In review — fix needed". |
+| Review section                                                                                       | Use it for                                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Title line: repo, PR number, **task id/key**, **phase name** (e.g. "Phase 4: Appointment Reminders") | Which project, track and phase this is. Keep the task id in the draft as a reference, not on slides.                                                                                                                                                                |
+| Header facts: author, branch, scope (files/lines), task/subtask status in the tracker, review date   | Owner (map the GitHub author via config), size of the change.                                                                                                                                                                                                       |
+| **Summary**                                                                                          | What the feature does → rewrite as user/business value.                                                                                                                                                                                                             |
+| **Verification** (test suite result, probe tables)                                                   | Quality evidence: "all 212 automated tests pass", "permissions verified". Drop the technical cases.                                                                                                                                                                 |
+| **Subtask Coverage** table (✅ / ⚠️ / ❌ per subtask)                                                | **Progress evidence.** Count verified subtasks: 4 of 5 ✅ → suggest ~80% and "4 of 5 parts verified". Confirm the percent with the lead.                                                                                                                            |
+| **Critical / Blocker**                                                                               | "Fix needed before release": describe the **effect on users** and the **size** of the fix ("a damaged image upload shows an error instead of a clear message; small fix, already tested"). Goes on the Blockers side of the `attention` slide if it delays release. |
+| **Optional Follow-up Refactoring**                                                                   | Usually omit from the deck. At most "minor improvements planned".                                                                                                                                                                                                   |
+| **Product/Policy Decision Needed**                                                                   | **Decisions Needed** on the `attention` slide: the business question, why it matters, the options. This is high value for the meeting.                                                                                                                              |
+| Items the PR leaves open on purpose / already decided                                                | Omit unless they change scope.                                                                                                                                                                                                                                      |
+| **Verdict** (APPROVED / NEEDS WORK / …)                                                              | Status: APPROVED → "Approved, ready to release" (or Delivered if merged); NEEDS WORK → "In review — fix needed".                                                                                                                                                    |
 
 Developers' PR descriptions and replies tell you what was built and what has been fixed since the review — a blocker answered with "fixed" plus new commits is **resolved, pending re-review**.
 

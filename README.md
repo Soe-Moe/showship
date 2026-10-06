@@ -7,7 +7,7 @@
 **Show what you shipped.**
 
 [![Status: Beta](https://img.shields.io/badge/status-beta-orange)](https://github.com/Soe-Moe/showship/issues)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.7-blue)](https://www.npmjs.com/package/showship)
+[![Version](https://img.shields.io/badge/version-0.1.0--beta.8-blue)](https://www.npmjs.com/package/showship)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933)](https://nodejs.org)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-Claude%20Code%20·%20Codex%20·%20Antigravity-D97757)](#install)
@@ -314,7 +314,7 @@ Only your own commits, the PRs you authored or reviewed, and your tasks are coll
   "company": "Acme Digital Co., Ltd.",
   "presenter": "Maya Lin @Maya", // title slide
   "closingPresenter": "Maya Lin", // closing slide
-  "logo": "~/Pictures/acme-logo.png", // PNG/JPG; borders trimmed automatically; false = none
+  "logo": "~/Pictures/acme-logo.png", // SVG/PNG/JPG; borders trimmed automatically; false = none
   "style": "corporate", // deck design: showship | paper | classic | modern | corporate | vivid
   "theme": {
     "dark": "141412",
@@ -540,7 +540,7 @@ skill/                    the agent skill (copied to <skills folder>/showship)
     tasks/                common.js · jira.js · linear.js · asana.js · clickup.js · lark.js
   references/             templates.md (JSON schema) · translation_guide.md
   examples/               report.example.json
-  assets/logo.png         default logo (the Showship mark)
+  assets/logo.svg         default logo (the Showship mark)
 docs/                     preview images and example deck
 ```
 
