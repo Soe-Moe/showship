@@ -151,6 +151,17 @@ Options:
 // ---------- interactive prompts (no dependencies) ----------
 const BACK = Symbol("back");
 
+// Every prompt line must fit on one terminal row. A wrapped line takes two rows, the redraw then
+// moves up one row too few, and each keypress leaves a copy of the question behind.
+const cols = () => Math.max(20, (process.stdout.columns || 80) - 1);
+// fit "head" (always shown) + "tail" (shortened with … if needed) into one row; returns the parts to style
+function fit(head, tail = "") {
+  const room = cols() - [...head].length;
+  if (room <= 1) return [[...head].slice(0, cols() - 1).join("") + "…", ""];
+  if ([...tail].length <= room) return [head, tail];
+  return [head, [...tail].slice(0, Math.max(0, room - 1)).join("") + "…"];
+}
+
 // Arrow-key list. With canBack, ← / Esc / Backspace returns BACK.
 function select(question, options, initial = 0, canBack = false) {
   return new Promise((resolve) => {
@@ -163,11 +174,12 @@ function select(question, options, initial = 0, canBack = false) {
     const lines = options.length + 2;
     const render = (first) => {
       if (!first) out.write(`\x1b[${lines}A`);
-      out.write(`\x1b[2K${cyan("?")} ${bold(question)} ${dim(canBack ? "(↑/↓, Enter · ← back)" : "(↑/↓, Enter)")}\n`);
+      const [q, qh] = fit(`? ${question} `, canBack ? "(↑/↓, Enter · ← back)" : "(↑/↓, Enter)");
+      out.write(`\x1b[2K${cyan("?")} ${bold(q.slice(2))}${dim(qh)}\n`);
       options.forEach((o, k) => {
         const sel = k === i;
-        const label = sel ? cyan(`❯ ${o.label}`) : `  ${o.label}`;
-        out.write(`\x1b[2K${label}${o.hint ? "  " + dim(o.hint) : ""}\n`);
+        const [l, h] = fit(`${sel ? "❯" : " "} ${o.label}`, o.hint ? `  ${o.hint}` : "");
+        out.write(`\x1b[2K${sel ? cyan(l) : l}${dim(h)}\n`);
       });
       out.write("\x1b[2K\n");
     };
@@ -176,7 +188,7 @@ function select(question, options, initial = 0, canBack = false) {
       if (inp.isTTY) inp.setRawMode(false);
       inp.pause();
       out.write(`\x1b[${lines}A\x1b[0J`);
-      if (answer !== undefined) out.write(`${green("✔")} ${bold(question)} ${cyan(answer)}\n`);
+      if (answer !== undefined) { const [q, a] = fit(`✔ ${question} `, answer); out.write(`${green("✔")} ${bold(q.slice(2))}${cyan(a)}\n`); }
       out.write("\x1b[?25h");
       resolve(value);
     };
@@ -202,14 +214,20 @@ function ask(question, def = "", canBack = false) {
     readline.emitKeypressEvents(inp);
     if (inp.isTTY) inp.setRawMode(true);
     inp.resume();
-    const hint = dim(`${def ? `(${def})` : "(Enter to skip)"}${canBack ? " · Esc back" : ""}`);
-    const render = () => out.write(`\r\x1b[2K${cyan("?")} ${bold(question)} ${hint} ${buf}`);
+    const hintText = `${def ? `(${def})` : "(Enter to skip)"}${canBack ? " · Esc back" : ""}`;
+    const render = () => {
+      // keep the line on one row: the typed text wins, then the question, then the hint
+      const [q, rest] = fit(`? ${question} `, `${hintText} ${buf}`);
+      const shown = rest.endsWith("…") ? fit(`? ${question} `, buf.length > cols() / 2 ? "…" + buf.slice(-Math.floor(cols() / 2)) : buf) : null;
+      if (shown) out.write(`\r\x1b[2K${cyan("?")} ${bold(shown[0].slice(2))}${shown[1]}`);
+      else out.write(`\r\x1b[2K${cyan("?")} ${bold(q.slice(2))}${dim(hintText)} ${buf}`);
+    };
     const finish = (value) => {
       inp.removeListener("keypress", onKey);
       if (inp.isTTY) inp.setRawMode(false);
       inp.pause();
       out.write("\r\x1b[2K");
-      if (value !== BACK) out.write(`${green("✔")} ${bold(question)} ${cyan(value || dim("skipped"))}\n`);
+      if (value !== BACK) { const [q, a] = fit(`✔ ${question} `, value || "skipped"); out.write(`${green("✔")} ${bold(q.slice(2))}${value ? cyan(a) : dim(a)}\n`); }
       resolve(value);
     };
     const onKey = (s, key = {}) => {
