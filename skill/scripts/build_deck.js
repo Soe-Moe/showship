@@ -281,8 +281,6 @@ function bookendPanel(pres, r, kind) {
   s.addShape("rect", { x: 0, y: 0, w: pw, h: 7.5, fill: { color: C.DARK }, line: { type: "none" } });
   s.addShape("rect", { x: pw, y: 0, w: 0.08, h: 7.5, fill: { color: C.LIME }, line: { type: "none" } });
   if (LOGO) {
-    // white tile so any logo colour reads on navy (the default Showship mark reads on dark as is)
-    if (!LOGO.isDefault) s.addShape("rect", { x: 0.7, y: 0.7, w: 1.3, h: 1.3, fill: { color: "FFFFFF" }, line: { type: "none" } });
     smallLogo(s, 1.35, 1.82, 1.0, 1.0);
   }
   s.addText(r.company, { x: 0.7, y: 2.2, w: pw - 1.2, h: 0.8, fontFace: F.B, fontSize: 14, bold: true, color: "FFFFFF", valign: "top", margin: 0 });
@@ -338,7 +336,6 @@ function bookendShapes(pres, r, kind) {
   s.addShape("ellipse", { x: 10.9, y: 4.3, w: 3.4, h: 3.4, fill: { color: C.LIGHT_LIME, transparency: 35 }, line: { type: "none" } });
   s.addShape("ellipse", { x: 7.6, y: 5.6, w: 1.2, h: 1.2, fill: { color: "FFFFFF", transparency: 80 }, line: { type: "none" } });
   if (LOGO) {
-    if (!LOGO.isDefault) s.addShape("roundRect", { x: 0.7, y: 0.6, w: 0.95, h: 0.95, rectRadius: 0.15, fill: { color: "FFFFFF" }, line: { type: "none" } });
     smallLogo(s, 1.175, 1.43, 0.72, 0.72);
   }
   s.addText(r.company, { x: LOGO ? 1.85 : 0.7, y: 0.6, w: 5.5, h: 0.95, fontFace: F.B, fontSize: 14, bold: true, color: "FFFFFF", valign: "middle", margin: 0 });
@@ -1193,7 +1190,6 @@ async function sigBookend(pres, r, kind) {
   s.background = { color: C.DARK };
   s.addImage({ path: await trailArt("bookend"), x: 0, y: 0, w: 13.333, h: 7.5 });
   if (LOGO) {
-    if (!LOGO.isDefault) s.addShape("roundRect", { x: 0.7, y: 0.6, w: 0.9, h: 0.9, rectRadius: 0.18, fill: { color: "FFFFFF" }, line: { type: "none" } });
     smallLogo(s, 1.15, 1.38, 0.66, 0.66);
   }
   s.addText(r.company, { x: LOGO ? 1.8 : 0.7, y: 0.6, w: 6, h: 0.9, fontFace: F.H, fontSize: 14, bold: true, color: "FFFFFF", valign: "middle", margin: 0 });
