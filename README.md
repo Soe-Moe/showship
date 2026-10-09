@@ -7,7 +7,7 @@
 **Show what you shipped.**
 
 [![Status: Beta](https://img.shields.io/badge/status-beta-orange)](https://github.com/Soe-Moe/showship/issues)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.8-blue)](https://www.npmjs.com/package/showship)
+[![Version](https://img.shields.io/badge/version-0.1.0--beta.9-blue)](https://www.npmjs.com/package/showship)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933)](https://nodejs.org)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-Claude%20Code%20·%20Codex%20·%20Antigravity-D97757)](#install)
@@ -186,9 +186,20 @@ npx showship --yes --period sprint --tasks jira --style corporate
 | `--skip-deps`            | skip `npm install` for the deck builder                            |
 | `--uninstall`            | remove the skill (backs up `config.json` first)                    |
 
-**Updating** is the same command. Your `config.json` and `node_modules` are kept, and the previous skill files are backed up to `~/.showship/backups/<timestamp>/`.
+### Updating
 
-You can also run the installer straight from GitHub: `npx github:Soe-Moe/showship`.
+Run the installer again with `@latest`. Without it, `npx` may reuse an older copy from its cache.
+
+```bash
+npx showship@latest                # asks again, with your current answers pre-selected
+npx showship@latest --yes          # no questions: update the files, keep every setting (Claude Code, global)
+npx showship@latest --yes --agent codex      # same for another agent: codex, antigravity or agents
+npx showship@latest --yes --project          # installed into a project? run this inside that project
+```
+
+Your `config.json` (company, logo, team, tracker, style…) and `node_modules` are kept; only the skill files are replaced, and the previous ones are backed up to `~/.showship/backups/<timestamp>/`. Restart your agent afterwards: skills are loaded when a session starts. The installer prints the version it installs; `npm view showship version` shows the newest one.
+
+To try the latest code on GitHub before it reaches npm: `npx github:Soe-Moe/showship`.
 
 <details>
 <summary>Manual install</summary>
