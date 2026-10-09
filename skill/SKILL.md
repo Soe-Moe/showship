@@ -205,9 +205,9 @@ Never put code, file paths, HTTP status codes, class names, test case tables or 
 1. Read every `<dir>/*.md` (including `tasks.md`; run the task collector first if it's missing and a tracker is configured) and `notes.md`, plus what the user tells you in chat. Earlier reports' `notes.md` may hold standing instructions (exclusions, environments, how to count) — check the newest earlier folder too.
 2. **Fill gaps in one consolidated question** (in the user's language): percentages to confirm, non-code work (paperwork, approvals, meetings), blockers outside GitHub, anything uncertain. Never invent numbers, dates, owners or blockers; if unknown, state the status in words.
 3. Plan the deck (below) and write `<dir>/report.json` per `references/templates.md`. `date` like `October 9, 2026`; presenter values from config.
-4. **Language check:** `node <skill>/scripts/lint_report.js <dir>/report.json --audience <business|engineering>`. Rewrite every FIX item (for `engineering`, only code and file names are flagged); for CHECK items keep the term only if it is explained in the same sentence or is an official plan name. Re-run until there are no FIX items.
+4. **Language and length check:** `node <skill>/scripts/lint_report.js <dir>/report.json --audience <business|engineering>`. Rewrite every FIX item (for `engineering`, only code and file names are flagged); for CHECK items keep the term only if it is explained in the same sentence or is an official plan name. Re-run until there are no FIX items.
 5. Build: `node <skill>/scripts/build_deck.js <dir>/report.json <dir>/<Period>_Progress_Report_<YYYY-MM-DD>.pptx`. Set `"period"` in `report.json` when it differs from config (and `"sprint"` for sprint reports) so the title matches.
-6. Verify: if LibreOffice is available, render to images and check every slide for overflow, overlaps and wrong numbers; fix and rebuild. Re-check every number against the drafts and the user's answers.
+6. Verify (mandatory, see `references/design_rules.md`): run `node <skill>/scripts/check_deck.js <deck>.pptx --png`. It renders the deck with LibreOffice and flags text near the slide edge or colliding. Then open every PNG in `<deck>-qa/` and look at it for overflow, hollow cards, faded text and wrong numbers. Fix `report.json` (shorten text first) or the template, rebuild, and repeat until the script is clean and every slide looks right. If LibreOffice is missing, say the deck was not rendered and check text against the character limits instead. Re-check every number against the drafts and the user's answers.
 7. Tell the user (in their language) where the file is, one line per slide, and what you inferred.
 
 ## Deck design
@@ -235,7 +235,7 @@ Never put code, file paths, HTTP status codes, class names, test case tables or 
 
 Skip `tracker` and `activity` in `member` mode unless the user asks — they are team views.
 
-**Rules:**
+**Rules:** (visual rules for templates and decks: `references/design_rules.md`)
 
 - Never use the same content template on consecutive slides. Use charts wherever there are real numbers.
 - Titles: one line, "Project: Outcome" ("App Store: Developer Account Verified").

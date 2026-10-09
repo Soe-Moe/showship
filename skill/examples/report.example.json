@@ -226,6 +226,150 @@
       ]
     },
     {
+      "type": "tracker",
+      "eyebrow": "Team · Task Tracker",
+      "title": "Developer Task Track",
+      "devs": [
+        {
+          "name": "Leo Park @Leo",
+          "project": "ClinicBook · Patient App",
+          "done": 3,
+          "open": 2,
+          "pct": 60,
+          "state": "progress",
+          "focus": "Sign-in and clinic search done; booking calendar in progress.",
+          "items": [
+            {
+              "text": "P1 · Accounts & Sign-in (3/3)",
+              "state": "done"
+            },
+            {
+              "text": "P2 · Clinic Search & Maps (5/5)",
+              "state": "done"
+            },
+            {
+              "text": "P3 · Booking Calendar (2/5)",
+              "state": "progress"
+            },
+            {
+              "text": "P4 · Payments & Receipts (0/4)",
+              "state": "next"
+            }
+          ]
+        },
+        {
+          "name": "Nina Rao @Nina",
+          "project": "ClinicBook · Clinic Dashboard",
+          "done": 4,
+          "open": 1,
+          "pct": 70,
+          "state": "progress",
+          "focus": "Onboarding and schedules done; reminders in final review.",
+          "items": [
+            {
+              "text": "P1 · Clinic Onboarding (3/3)",
+              "state": "done"
+            },
+            {
+              "text": "P2 · Doctor Schedules (5/5)",
+              "state": "done"
+            },
+            {
+              "text": "P4 · Reminders, in review (5/5)",
+              "state": "progress"
+            },
+            {
+              "text": "P3 · Reports & Exports (0/3)",
+              "state": "next"
+            }
+          ]
+        },
+        {
+          "name": "Maya Lin @Maya",
+          "project": "PulseBoard · Analytics",
+          "done": 5,
+          "open": 1,
+          "pct": 75,
+          "state": "progress",
+          "focus": "Data transfer done; usage tracking rolling out.",
+          "items": [
+            {
+              "text": "Data transfer to new system",
+              "state": "done"
+            },
+            {
+              "text": "Event plan agreed",
+              "state": "done"
+            },
+            {
+              "text": "Usage tracking rollout",
+              "state": "progress"
+            },
+            {
+              "text": "Code reviews, 3 features",
+              "state": "done"
+            }
+          ]
+        }
+      ],
+      "footnote": "Done/Open = planned tasks this week; work in review stays open until approved."
+    },
+    {
+      "type": "activity",
+      "eyebrow": "Engineering Activity · GitHub",
+      "title": "Team Delivery Activity This Week",
+      "series": [
+        "Development work",
+        "Features submitted",
+        "Features approved",
+        "Reviews given"
+      ],
+      "people": [
+        {
+          "name": "Leo Park @Leo",
+          "values": [
+            18,
+            1,
+            2,
+            0
+          ]
+        },
+        {
+          "name": "Nina Rao @Nina",
+          "values": [
+            14,
+            2,
+            1,
+            3
+          ]
+        },
+        {
+          "name": "Maya Lin @Maya",
+          "values": [
+            6,
+            1,
+            1,
+            4
+          ]
+        }
+      ],
+      "kpis": [
+        {
+          "value": "3",
+          "label": "Features approved"
+        },
+        {
+          "value": "2",
+          "label": "In final review"
+        },
+        {
+          "value": "7",
+          "label": "Code reviews completed"
+        }
+      ],
+      "note": "Source: GitHub activity this week."
+    },
+    {
       "type": "table",
       "eyebrow": "Looking Ahead",
       "title": "Next Week's Plan",

@@ -8,7 +8,7 @@ A full working example lives in `examples/report.example.json`.
   "presenter": "Maya Lin @Maya",           // title slide
   "closingPresenter": "Maya Lin",            // closing slide
   "company": "Acme Digital Co., Ltd.",   // optional (default)
-  "eyebrow": "PROGRESS REPORT",                // optional (default)
+  "eyebrow": "Progress report",                // optional (default)
   "period": "sprint",                          // optional: weekly | biweekly | sprint | monthly | custom (default from config)
   "sprint": 14,                                // optional: sprint number → "Sprint 14 Progress Report"
   "title": "Weekly Development\nProgress Report", // optional — overrides the period's default title
@@ -17,9 +17,11 @@ A full working example lives in `examples/report.example.json`.
 }
 ```
 
+**Length limits** (characters; enforced by `scripts/lint_report.js`, and see `design_rules.md`): title 62, eyebrow 48, dashboard card label 34 / headline 40 / desc 110, key update and impact 150, timeline step title 28 / tag 16 / desc 90, phase name 45, table focus 130, finding text 140, attention title 80 / text 170, tracker item 55 / focus 110.
+
 All styles read the same JSON. `classic` renders it with its own editorial layouts (e.g. `rings` as large figures, `phase_bars` as phase lists, `timeline` vertically); `showship` has its own signature layouts (colour per project, gauges, pill tracks, milestone trail); `paper` has its own printed-report layouts (ruled lists, big figures, a single trail line for timelines; `rows` ignores `illustration`); `modern`, `corporate` and `vivid` share the card layouts. Optional `"color"` on a dashboard card or `phase_bars` slide pins a project colour (hex); `"signature": false` hides the "Shipped with Showship" mark.
 
-Every content slide has `type`, `eyebrow` (small label, auto-uppercased) and `title` (one line).
+Every content slide has `type`, `eyebrow` (short label, shown in sentence case) and `title` (one line).
 
 **States** used across templates: `done` (accent colour), `progress` (light accent), `blocked` (warning colour), `next` (grey / not started). Colours depend on the style.
 

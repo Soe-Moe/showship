@@ -9,6 +9,7 @@ config.json
 Showship/
 *.pptx
 *.pdf
+*-qa/
 !docs/example-deck.pptx
 !docs/example-deck-showship.pptx
 !docs/example-deck-paper.pptx

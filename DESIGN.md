@@ -32,3 +32,5 @@ Direction chosen by the product owner (Skylar). This file is the brief for the `
 ## Dials
 
 Dial: ENERGY 2 / RHYTHM 3 / MOTION 1
+
+The rules that apply to every style (sizes, overflow, composition, mandatory render check) are in `skill/references/design_rules.md`.

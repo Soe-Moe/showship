@@ -74,6 +74,7 @@ The installer asks these questions; you can change them in `config.json` at any 
 - **Never invents numbers** — percentages, owners, dates and blockers come from your data or from you. The agent asks one consolidated question for anything GitHub can't tell it.
 - **12 slide templates, chosen to fit the data** — KPI dashboard, milestone timeline, doughnut progress, phase bar charts, workstreams, icon rows with generated illustrations, screenshot gallery, code-review insights, blockers & decisions, developer task tracker, team activity chart, next-steps table. Consecutive slides never reuse the same layout.
 - **6 deck designs** — the colourful _Showship_ signature style, plus _Paper_, _Classic_, _Modern_, _Corporate_ and _Vivid_; every slide type works in all six.
+- **Checks its own layout** — after the build the deck is rendered and every slide is checked for text crossing the margins or colliding, and text that is too long for its slot is caught before the build.
 - **Your branding** — company name, logo (auto-trimmed) and colour overrides from one config file.
 - **Works across changing repos** — collect per repo, build once. The set of repos can change every period.
 - **Task tracker integrations** — pull tasks, subtasks, assignees and due dates from **Jira, Linear, Asana, ClickUp or Lark**, or any other tool your agent reaches through **MCP** for "who is doing what", progress evidence and overdue risks.
@@ -498,8 +499,13 @@ You can also build a deck directly:
 
 ```bash
 node ~/.claude/skills/showship/scripts/build_deck.js report.json out.pptx
-node ~/.claude/skills/showship/scripts/lint_report.js report.json   # plain-language check
+node ~/.claude/skills/showship/scripts/lint_report.js report.json   # plain-language and text-length check
+node ~/.claude/skills/showship/scripts/check_deck.js out.pptx --png  # render and check every slide
 ```
+
+### Layout check
+
+Every deck is rendered with LibreOffice and each slide is checked for text that crosses the slide margins or collides with other text. The slide images land in `out-qa/` so you (and the agent) can look at them. The check needs [LibreOffice](https://www.libreoffice.org/) and poppler (`brew install poppler`), plus the deck's fonts installed on the machine; without them it reports that it could not render. `lint_report.js` also fails text that is longer than its slide slot (character limits in [`templates.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/templates.md)), so overflow is caught before the build.
 
 ## Getting the most out of code reviews
 
@@ -542,7 +548,7 @@ Code, file paths, error codes and raw comments never reach the slides, and probl
 | Jira returns HTTP 401/403                                 | check `JIRA_EMAIL` matches the token's account and that you can see the projects in the browser                                                                                  |
 | The agent doesn't pick up the skill (Codex / Antigravity) | check the folder in the [install table](#install), restart the agent, and ask it "what skills are available?" — then [open an issue](https://github.com/Soe-Moe/showship/issues) |
 | `npm audit` warning about `image-size`                    | the package pins a patched version via `overrides`; delete `node_modules` and `package-lock.json` in `scripts/` and run `npm install` again                                      |
-| Fonts look different                                      | decks use Cambria / Calibri; install them or let PowerPoint substitute                                                                                                           |
+| Fonts look different                                      | Showship and Paper use Poppins + Arial, Classic and Vivid use Georgia + Arial, Modern uses Cambria + Calibri, Corporate uses Arial; install the one your style needs or PowerPoint substitutes it |
 | `sharp` fails to install                                  | `cd <skills folder>/showship/scripts && npm rebuild sharp`                                                                                                                       |
 
 ## Repository layout
@@ -553,17 +559,18 @@ skill/                    the agent skill (copied to <skills folder>/showship)
   SKILL.md                instructions the agent follows
   config.example.json
   scripts/                collect_commits.sh · collect_prs.sh · collect_tasks.js
-                          build_deck.js · lint_report.js
+                          build_deck.js · lint_report.js · check_deck.js
+                          render_pdf.js · make_previews.js
     tasks/                common.js · jira.js · linear.js · asana.js · clickup.js · lark.js
-  references/             templates.md (JSON schema) · translation_guide.md
+  references/             templates.md (JSON schema) · translation_guide.md · design_rules.md
   examples/               report.example.json
   assets/logo.svg         default logo (the Showship mark)
-docs/                     preview images and example deck
+docs/                     preview images and example decks (regenerate: node skill/scripts/make_previews.js)
 ```
 
 ## Contributing
 
-Issues and pull requests are welcome — new slide templates, collectors for other trackers (Trello, GitHub Projects, Notion, Monday), better jargon rules, more languages, and reports from Codex / Antigravity users.
+Issues and pull requests are welcome — new slide templates (read [`design_rules.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/design_rules.md) first; run `check_deck.js` on every style and refresh the `docs/` images with `make_previews.js`), collectors for other trackers (Trello, GitHub Projects, Notion, Monday), better jargon rules, more languages, and reports from Codex / Antigravity users.
 
 ## License
 
