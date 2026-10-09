@@ -7,7 +7,7 @@
 **Show what you shipped.**
 
 [![Status: Beta](https://img.shields.io/badge/status-beta-orange)](https://github.com/Soe-Moe/showship/issues)
-[![Version](https://img.shields.io/badge/version-0.1.0--beta.9-blue)](https://www.npmjs.com/package/showship)
+[![Version](https://img.shields.io/npm/v/showship?include_prereleases&label=version&color=blue)](https://www.npmjs.com/package/showship)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933)](https://nodejs.org)
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-Claude%20Code%20·%20Codex%20·%20Antigravity-D97757)](#install)
@@ -200,6 +200,8 @@ npx showship@latest --yes --project          # installed into a project? run thi
 
 Your `config.json` (company, logo, team, tracker, style…) and `node_modules` are kept; only the skill files are replaced, and the previous ones are backed up to `~/.showship/backups/<timestamp>/`. Restart your agent afterwards: skills are loaded when a session starts. The installer prints the version it installs; `npm view showship version` shows the newest one.
 
+**You are told when there is an update.** The skill records the version it was installed with (`VERSION` in the skill folder). At the start of a session the agent looks up the newest release on npm (one request, only the package name is sent) and, if yours is older, tells you the exact command to run (`npx showship@<version> --yes`). You can ignore it and carry on; it is shown again next session until you update. Set `"updateCheck": false` in `config.json` to turn it off. Installs made before this feature (up to `0.1.0-beta.10`) have no `VERSION` file, so they only start checking after one manual update.
+
 To try the latest code on GitHub before it reaches npm: `npx github:Soe-Moe/showship`.
 
 <details>
@@ -334,6 +336,7 @@ Only your own commits, the PRs you authored or reviewed, and your tasks are coll
   "closingPresenter": "Maya Lin", // closing slide
   "logo": "~/Pictures/acme-logo.png", // SVG/PNG/JPG; borders trimmed automatically; false = none
   "style": "corporate", // deck design: showship | paper | classic | modern | corporate | vivid
+  "updateCheck": true, // true (default) = the agent tells you once per session when a newer Showship exists; false = never check
   "theme": {
     "dark": "141412",
     "accent": "A8CC3A",
@@ -531,6 +534,7 @@ Code, file paths, error codes and raw comments never reach the slides, and probl
 
 ## Privacy
 
+- The only network call that is not your own GitHub or tracker access is the update check: `npm view showship dist-tags` at the start of a session. Turn it off with `"updateCheck": false`.
 - Everything runs locally. Data is read through `git`, `gh` (GitHub API, your credentials) and optionally your task tracker's API (Jira, Linear, Asana, ClickUp) or `lark-cli`; drafts and decks are written to your reports folder.
 - Tracker tokens are read from environment variables only and are never written to config or report files.
 - Your AI agent processes the collected text as part of your session, like any other file you open with it.

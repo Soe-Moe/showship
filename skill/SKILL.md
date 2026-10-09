@@ -5,6 +5,21 @@ description: Showship — show what you shipped. Build a progress report deck (w
 
 # Showship — show what you shipped (GitHub activity → business-friendly deck)
 
+## Update check
+
+Do this once at the start of every session in which this skill is used, before the user's task. It never blocks the task.
+
+1. Read `<skill folder>/config.json`. If `updateCheck` is `false`, skip this whole section. If the key is missing, treat it as `true`.
+2. Read the installed version from `<skill folder>/VERSION` (one line, e.g. `0.1.0-beta.10`). If the file does not exist, the install predates update checks: treat the installed version as unknown and older than any release.
+3. Look up the newest release: `npm view showship dist-tags --json` (give it about 10 seconds). Take the highest version among all the tags' values, comparing dot-separated parts as numbers (so `0.1.0-beta.10` is newer than `0.1.0-beta.9`, and a release without a pre-release suffix is newer than the same number with one). If the command fails, times out, or `npm` is missing, skip silently: do not mention the check, do not retry, do not ask the user to fix anything.
+4. If the newest version is higher than the installed one (or the installed one is unknown), tell the user once, in their language and in at most three lines:
+   - Showship `<newest>` is available (installed: `<installed>`).
+   - To update, run `npx showship@<newest> --yes`, then restart the agent (skills load when a session starts). Add `--agent codex`, `--agent antigravity` or `--project` if that is how it was installed.
+   - They can ignore this and continue, nothing breaks.
+   Then carry on with what they asked, using the installed version. If they ask you to run the update, run that command, then tell them to restart the agent and stop (do not continue the task in the old session on half-replaced files).
+5. Say it once per session, not before every step. Do not remember that they skipped: the next session shows it again until they update or set `updateCheck` to `false` in `config.json`.
+6. The lookup sends only the package name to the npm registry. Nothing from the user's repos, reports or config leaves the machine.
+
 ## Reporting period
 
 Config `period` sets the default rhythm; the user can override it in any request ("last two weeks", "September", "Oct 1 to Oct 9", "sprint 14").

@@ -449,6 +449,8 @@ async function main() {
     const p = path.join(target, f);
     if (fs.existsSync(p)) try { fs.chmodSync(p, 0o755); } catch {}
   }
+  // The skill reads this to tell the user when a newer release exists (see "Update check" in SKILL.md).
+  fs.writeFileSync(path.join(target, "VERSION"), PKG.version + "\n");
   console.log(`${green("✔")} Skill files ${updating ? "updated" : "installed"}`);
 
   const existing = readCfg();

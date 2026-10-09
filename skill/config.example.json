@@ -9,6 +9,8 @@
   "closingPresenter": "Maya Lin",
   "logo": "~/path/to/company-logo.png",
   "style": "classic",
+  "updateCheck": true,
+  "_updateCheck_comment": "true = tell me when a newer Showship release exists (one npm lookup per session). false = never check",
   "theme": {
     "_comment": "Optional hex colours that override the style's palette (dark, accent, accentLight, warning)",
     "dark": "141412",
