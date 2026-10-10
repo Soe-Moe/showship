@@ -16,6 +16,8 @@
  * allowed in `phases[].name` and `table` → `current` — they are skipped.
  */
 const fs = require("fs");
+const path = require("path");
+const { validate } = require("./schema");
 
 // [regex, level, suggestion]
 const RULES = [
@@ -52,31 +54,6 @@ const RULES = [
   [/\w+\.(php|js|ts|py|json|sql)\b/i, "fix", "remove file names"],
 ];
 
-// Length limits: text longer than this does not fit its slot at presentation size.
-// [path regex, max characters]. Keep in step with references/templates.md.
-const LIMITS = [
-  [/^slides\[\d+\]\.title$/, 62],
-  [/^slides\[\d+\]\.eyebrow$/, 48],
-  [/\.cards\[\d+\]\.label$/, 34],
-  [/\.cards\[\d+\]\.headline$/, 40],
-  [/\.cards\[\d+\]\.desc$/, 110],
-  [/\.keyUpdate$/, 150],
-  [/\.impact$/, 150],
-  [/\.steps\[\d+\]\.title$/, 28],
-  [/\.steps\[\d+\]\.tag$/, 16],
-  [/\.steps\[\d+\]\.desc$/, 90],
-  [/\.hero\.desc$/, 160],
-  [/\.flow\.steps\[\d+\]\.desc$/, 50],
-  [/\.phases\[\d+\]\.name$/, 45],
-  [/\.rows\[\d+\]\.focus$/, 130],
-  [/\.rows\[\d+\]\.header$/, 40],
-  [/\.findings\[\d+\]\.text$/, 140],
-  [/\.(blockers|decisions)\[\d+\]\.title$/, 80],
-  [/\.(blockers|decisions)\[\d+\]\.text$/, 170],
-  [/\.items\[\d+\]\.text$/, 55],
-  [/\.devs\[\d+\]\.focus$/, 110],
-];
-
 const SKIP_KEYS = new Set(["type", "icon", "image", "images", "center", "nodes", "state", "date", "presenter", "closingPresenter", "company", "url"]);
 
 function walk(node, path, out) {
@@ -91,7 +68,6 @@ function walk(node, path, out) {
 }
 
 const file = process.argv[2];
-const countChars = (t) => [...t].length;
 const ai = process.argv.indexOf("--audience");
 const audience = (ai > 0 ? process.argv[ai + 1] : "business") || "business";
 const ENGINEERING_KEEP = new Set(["remove code formatting / code identifiers", "remove file names", "no em dash on slides: use a comma, colon, period or parentheses"]);
@@ -101,13 +77,17 @@ const strings = [];
 walk(r.slides || [], "slides", strings);
 
 let fixes = 0, checks = 0;
+
+// Structure, types, ranges, text length: references/report.schema.json is the single source of truth.
+const schema = JSON.parse(fs.readFileSync(path.join(__dirname, "..", "references", "report.schema.json"), "utf8"));
+const shown = new Set();
+for (const { path: p, level, message } of validate(r, schema)) {
+  const where = p || "report";
+  if (level === "error") { fixes++; console.log(`FIX   ${where}: ${message}`); }
+  else { checks++; console.log(`CHECK ${where}: ${message}`); }
+  shown.add(where);
+}
 for (const [p, text] of strings) {
-  for (const [re, max] of LIMITS) {
-    if (re.test(p) && countChars(text) > max) {
-      fixes++;
-      console.log(`FIX   ${p}: ${countChars(text)} characters, limit ${max} → shorten it so it fits its slot\n       in: ${text.slice(0, 140)}`);
-    }
-  }
   const officialName = /\.phases\[\d+\]\.name$/.test(p) || /\.current$/.test(p);
   for (const [re, level, hint] of RULES) {
     if (audience === "engineering" && !ENGINEERING_KEEP.has(hint)) continue;

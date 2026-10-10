@@ -1,0 +1,1406 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Soe-Moe/showship/blob/master/skill/references/report.schema.json",
+  "title": "Showship report.json",
+  "description": "The spec build_deck.js turns into a .pptx. Title and closing slides are added automatically; `slides` holds the content slides in order.",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "description": "Shown on the title and closing slides, for example October 9, 2026."
+    },
+    "presenter": {
+      "type": "string",
+      "description": "Title slide presenter, display name exactly as in config."
+    },
+    "closingPresenter": {
+      "type": "string",
+      "description": "Closing slide presenter."
+    },
+    "company": {
+      "type": "string",
+      "description": "Company name. Default: config.json."
+    },
+    "eyebrow": {
+      "type": "string",
+      "description": "Title slide label. Default: Progress report.",
+      "maxLength": 48
+    },
+    "period": {
+      "enum": [
+        "weekly",
+        "biweekly",
+        "sprint",
+        "monthly",
+        "custom"
+      ],
+      "description": "Reporting rhythm; sets the default title."
+    },
+    "sprint": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Sprint number, used when period is sprint."
+    },
+    "title": {
+      "type": "string",
+      "description": "Overrides the period's default deck title. \\n makes a line break."
+    },
+    "style": {
+      "enum": [
+        "showship",
+        "paper",
+        "classic",
+        "modern",
+        "corporate",
+        "vivid"
+      ],
+      "description": "Deck design. Default: config.json."
+    },
+    "theme": {
+      "type": "object",
+      "properties": {
+        "dark": {
+          "$ref": "#/$defs/hex"
+        },
+        "accent": {
+          "$ref": "#/$defs/hex"
+        },
+        "accentLight": {
+          "$ref": "#/$defs/hex"
+        },
+        "warning": {
+          "$ref": "#/$defs/hex"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Colour overrides for the style's palette."
+    },
+    "logo": {
+      "type": [
+        "string",
+        "boolean"
+      ],
+      "description": "Path to the company logo (SVG, PNG, JPG), or false for none."
+    },
+    "signature": {
+      "type": "boolean",
+      "description": "false hides the Shipped with Showship mark."
+    },
+    "slides": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/slide"
+      },
+      "description": "Content slides in order. Never the same template twice in a row.",
+      "minItems": 1
+    }
+  },
+  "required": [
+    "slides"
+  ],
+  "additionalProperties": false,
+  "patternProperties": {
+    "^_": {}
+  },
+  "$defs": {
+    "state": {
+      "enum": [
+        "done",
+        "progress",
+        "blocked",
+        "next"
+      ],
+      "description": "done = completed, progress = in progress, blocked = blocked or at risk, next = not started."
+    },
+    "icon": {
+      "type": "string",
+      "pattern": "^[A-Z][A-Za-z0-9]*$",
+      "description": "A Lucide icon name without the Lu prefix, PascalCase (Database, Users, Rocket...)."
+    },
+    "hex": {
+      "type": "string",
+      "pattern": "^#?[0-9A-Fa-f]{6}$",
+      "description": "Hex colour, with or without #."
+    },
+    "dashboard": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Project or workstream name.",
+                "maxLength": 34
+              },
+              "metric": {
+                "type": [
+                  "string",
+                  "number"
+                ],
+                "description": "Headline figure: a percent (\"65%\"), a fraction (\"1 / 2\"), a count (\"3\") or a word (\"Live\")."
+              },
+              "state": {
+                "$ref": "#/$defs/state"
+              },
+              "status": {
+                "type": "string",
+                "description": "Status word shown on the card, for example Completed, On track, At risk.",
+                "maxLength": 16
+              },
+              "headline": {
+                "type": "string",
+                "description": "What happened, in a few words.",
+                "maxLength": 40
+              },
+              "desc": {
+                "type": "string",
+                "description": "One plain sentence about the result.",
+                "maxLength": 110
+              },
+              "color": {
+                "$ref": "#/$defs/hex",
+                "description": "Pins this project's colour (Showship and Paper styles)."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "metric"
+            ]
+          },
+          "description": "One card per project.",
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "keyUpdate": {
+          "type": "string",
+          "description": "The single most important message, shown in a strip at the bottom.",
+          "maxLength": 150
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "cards"
+      ],
+      "description": "Executive summary: KPI cards plus an optional key update. Use as slide 2."
+    },
+    "timeline": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "badge": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "Badge text, for example Blocker resolved.",
+              "maxLength": 24
+            },
+            "state": {
+              "$ref": "#/$defs/state"
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "text"
+          ]
+        },
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "tag": {
+                "type": "string",
+                "description": "When, for example Last week.",
+                "maxLength": 16
+              },
+              "title": {
+                "type": "string",
+                "description": "Step name.",
+                "maxLength": 28
+              },
+              "state": {
+                "$ref": "#/$defs/state"
+              },
+              "desc": {
+                "type": "string",
+                "description": "What happened.",
+                "maxLength": 90
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "title"
+            ]
+          },
+          "description": "Milestones from left to right.",
+          "minItems": 2,
+          "maxItems": 5
+        },
+        "impact": {
+          "type": "string",
+          "description": "Business impact in one line.",
+          "maxLength": 150
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "steps"
+      ],
+      "description": "Milestones or a blocker that was resolved."
+    },
+    "rings": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "rings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "label": {
+                "type": "string",
+                "description": "Ring label.",
+                "maxLength": 30
+              },
+              "sub": {
+                "type": "string",
+                "description": "Small line under the label.",
+                "maxLength": 50
+              },
+              "pct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percent complete, 0 to 100."
+              },
+              "dark": {
+                "type": "boolean",
+                "description": "Marks the overall ring."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "pct"
+            ]
+          },
+          "description": "Doughnut charts.",
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "stats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "description": "What the count means.",
+                "maxLength": 30
+              },
+              "state": {
+                "$ref": "#/$defs/state"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "value",
+              "label"
+            ]
+          },
+          "description": "Status tiles under the rings.",
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "footnote": {
+          "type": "string",
+          "description": "How the progress is calculated.",
+          "maxLength": 120
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "rings"
+      ],
+      "description": "Doughnut progress charts plus optional status tiles."
+    },
+    "phase_bars": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "tracks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Track name, for example Patient App.",
+                "maxLength": 40
+              },
+              "owner": {
+                "type": "string",
+                "description": "Owner display name.",
+                "maxLength": 40
+              },
+              "project": {
+                "type": "string",
+                "description": "Product name, used to pick the project colour.",
+                "maxLength": 40
+              },
+              "color": {
+                "$ref": "#/$defs/hex",
+                "description": "Pins this track's colour."
+              },
+              "phases": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Phase name in plain words. Keep the plan's numbering (P1, P2).",
+                      "maxLength": 45
+                    },
+                    "pct": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 100,
+                      "description": "Percent complete, 0 to 100."
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "name",
+                    "pct"
+                  ]
+                },
+                "description": "Phases, usually 3 to 6.",
+                "minItems": 1,
+                "maxItems": 8
+              },
+              "note": {
+                "type": "string",
+                "description": "One-line note under the bars.",
+                "maxLength": 120
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "title",
+              "phases"
+            ]
+          },
+          "description": "One or two tracks.",
+          "minItems": 1,
+          "maxItems": 2
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "tracks"
+      ],
+      "description": "Phase-level bars per track. pct 100 = completed, 1 to 99 = in progress, 0 = not started."
+    },
+    "workstreams": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "hero": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "description": "Small label, for example Workstream 1.",
+              "maxLength": 30
+            },
+            "title": {
+              "type": "string",
+              "description": "Workstream name.",
+              "maxLength": 44
+            },
+            "metric": {
+              "type": [
+                "string",
+                "number"
+              ]
+            },
+            "state": {
+              "$ref": "#/$defs/state"
+            },
+            "status": {
+              "type": "string",
+              "description": "Status word.",
+              "maxLength": 16
+            },
+            "desc": {
+              "type": "string",
+              "description": "What was delivered.",
+              "maxLength": 160
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "title"
+          ]
+        },
+        "flow": {
+          "type": "object",
+          "properties": {
+            "label": {
+              "type": "string",
+              "description": "Small label.",
+              "maxLength": 30
+            },
+            "title": {
+              "type": "string",
+              "description": "Workstream name.",
+              "maxLength": 44
+            },
+            "state": {
+              "$ref": "#/$defs/state"
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "description": "Step name.",
+                    "maxLength": 28
+                  },
+                  "desc": {
+                    "type": "string",
+                    "description": "Short detail.",
+                    "maxLength": 50
+                  },
+                  "state": {
+                    "$ref": "#/$defs/state"
+                  }
+                },
+                "additionalProperties": false,
+                "required": [
+                  "title"
+                ]
+              },
+              "description": "Chevron steps.",
+              "minItems": 3,
+              "maxItems": 5
+            },
+            "next": {
+              "type": "string",
+              "description": "Next step, one line. Do not start it with Next.",
+              "maxLength": 120
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "title",
+            "steps"
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "hero",
+        "flow"
+      ],
+      "description": "A finished item on the left, a process flow on the right."
+    },
+    "rows": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "icon": {
+                "$ref": "#/$defs/icon"
+              },
+              "header": {
+                "type": "string",
+                "description": "Row heading.",
+                "maxLength": 40
+              },
+              "desc": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 200
+                  },
+                  {
+                    "type": "array",
+                    "items": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "object",
+                          "properties": {
+                            "label": {
+                              "type": "string",
+                              "description": "Bold label."
+                            },
+                            "text": {
+                              "type": "string",
+                              "description": "Text after the label."
+                            }
+                          },
+                          "additionalProperties": false,
+                          "required": [
+                            "label",
+                            "text"
+                          ]
+                        }
+                      ]
+                    },
+                    "description": "Lines, with {label, text} for Label: text.",
+                    "minItems": 1,
+                    "maxItems": 6
+                  }
+                ],
+                "description": "A sentence, or an array of lines."
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "header",
+              "desc"
+            ]
+          },
+          "description": "Icon rows.",
+          "minItems": 2,
+          "maxItems": 4
+        },
+        "image": {
+          "type": "string",
+          "description": "Screenshot path, relative to report.json."
+        },
+        "illustration": {
+          "type": "object",
+          "properties": {
+            "center": {
+              "$ref": "#/$defs/icon"
+            },
+            "nodes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/icon"
+              },
+              "description": "Satellite icons.",
+              "minItems": 2,
+              "maxItems": 4
+            }
+          },
+          "additionalProperties": false,
+          "required": [
+            "center",
+            "nodes"
+          ],
+          "description": "Generated hub-and-spoke graphic. Use either image or illustration, not both."
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "rows"
+      ],
+      "description": "Icon rows with an optional screenshot or illustration."
+    },
+    "gallery": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Screenshot paths, relative to report.json. All the same aspect ratio.",
+          "minItems": 2,
+          "maxItems": 7
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 30
+          },
+          "description": "Step labels, one per image.",
+          "minItems": 0,
+          "maxItems": 7
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "images"
+      ],
+      "description": "Screenshot strip."
+    },
+    "activity": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "series": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 24
+          },
+          "description": "Series names, for example Development work.",
+          "minItems": 2,
+          "maxItems": 4
+        },
+        "people": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Display name exactly as in config.",
+                "maxLength": 40
+              },
+              "values": {
+                "type": "array",
+                "items": {
+                  "type": "number",
+                  "minimum": 0
+                },
+                "description": "One number per series, from the collected data.",
+                "minItems": 2,
+                "maxItems": 4
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "values"
+            ]
+          },
+          "description": "One group of columns per person.",
+          "minItems": 2,
+          "maxItems": 6
+        },
+        "kpis": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "description": "What the number means.",
+                "maxLength": 34
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "value",
+              "label"
+            ]
+          },
+          "description": "KPI tiles, the first is highlighted.",
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "note": {
+          "type": "string",
+          "description": "Source line.",
+          "maxLength": 140
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "series",
+        "people"
+      ],
+      "description": "Team delivery activity from GitHub. Never a ranking."
+    },
+    "review_insights": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "stats": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {
+                "type": [
+                  "string",
+                  "number"
+                ]
+              },
+              "label": {
+                "type": "string",
+                "description": "What the number means.",
+                "maxLength": 40
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "value",
+              "label"
+            ]
+          },
+          "description": "Stats in the dark column.",
+          "minItems": 2,
+          "maxItems": 4
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "area": {
+                "type": "string",
+                "description": "Quality area, for example Performance.",
+                "maxLength": 30
+              },
+              "text": {
+                "type": "string",
+                "description": "One business-language sentence.",
+                "maxLength": 140
+              },
+              "state": {
+                "$ref": "#/$defs/state"
+              },
+              "status": {
+                "type": "string",
+                "description": "Overrides the status pill.",
+                "maxLength": 22
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "area",
+              "text"
+            ]
+          },
+          "description": "Findings.",
+          "minItems": 3,
+          "maxItems": 5
+        },
+        "note": {
+          "type": "string",
+          "description": "Source line.",
+          "maxLength": 140
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "stats",
+        "findings"
+      ],
+      "description": "What code review verified and caught. Never raw code comments or names attached to problems."
+    },
+    "attention": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "The blocker or the question.",
+                "maxLength": 80
+              },
+              "text": {
+                "type": "string",
+                "description": "Why it matters.",
+                "maxLength": 170
+              },
+              "meta": {
+                "type": "string",
+                "description": "Owner, date or options. One small line.",
+                "maxLength": 120
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "title"
+            ]
+          },
+          "description": "Blockers and risks.",
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "decisions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "The blocker or the question.",
+                "maxLength": 80
+              },
+              "text": {
+                "type": "string",
+                "description": "Why it matters.",
+                "maxLength": 170
+              },
+              "meta": {
+                "type": "string",
+                "description": "Owner, date or options. One small line.",
+                "maxLength": 120
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "title"
+            ]
+          },
+          "description": "Decisions needed from the business.",
+          "minItems": 0,
+          "maxItems": 4
+        },
+        "blockersTitle": {
+          "type": "string",
+          "description": "Column heading override.",
+          "maxLength": 30
+        },
+        "decisionsTitle": {
+          "type": "string",
+          "description": "Column heading override.",
+          "maxLength": 30
+        },
+        "noBlockers": {
+          "type": "string",
+          "description": "Text shown when there are no blockers.",
+          "maxLength": 60
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "description": "Blockers & risks plus decisions needed."
+    },
+    "tracker": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "devs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Display name exactly as in config.",
+                "maxLength": 40
+              },
+              "project": {
+                "type": "string",
+                "description": "Project and area, for example ClinicBook · Clinic Dashboard.",
+                "maxLength": 44
+              },
+              "done": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "open": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "pct": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 100,
+                "description": "Percent complete, 0 to 100."
+              },
+              "state": {
+                "$ref": "#/$defs/state"
+              },
+              "focus": {
+                "type": "string",
+                "description": "Current focus in one sentence.",
+                "maxLength": 110
+              },
+              "items": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "description": "Task or phase.",
+                      "maxLength": 55
+                    },
+                    "state": {
+                      "$ref": "#/$defs/state"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": [
+                    "text"
+                  ]
+                },
+                "description": "Up to 6 items.",
+                "minItems": 0,
+                "maxItems": 6
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "name"
+            ]
+          },
+          "description": "One card per person.",
+          "minItems": 1,
+          "maxItems": 4
+        },
+        "footnote": {
+          "type": "string",
+          "description": "How done and open are counted.",
+          "maxLength": 160
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "devs"
+      ],
+      "description": "Developer task track from the task tracker and reviews."
+    },
+    "table": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "project": {
+                "type": "string",
+                "description": "Project and track. Start with the same product name as elsewhere.",
+                "maxLength": 44
+              },
+              "owner": {
+                "type": "string",
+                "description": "Owner display name.",
+                "maxLength": 40
+              },
+              "focus": {
+                "type": "string",
+                "description": "Next focus.",
+                "maxLength": 130
+              },
+              "current": {
+                "type": "string",
+                "description": "Current status, for example P3 · 40%.",
+                "maxLength": 24
+              },
+              "state": {
+                "$ref": "#/$defs/state"
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "project",
+              "focus"
+            ]
+          },
+          "description": "Plan rows.",
+          "minItems": 1,
+          "maxItems": 6
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "rows"
+      ],
+      "description": "Next period's plan. Usually the last content slide."
+    },
+    "slide": {
+      "type": "object",
+      "required": [
+        "type"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "dashboard",
+            "timeline",
+            "rings",
+            "phase_bars",
+            "workstreams",
+            "rows",
+            "gallery",
+            "activity",
+            "review_insights",
+            "attention",
+            "tracker",
+            "table"
+          ],
+          "description": "Slide template."
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "dashboard"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/dashboard"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "timeline"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/timeline"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "rings"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/rings"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "phase_bars"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/phase_bars"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "workstreams"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/workstreams"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "rows"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/rows"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "gallery"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/gallery"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "activity"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/activity"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "review_insights"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/review_insights"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "attention"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/attention"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "tracker"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/tracker"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "table"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/table"
+          }
+        }
+      ]
+    }
+  }
+}

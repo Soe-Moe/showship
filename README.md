@@ -496,13 +496,13 @@ Set it once in `config.json` (`"style": "vivid"`), in the installer (`--style vi
 | `tracker`         | developer task track: done/open, progress, focus         | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-tracker.png)         |
 | `table`           | next period's plan with owners and status                | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-next-steps.png)      |
 
-Also: `timeline`, `rings` (doughnut charts), `workstreams`, `rows` (with generated hub-and-spoke illustrations or screenshots), `gallery` (UI screenshots), `activity` (team throughput chart). Full JSON schema: [`skill/references/templates.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/templates.md).
+Also: `timeline`, `rings` (doughnut charts), `workstreams`, `rows` (with generated hub-and-spoke illustrations or screenshots), `gallery` (UI screenshots), `activity` (team throughput chart). Every field is described in [`skill/references/templates.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/templates.md) and defined as a JSON Schema in [`skill/references/report.schema.json`](https://github.com/Soe-Moe/showship/blob/master/skill/references/report.schema.json). `lint_report.js` checks `report.json` against it (wrong or missing fields, bad values, text too long for its slot, typos with a "did you mean" hint), and editors that support JSON Schema give autocomplete.
 
 You can also build a deck directly:
 
 ```bash
 node ~/.claude/skills/showship/scripts/build_deck.js report.json out.pptx
-node ~/.claude/skills/showship/scripts/lint_report.js report.json   # plain-language and text-length check
+node ~/.claude/skills/showship/scripts/lint_report.js report.json   # plain-language and structure check (validates against report.schema.json)
 node ~/.claude/skills/showship/scripts/check_deck.js out.pptx --png  # render and check every slide
 ```
 
@@ -564,9 +564,9 @@ skill/                    the agent skill (copied to <skills folder>/showship)
   config.example.json
   scripts/                collect_commits.sh · collect_prs.sh · collect_tasks.js
                           build_deck.js · lint_report.js · check_deck.js
-                          render_pdf.js · make_previews.js
+                          render_pdf.js · make_previews.js · schema.js
     tasks/                common.js · jira.js · linear.js · asana.js · clickup.js · lark.js
-  references/             templates.md (JSON schema) · translation_guide.md · design_rules.md
+  references/             templates.md · report.schema.json · translation_guide.md · design_rules.md
   examples/               report.example.json
   assets/logo.svg         default logo (the Showship mark)
 docs/                     preview images and example decks (regenerate: node skill/scripts/make_previews.js)

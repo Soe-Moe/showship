@@ -9,7 +9,7 @@ Read this before changing `scripts/build_deck.js`, adding a style, or adding a s
 - Every piece of text sits inside its shape and inside the 0.7 in side margins. The first and last columns of a row (timeline, table, tracker) are placed from the margin inward, never centred on a point near the edge.
 - Size containers from the content, not the other way round. A card with one item is short; do not leave a hollow panel.
 - Text never relies on `fit: "shrink"` to survive. PowerPoint applies it only when someone edits the box, and LibreOffice ignores it, so the shrunk text overflows on the machine that matters. Write the limits (below) so text fits at its set size.
-- Respect the character limits in `references/templates.md`. `scripts/lint_report.js` enforces them and fails the build input when text is too long. Shorten the sentence; do not shrink the font.
+- Respect the character limits in `references/templates.md`. The limits live in `references/report.schema.json` (`maxLength`) and `scripts/lint_report.js` enforces them, failing the input when text is too long. Shorten the sentence; do not shrink the font.
 - A title is one line. Eyebrows are short labels, not sentences.
 
 ## 2. Legible at presentation size
@@ -75,4 +75,4 @@ node scripts/check_deck.js  <dir>/<name>.pptx --png                             
 
 - Change a style by editing its definition in `STYLES` and its layout functions. Do not patch the generated `.pptx` or rewrite the script with a one-off helper.
 - After any template change, build the example in all six styles and run `check_deck.js` on each, then add a long-text case (labels at their character limits) and run it again. A template that only works with short example text is not finished.
-- A new slide type needs: its schema in `references/templates.md` with character limits, the limits added to `lint_report.js`, an implementation for every style, and an entry in the example report.
+- A new slide type needs: its definition in `references/report.schema.json` (fields, counts, `maxLength` limits) and its description in `references/templates.md`, an implementation for every style, and an entry in the example report.

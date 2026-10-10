@@ -1,4 +1,5 @@
 {
+  "$schema": "../references/report.schema.json",
   "_comment": "Reference example in plain business language. All companies, people, products and numbers are fictional.",
   "date": "October 9, 2026",
   "presenter": "Maya Lin @Maya",
