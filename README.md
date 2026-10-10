@@ -6,6 +6,7 @@
 
 **Show what you shipped.**
 
+[![Website](https://img.shields.io/badge/docs-showship.github.io-6C4CF5)](https://showship.github.io/)
 [![Status: Beta](https://img.shields.io/badge/status-beta-orange)](https://github.com/Soe-Moe/showship/issues)
 [![Version](https://img.shields.io/npm/v/showship?include_prereleases&label=version&color=blue)](https://www.npmjs.com/package/showship)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
@@ -13,6 +14,8 @@
 [![Agent Skill](https://img.shields.io/badge/Agent%20Skill-Claude%20Code%20·%20Codex%20·%20Antigravity-D97757)](#install)
 
 **Turns GitHub activity plus Jira, Linear, Asana, ClickUp & Lark tasks into a plain-language progress deck (PPTX) for your boss or client to understand weekly, per sprint, monthly or for any date range.**
+
+**[Website](https://showship.github.io/)** · [Documentation](https://showship.github.io/docs/) · [Install](https://showship.github.io/docs/install/) · [Quick start](https://showship.github.io/docs/quick-start/) · [Deck designs](https://showship.github.io/designs/)
 
 
 
@@ -109,6 +112,8 @@ Everything for one report lives in one folder, e.g. `~/Showship/2026-10-09/`. Th
 `gh auth login` with **your own** account is enough — you can read your teammates' PRs just as you do in the browser. If your organisation uses SAML SSO, authorise the token for the org when GitHub asks.
 
 ## Install
+
+Also on the website: [Install guide](https://showship.github.io/docs/install/).
 
 ```bash
 npx showship
@@ -217,6 +222,8 @@ cd ~/.claude/skills/showship/scripts && npm install
 
 ## Quick start
 
+Also on the website: [Quick start guide](https://showship.github.io/docs/quick-start/).
+
 ```bash
 cd ~/code/clinicbook-api
 claude            # or: codex, antigravity
@@ -233,6 +240,8 @@ The agent merges the drafts, asks one consolidated question (progress percentage
 You can talk to it in any language — e.g. _"ဒီတစ်ပတ် report အတွက် collect လုပ်ပေး"_ works just as well.
 
 ## Usage examples
+
+Also on the website: [More usage examples](https://showship.github.io/docs/examples/).
 
 Everything is driven by plain requests to your agent — in English or your own language.
 
@@ -323,6 +332,8 @@ Only your own commits, the PRs you authored or reviewed, and your tasks are coll
 
 ## Configuration
 
+Also on the website: [Configuration reference](https://showship.github.io/docs/configuration/).
+
 `<skills folder>/showship/config.json` (created on first run from [`config.example.json`](https://github.com/Soe-Moe/showship/blob/master/skill/config.example.json)):
 
 ```jsonc
@@ -379,6 +390,8 @@ Tips:
 - Unknown names? The agent asks once and adds them.
 
 ## Task tracker integrations
+
+Also on the website: [Task trackers guide](https://showship.github.io/docs/task-trackers/).
 
 Commits and PRs show what was _built_; the task tracker shows what was _planned_ — phases, subtasks, owners, due dates. With a tracker configured, the agent collects it once per report into `<report>/tasks.md` and uses it for "who is doing what", subtask-based progress ("4 of 5 parts done"), overdue risks and the Developer Task Track slide. The digest looks the same whichever tool you use.
 
@@ -457,6 +470,8 @@ Standing instructions (people to exclude, how to count progress, environments) c
 
 ## Deck styles
 
+Also on the website: [Deck designs gallery](https://showship.github.io/designs/).
+
 Six designs, chosen to read well in a business meeting. Every slide type works in every style, from the same `report.json`.
 
 **Showship**: the signature style. Every project gets its own colour, carried from the dashboard to the phase tracks, task tracker and next-steps table, so the audience can follow a project by colour alone. Semicircle gauges, pill-track phase charts, a waffle of done/open tasks, a milestone trail for timelines, and the ship-trail ribbons on title slides. Uses the free [Poppins](https://fonts.google.com/specimen/Poppins) font (PowerPoint substitutes it if it isn't installed). A small "Shipped with Showship" mark sits in the footer; turn it off with `"signature": false` in `config.json` or `report.json`.
@@ -485,6 +500,8 @@ Set it once in `config.json` (`"style": "vivid"`), in the installer (`--style vi
 
 ## Slide templates
 
+Also on the website: [Slide templates reference](https://showship.github.io/docs/slide-templates/).
+
 <sub>Shown in the Showship style.</sub>
 
 | Template          | Use it for                                               |                                                                                               |
@@ -512,6 +529,8 @@ Every deck is rendered with LibreOffice and each slide is checked for text that 
 
 ## Getting the most out of code reviews
 
+Also on the website: [Code reviews guide](https://showship.github.io/docs/code-reviews/).
+
 Showship is at its best when the lead writes structured reviews. Any format works, but sections like these map directly onto the deck:
 
 ```markdown
@@ -534,6 +553,8 @@ Code, file paths, error codes and raw comments never reach the slides, and probl
 
 ## Privacy
 
+Also on the website: [Privacy notes](https://showship.github.io/docs/privacy/).
+
 - The only network call that is not your own GitHub or tracker access is the update check: `npm view showship dist-tags` at the start of a session. Turn it off with `"updateCheck": false`.
 - Everything runs locally. Data is read through `git`, `gh` (GitHub API, your credentials) and optionally your task tracker's API (Jira, Linear, Asana, ClickUp) or `lark-cli`; drafts and decks are written to your reports folder.
 - Tracker tokens are read from environment variables only and are never written to config or report files.
@@ -541,6 +562,8 @@ Code, file paths, error codes and raw comments never reach the slides, and probl
 - `config.json` (names, ids, paths) and generated reports are git-ignored and excluded from the npm package.
 
 ## Troubleshooting
+
+Also on the website: [Troubleshooting guide](https://showship.github.io/docs/troubleshooting/).
 
 | Problem                                                   | Fix                                                                                                                                                                              |
 | --------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -573,6 +596,8 @@ docs/                     preview images and example decks (regenerate: node ski
 ```
 
 ## Contributing
+
+Also on the website: [Contributing guide](https://showship.github.io/docs/contributing/).
 
 Issues and pull requests are welcome — new slide templates (read [`design_rules.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/design_rules.md) first; run `check_deck.js` on every style and refresh the `docs/` images with `make_previews.js`), collectors for other trackers (Trello, GitHub Projects, Notion, Monday), better jargon rules, more languages, and reports from Codex / Antigravity users.
 
