@@ -11,6 +11,7 @@ Business readers want to know **what capability now exists, for whom, and why it
 5. **Write for the least technical person in the room.** Business, PMs and the CTO sit in the same meeting. Use plain words; put a technical term in brackets only when it adds something for the CTO: "image processing (resize & compress)", "connection to the SMS provider".
 6. **Fixes are about the user's experience**: "Fixed profile photo uploads failing for customers", not "fix null check in uploader".
 7. **No numbers you can't back up.** Commit counts and lines changed are not progress percentages; don't present them as such.
+8. **Detail beats a headline when people need to remember it.** A task slide that only says "Booking Calendar, 40%" is forgotten by Friday. For each task that matters, say what it is for, what was done in the period, what is left and what is waiting on whom, using its subtasks as the concrete steps ("Doctors can set their weekly hours", "Free time slots update when someone books"). Translate each step into what a person can now do. Keep every real step; group the technical ones instead of dropping them.
 
 ## Common translations
 

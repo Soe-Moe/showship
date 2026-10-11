@@ -2451,6 +2451,74 @@ TEM.tracker = async (pres, d) => {
   if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.62, w: 11.93, h: 0.28, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
 };
 
+// ---------- task_detail: tasks written out in full (every style) ----------
+// One column per task (1 to 3): status, title, owner, a plain-language summary, then the subtasks or steps with their own
+// state. One task gets the whole width: the words on the left, the steps on the right. The body is shared; each style
+// supplies its slide chrome, panel, status tag and colours through a "look".
+function taskDetailBody(s, d, L) {
+  const tasks = d.tasks || [], n = tasks.length, top = 1.95, bottom = d.footnote ? 6.5 : 6.85, h = bottom - top, gap = 0.3;
+  const cw = n === 1 ? 11.93 : (11.93 - (n - 1) * gap) / n, wide = n === 1, pad = 0.25;
+  // text height estimate: characters x point size x average glyph width, over the box width, times line height
+  const lines = (t, pt, w, k) => Math.max(1, Math.ceil(String(t || "").length * pt * k / 72 / w));
+  tasks.forEach((t, i) => {
+    const x = 0.7 + i * (cw + gap), col = L.col(t, d), lw = wide ? 4.9 : cw - 2 * pad, px = wide ? x + pad + lw + 0.5 : x + pad, pw = wide ? cw - 2 * pad - lw - 0.5 : lw;
+    L.panel(s, x, top, cw, h, col, i);
+    L.tag(s, t.state, t.status, x + pad, top + 0.2, lw, col);
+    const tfs = wide ? 18 : 15, th = lines(t.title, tfs, lw, 0.6) * tfs * 1.25 / 72;
+    s.addText(t.title, { x: x + pad, y: top + 0.58, w: lw, h: th, fontFace: F.H, fontSize: tfs, bold: true, color: L.text(), valign: "top", margin: 0 });
+    let y = top + 0.58 + th + 0.05;
+    if (t.owner) { s.addText(`Owner: ${t.owner}`, { x: x + pad, y, w: lw, h: 0.25, fontFace: F.B, fontSize: 11, color: L.gray(), margin: 0, valign: "middle" }); y += 0.3; }
+    const pts = t.points || [], pfs = wide ? 13 : 11, pstep = (p) => lines(p.text, pfs, pw - 0.27, 0.5) * pfs * 1.2 / 72 + 0.06;
+    const ptsH = pts.reduce((a, p) => a + pstep(p), 0) + (pts.length ? 0.3 : 0);
+    let sfs = wide ? 13 : 12, sh = lines(t.summary, sfs, lw, 0.5) * sfs * 1.3 / 72;
+    if (!wide && y + sh + 0.15 + ptsH > top + h) { sfs = 11; sh = lines(t.summary, sfs, lw, 0.5) * sfs * 1.3 / 72; }
+    if (!wide && y + sh + 0.15 + ptsH > top + h + 0.02) console.warn(`Warning: task_detail "${d.title}", task "${t.title}": too much text for ${n} columns, it will run past the panel. Use fewer tasks on this slide, fewer points, or shorter text.`);
+    s.addText(t.summary || "", { x: x + pad, y, w: lw, h: wide ? h - (y - top) - 0.2 : sh, fontFace: F.B, fontSize: sfs, color: L.softText(), valign: "top", margin: 0, lineSpacingMultiple: 1.1 });
+    let py = wide ? top + 0.2 : y + sh + 0.15;
+    if (pts.length) { s.addText("Details", { x: px, y: py, w: pw, h: 0.25, fontFace: F.B, fontSize: 11, bold: true, color: L.gray(), margin: 0, valign: "middle" }); py += 0.3; }
+    pts.forEach((p) => {
+      const state = p.state || "done", c = state === "blocked" ? C.AMBER : state === "next" ? C.GRAY : col, solid = state === "done" || state === "blocked", st2 = wide ? Math.min(0.8, (h - 0.9) / pts.length) : pstep(p);
+      s.addShape("ellipse", { x: px, y: py + 0.06, w: 0.13, h: 0.13, fill: solid ? { color: c } : { type: "none" }, line: solid ? { type: "none" } : { color: c, width: 1.5 } });
+      s.addText(p.text, { x: px + 0.27, y: py, w: pw - 0.27, h: st2, fontFace: F.B, fontSize: pfs, color: state === "next" ? L.gray() : L.text(), valign: "top", margin: 0 });
+      py += st2;
+    });
+  });
+  if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.55, w: 11.93, h: 0.3, fontFace: F.B, fontSize: 11, italic: true, color: L.gray(), margin: 0 });
+}
+const tdCol = (t, d) => projFor([t.project, d.project, d.eyebrow, d.title], C.LIME);
+const TD_CARD = {
+  slide: async (pres, d) => { const s = newSlide(pres); header(s, d.eyebrow || "Task details", d.title || "Task details", 28); return s; },
+  col: () => C.LIME,
+  panel: (s, x, y, w, h) => card(s, x, y, w, h),
+  tag: (s, state, text, x, y) => pill(s, text || st(state).label, x, y, state),
+  text: () => C.DARK, softText: () => C.BODY, gray: () => C.BODY,
+};
+function tdLook(base, over) { const L = Object.assign({}, base, over); F.H = F.H; F.B = F.B; return L; }
+T.task_detail = async (pres, d) => { const L = tdLook(TD_CARD, {}); taskDetailBody(await L.slide(pres, d), d, L); };
+TE.task_detail = async (pres, d) => {
+  const L = tdLook(TD_CARD, { panel: (s, x, y, w, h, col, i) => { if (i) vl(s, x - 0.15, y, h); hl(s, x, y, w, 2, C.DARK); },
+    tag: (s, state, text, x, y, w) => tag(s, text || st(state).label, x, y + 0.02, w, state) });
+  taskDetailBody(await L.slide(pres, d), d, L);
+};
+TS.task_detail = async (pres, d) => {
+  const L = tdLook(TD_CARD, { slide: (p, dd) => sigSlide(p, dd.eyebrow || "Task details", dd.title || "Task details", 28), col: tdCol,
+    panel: (s, x, y, w, h, col) => { rcard(s, x, y, w, h, col); s.addShape("rect", { x: x + 0.25, y, w: 0.9, h: 0.07, fill: { color: col }, line: { type: "none" } }); },
+    tag: (s, state, text, x, y, w, col) => stChip(s, state, text || st(state).label, x, y, col) });
+  taskDetailBody(await L.slide(pres, d), d, L);
+};
+TP.task_detail = async (pres, d) => {
+  const L = tdLook(TD_CARD, { slide: (p, dd) => paperSlide(p, dd.eyebrow || "Task details", dd.title || "Task details", tdCol({}, dd)), col: tdCol,
+    panel: (s, x, y, w, h, col, i) => { pRule(s, x, y, w, C.DARK, 2); if (i) s.addShape("line", { x: x - 0.15, y, w: 0, h, line: { color: C.GRID, width: 0.75 } }); },
+    tag: (s, state, text, x, y, w, col) => pStatus(s, state, text, x, y, w, col), gray: () => C.GRAY });
+  taskDetailBody(await L.slide(pres, d), d, L);
+};
+TEM.task_detail = async (pres, d) => {
+  const L = tdLook(TD_CARD, { slide: (p, dd) => emberSlide(p, dd.eyebrow || "Task details", dd.title || "Task details", tdCol({}, dd)), col: tdCol,
+    panel: (s, x, y, w, h) => ePanel(s, x, y, w, h),
+    tag: (s, state, text, x, y, w, col) => eTag(s, state, text, x, y, w, col), text: eText, softText: () => C.BODY, gray: () => C.GRAY });
+  taskDetailBody(await L.slide(pres, d), d, L);
+};
+
 // ---------- Main ----------
 (async () => {
   const [, , inFile, outFile] = process.argv;

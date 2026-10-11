@@ -75,7 +75,7 @@ The installer asks these questions; you can change them in `config.json` at any 
 - **Understands your reviews** — comments from the lead's GitHub account are tagged `(LEAD)` and treated as the most authoritative source. Structured reviews (summary, subtask coverage, blockers, decisions, verdict) map straight onto progress, status, risks and "decisions needed".
 - **Plain language by default, technical when you want it** — set `audience` to `business` or `engineering`. A built-in jargon check (`lint_report.js`) flags terms like _endpoint, schema, payload, JSON, 500 error, N+1_ and suggests business wording before the deck is built.
 - **Never invents numbers** — percentages, owners, dates and blockers come from your data or from you. The agent asks one consolidated question for anything GitHub can't tell it.
-- **12 slide templates, chosen to fit the data** — KPI dashboard, milestone timeline, doughnut progress, phase bar charts, workstreams, icon rows with generated illustrations, screenshot gallery, code-review insights, blockers & decisions, developer task tracker, team activity chart, next-steps table. Consecutive slides never reuse the same layout.
+- **13 slide templates, chosen to fit the data** — KPI dashboard, milestone timeline, doughnut progress, phase bar charts, workstreams, icon rows with generated illustrations, screenshot gallery, code-review insights, blockers & decisions, developer task tracker, task details written out in full, team activity chart, next-steps table. Consecutive slides never reuse the same layout.
 - **7 deck designs** — the colourful _Showship_ signature style, plus _Paper_, _Ember_, _Classic_, _Modern_, _Corporate_ and _Vivid_; every slide type works in all seven.
 - **Checks its own layout** — after the build the deck is rendered and every slide is checked for text crossing the margins or colliding, and text that is too long for its slot is caught before the build.
 - **Your branding** — company name, logo (auto-trimmed) and colour overrides from one config file.
@@ -516,6 +516,7 @@ Also on the website: [Slide templates reference](https://showship.github.io/docs
 | `phase_bars`      | phase-by-phase completion per track, with owners         | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-phase-bars.png)      |
 | `review_insights` | what code review verified and caught before release      | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-review-insights.png) |
 | `attention`       | blockers & risks + decisions needed from the business    | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-attention.png)       |
+| `task_detail`     | each task written out: purpose, what was done, its steps | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-task-detail.png)     |
 | `tracker`         | developer task track: done/open, progress, focus         | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-tracker.png)         |
 | `table`           | next period's plan with owners and status                | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-next-steps.png)      |
 

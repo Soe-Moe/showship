@@ -71,8 +71,12 @@ node scripts/check_deck.js  <dir>/<name>.pptx --png                             
 3. Fix the source (`report.json` text first, then the template) and rebuild. Repeat until both the script and your eyes pass.
 4. If LibreOffice is not installed, say so, and review each slide against the character limits instead. Do not claim the deck was rendered.
 
+## 7b. When the data does not fit
+
+Content comes first. If a slide needs more detail than its template holds, do not shrink the type below the minimums in section 2 and do not cut real information. In order of preference: split the content over more slides, pick a template that fits it (`task_detail` for tasks written out in full), or adjust the layout in `scripts/build_deck.js` (column widths, spacing, an added rule or figure) so the result still follows sections 1 to 6. Then verify as in section 7.
+
 ## 8. Changing a template
 
 - Change a style by editing its definition in `STYLES` and its layout functions. Do not patch the generated `.pptx` or rewrite the script with a one-off helper.
 - After any template change, build the example in every style and run `check_deck.js` on each, then add a long-text case (labels at their character limits) and run it again. A template that only works with short example text is not finished.
-- A new slide type needs: its definition in `references/report.schema.json` (fields, counts, `maxLength` limits) and its description in `references/templates.md`, an implementation for every style, and an entry in the example report.
+- A new slide type (`task_detail` is the most recent) needs: its definition in `references/report.schema.json` (fields, counts, `maxLength` limits) and its description in `references/templates.md`, an implementation for every style, and an entry in the example report.

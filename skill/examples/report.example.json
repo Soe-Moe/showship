@@ -168,6 +168,89 @@
       ]
     },
     {
+      "type": "task_detail",
+      "eyebrow": "ClinicBook · Patient App",
+      "title": "ClinicBook: What Was Done on Each Task",
+      "tasks": [
+        {
+          "title": "P3 · Booking Calendar",
+          "owner": "Leo Park @Leo",
+          "state": "progress",
+          "status": "In progress",
+          "summary": "Patients pick a doctor, a day and a time slot in one screen. Free slots update as other patients book, so nobody is offered a time that is already taken.",
+          "points": [
+            {
+              "text": "Doctor and day picker built",
+              "state": "done"
+            },
+            {
+              "text": "Free time slots shown live",
+              "state": "done"
+            },
+            {
+              "text": "Booking confirmation screen",
+              "state": "progress"
+            },
+            {
+              "text": "Rescheduling an existing booking",
+              "state": "next"
+            },
+            {
+              "text": "Cancellation with clinic notice",
+              "state": "next"
+            }
+          ]
+        },
+        {
+          "title": "P2 · Clinic Search and Maps",
+          "owner": "Leo Park @Leo",
+          "state": "done",
+          "status": "Completed",
+          "summary": "Patients find nearby clinics by name, specialty or distance and open directions in their maps app. Reviewed and approved this week.",
+          "points": [
+            {
+              "text": "Search by name and specialty",
+              "state": "done"
+            },
+            {
+              "text": "Distance sorting from the patient's location",
+              "state": "done"
+            },
+            {
+              "text": "Directions open in the maps app",
+              "state": "done"
+            },
+            {
+              "text": "Works offline for recent searches",
+              "state": "done"
+            }
+          ]
+        },
+        {
+          "title": "P4 · Payments and Receipts",
+          "owner": "Leo Park @Leo",
+          "state": "next",
+          "status": "Not started",
+          "summary": "Patients pay the booking deposit in the app and get a receipt by email. Starts after the booking calendar is approved.",
+          "points": [
+            {
+              "text": "Choose a payment method",
+              "state": "next"
+            },
+            {
+              "text": "Pay the booking deposit",
+              "state": "next"
+            },
+            {
+              "text": "Receipt sent by email",
+              "state": "next"
+            }
+          ]
+        }
+      ],
+      "footnote": "Status as of this week's review; detail comes from the task tracker and the lead's code reviews."
+    },
+    {
       "type": "review_insights",
       "eyebrow": "Quality · Code Review",
       "title": "Quality Check: Issues Caught Before Release",

@@ -17,7 +17,7 @@ A full working example lives in `examples/report.example.json`. The machine-read
 }
 ```
 
-**Length limits** (characters; defined as `maxLength` in the schema and enforced by `scripts/lint_report.js`, see `design_rules.md`): title 62, eyebrow 48, dashboard card label 34 / headline 40 / desc 110, key update and impact 150, timeline step title 28 / tag 16 / desc 90, phase name 45, table focus 130, finding text 140, attention title 80 / text 170, tracker item 55 / focus 110.
+**Length limits** (characters; defined as `maxLength` in the schema and enforced by `scripts/lint_report.js`, see `design_rules.md`): title 62, eyebrow 48, dashboard card label 34 / headline 40 / desc 110, key update and impact 150, timeline step title 28 / tag 16 / desc 90, phase name 45, table focus 130, finding text 140, attention title 80 / text 170, tracker item 55 / focus 110, task detail title 50 / summary 200 / point 64.
 
 All styles read the same JSON. `classic` renders it with its own editorial layouts (e.g. `rings` as large figures, `phase_bars` as phase lists, `timeline` vertically); `showship` has its own signature layouts (colour per project, gauges, pill tracks, milestone trail); `paper` has its own printed-report layouts (ruled lists, big figures, a single trail line for timelines; `rows` ignores `illustration`); `ember` has its own dark-panel layouts (a hero panel with one giant figure, vertical pillars for `rings`, a zigzag trail for timelines, banded rows; `rows` ignores `illustration`); `modern`, `corporate` and `vivid` share the card layouts. Optional `"color"` on a dashboard card or `phase_bars` slide pins a project colour (hex); `"signature": false` hides the "Shipped with Showship" mark.
 
@@ -154,6 +154,23 @@ Two columns: Blockers & Risks (amber) and Decisions Needed (dark). 0–4 items e
   "decisions": [ { "title": "Can patients turn off SMS reminders and keep email only?",
     "text": "Today every patient with a phone number receives SMS reminders.",
     "meta": "Options: allow opt-out · clinic decides per patient · keep as today" } ] }
+```
+
+## `task_detail` — tasks written out in full (from the tracker's subtasks, drafts and reviews)
+
+Use it after a project's overview slides, and after `tracker`, so a reader can recall what each task was. 1 to 3 tasks per slide; one task gets the whole width (summary left, steps right), two or three become columns. Each task: `title` (50), `owner` (30), `state` + `status` word (22), `summary` (200, what it is for and what happened this period, in plain language) and up to 5 `points` (64 each: subtasks or steps, each with its own `state`; default `done`). Optional `project` (sets the colour in the Showship, Paper and Ember designs) and `footnote` (140). Three columns are tight: give each task about 4 points and 140 characters of summary, or use two tasks per slide, and split the rest onto another slide. Plan the slides per project (repo): up to 3 tasks fit one slide; with more, split them across slides of 2 or 3 tasks with the same `project` and "part 1 of 2" in the eyebrow; a single large task gets its own slide; small tasks of one product share a slide. The builder warns when a column will run past its panel.
+
+```json
+{ "type": "task_detail", "eyebrow": "ClinicBook · Patient App", "title": "ClinicBook: What Was Done on Each Task",
+  "tasks": [
+    { "title": "P3 · Booking Calendar", "owner": "Leo Park @Leo", "state": "progress", "status": "In progress",
+      "summary": "Patients pick a doctor, a day and a time slot in one screen. Free slots update as others book.",
+      "points": [
+        { "text": "Doctor and day picker built", "state": "done" },
+        { "text": "Booking confirmation screen", "state": "progress" },
+        { "text": "Rescheduling an existing booking", "state": "next" } ] }
+  ],
+  "footnote": "Detail comes from the task tracker and the lead's code reviews." }
 ```
 
 ## `tracker` — developer task track (from the task tracker + reviews)

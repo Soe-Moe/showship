@@ -231,10 +231,10 @@ Never put code, file paths, HTTP status codes, class names, test case tables or 
 
 1. Title (automatic)
 2. `dashboard` — one card per project: headline metric, status (COMPLETED / ON TRACK / AT RISK / BLOCKED), one plain sentence; key-update strip for the single most important message (often a decision needed).
-3. Per project, 1–2 slides — progress with owners (`rings` + `phase_bars` for phased work; `timeline` for something that moved through stages or a resolved blocker; `workstreams`; `rows` with an illustration or screenshot for descriptive work; `gallery` for UI screenshots).
+3. Per project, 1–2 slides — progress with owners (`rings` + `phase_bars` for phased work; `timeline` for something that moved through stages or a resolved blocker; `workstreams`; `rows` with an illustration or screenshot for descriptive work; `gallery` for UI screenshots). **Then a `task_detail` slide for the tasks the audience will ask about later** (see "Task detail, not just the overview" below).
 4. `review_insights` (optional) — what review verified and caught before release, in plain words.
 5. `attention` — Blockers & Risks + Decisions Needed. Include it whenever there is any blocker or decision; if none, a dashboard key-update line saying so is enough.
-6. `tracker` — Developer Task Track: one card per person with done/open task counts from the tracker, progress %, current focus and their task list (tracker + review status). `activity` (optional) — team throughput from GitHub; never a ranking.
+6. `tracker` — Developer Task Track: one card per person with done/open task counts from the tracker, progress %, current focus and their task list (tracker + review status). Follow it with `task_detail` slides for each person's main tasks when the list alone would not jog the audience's memory. `activity` (optional) — team throughput from GitHub; never a ranking.
 7. `table` — next period's plan (Next Week's / Next Sprint's / Next Month's Plan): owner, next focus, current status.
 8. Closing (automatic)
 
@@ -242,13 +242,28 @@ Never put code, file paths, HTTP status codes, class names, test case tables or 
 
 1. Title (automatic; presenter = the user; title follows the period, e.g. "Weekly Progress Report", "Sprint 14 Progress Report")
 2. `dashboard` — one card per project or workstream the user touched: metric, status, one sentence; key-update strip for the most important point (often "help needed").
-3. One slide per significant piece of work — `timeline`, `workstreams`, `phase_bars` (if they own phases) or `rows` with a screenshot/illustration.
+3. One slide per significant piece of work — `timeline`, `workstreams`, `phase_bars` (if they own phases) or `rows` with a screenshot/illustration — and a `task_detail` slide for the tasks behind it.
 4. `review_insights` (optional) — reviews received and given: what was approved, what was fixed.
 5. `attention` — blockers, and decisions or help needed from the manager/client.
 6. `table` — next period's plan (owner column may simply be the user).
 7. Closing (automatic)
 
 Skip `tracker` and `activity` in `member` mode unless the user asks — they are team views.
+
+**Task detail, not just the overview.** Counts, percentages and one-line items are not enough to remember a task a week later. For every task or phase that moved this period, was blocked, or that someone will ask about, write it out in business language with `task_detail` (1 to 3 tasks per slide, 2 when each task has full detail):
+- `summary`: what the task is for, what the users or the business get from it, and what happened this period, in two or three plain sentences. Not a restatement of the title.
+- `points`: its subtasks or concrete steps from `tasks.md`, the drafts and the lead's reviews, each in plain words with its own state (done, in progress, not started, blocked). Keep the plan's own order. Include what is left, not only what is done.
+- Include owner, status word and, when known, the reason for a delay or a decision it waits on. Never invent details: if the tracker or drafts do not say, leave it out or ask.
+- Do not drop detail to make it fit. Split the task list across more slides (each project may need two or three), group related subtasks into one point, or move a long task to its own slide with one task (which gives its steps the whole width).
+- **Plan the `task_detail` slides per repo.** Each collected repo's draft (`<dir>/<repo>.md`) and its tracker tasks belong to one project, so count that project's tasks that matter and decide how many slides it needs:
+  - 1 to 3 tasks: one `task_detail` slide for that project.
+  - 4 or more: split into several slides of 2 or 3 tasks each, in the plan's order (or by track or owner), with the same `project` and an eyebrow that says which part ("ClinicBook · Patient App, part 2 of 3"). Do not squeeze them into one slide.
+  - A repo with a single, large task (many subtasks): give it its own slide with one task, so the steps get the full width.
+  - Repos with only one small task each: do not give each its own slide. Group the small tasks of the same product into one slide (the `project` is then the product), and say which repo or area each belongs to in its title.
+  - Keep one project's slides together, in the order of the dashboard, and never put two projects' tasks in the same column set unless they are small tasks of the same product.
+- Keep `dashboard`, `rings` and `tracker` as the overview and `task_detail` as the evidence behind them. In `lead` mode a team of several people usually needs a `task_detail` slide or two per project.
+
+**Adapting the layout.** The templates are a starting point. If the data does not fit a template well (a long list, a task with many steps, a number that needs its own space), choose a better-fitting template, split the slide, or adjust the layout in `scripts/build_deck.js` for this deck (spacing, column widths, type size above the minimums in `design_rules.md`, an added rule or figure) so it looks designed, not squeezed. Never shrink text below the minimums or cut content to make a slide fit. Verify as in step 6 and look at every slide.
 
 **Rules:** (visual rules for templates and decks: `references/design_rules.md`)
 

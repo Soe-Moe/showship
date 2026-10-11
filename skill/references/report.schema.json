@@ -1215,6 +1215,7 @@
             "review_insights",
             "attention",
             "tracker",
+            "task_detail",
             "table"
           ],
           "description": "Slide template."
@@ -1390,6 +1391,21 @@
           "if": {
             "properties": {
               "type": {
+                "const": "task_detail"
+              }
+            },
+            "required": [
+              "type"
+            ]
+          },
+          "then": {
+            "$ref": "#/$defs/task_detail"
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
                 "const": "table"
               }
             },
@@ -1402,6 +1418,84 @@
           }
         }
       ]
+    },
+    "task_detail": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "eyebrow": {
+          "type": "string",
+          "description": "Short label above the title, shown in sentence case. Start it with the project name so the project keeps its colour.",
+          "maxLength": 48
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title, one line. Pattern: Project: Outcome.",
+          "maxLength": 62
+        },
+        "project": {
+          "type": "string",
+          "description": "Project name; sets the colour in the Showship, Paper and Ember designs.",
+          "maxLength": 44
+        },
+        "tasks": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 3,
+          "description": "One entry per task or phase, written out in full.",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "The task, named so the audience recognises it.",
+                "maxLength": 50
+              },
+              "owner": {
+                "type": "string",
+                "description": "Display name exactly as in config.",
+                "maxLength": 30
+              },
+              "state": {
+                "$ref": "#/$defs/state"
+              },
+              "status": {
+                "type": "string",
+                "maxLength": 22,
+                "description": "Status word, for example In review."
+              },
+              "summary": {
+                "type": "string",
+                "description": "What the task is for and what happened this period, in plain language.",
+                "maxLength": 200
+              },
+              "points": {
+                "type": "array",
+                "maxItems": 5,
+                "description": "The subtasks or concrete steps, each with its own state.",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "text": {
+                      "type": "string",
+                      "maxLength": 64
+                    },
+                    "state": {
+                      "$ref": "#/$defs/state"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "footnote": {
+          "type": "string",
+          "maxLength": 140
+        }
+      }
     }
   }
 }

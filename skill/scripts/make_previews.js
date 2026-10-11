@@ -62,7 +62,7 @@ async function sheet(files, cols, out) {
       await sheet(pages, 3, path.join(DOCS, `${style}-grid.png`));
       if (style === "showship") {
         fs.copyFileSync(path.join(DOCS, "showship-grid.png"), path.join(DOCS, "preview-grid.png"));
-        const single = { dashboard: "slide-dashboard", phase_bars: "slide-phase-bars", review_insights: "slide-review-insights", attention: "slide-attention", tracker: "slide-tracker", table: "slide-next-steps" };
+        const single = { dashboard: "slide-dashboard", phase_bars: "slide-phase-bars", review_insights: "slide-review-insights", attention: "slide-attention", tracker: "slide-tracker", task_detail: "slide-task-detail", table: "slide-next-steps" };
         for (const [t, name] of Object.entries(single)) await sharp(pick(t)).resize(961, 540).png().toFile(path.join(DOCS, `${name}.png`));
       }
     }
