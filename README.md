@@ -306,6 +306,23 @@ Only your own commits, the PRs you authored or reviewed, and your tasks are coll
 > Remove the team activity chart
 ```
 
+### Screenshots and photos
+
+Slides have no pictures unless you ask for them. Ask in your prompt, or write it in `notes.md`:
+
+```text
+> Add a screenshot of the booking screen to the Booking Calendar task
+> Use the three phone screenshots in ~/Desktop/shots as a gallery slide
+> Take screenshots of the sign-in and search screens from the patient app repo
+> Add the whiteboard photo to the architecture slide
+```
+
+- **Your own files** (screenshots, phone photos): give the path. Showship copies them into the report folder under `images/`. PNG, JPG, GIF, WebP and SVG work; convert HEIC photos to JPG first (`sips -s format jpeg in.heic --out out.jpg` on a Mac). Phone photos are rotated upright and large files are scaled down automatically.
+- **Screenshots from a repo**: the agent finds how the app runs, tells you what it will start, and asks before running servers or anything that needs a login. It captures phone screens at 390 x 844 and web pages at 1440 x 900. If it cannot run the app it asks you for screenshots instead of guessing.
+- **Where they appear**: `task_detail` shows a picture next to one task (large when it is the only task on the slide, a thumbnail with two or three) with a short caption; `rows` takes one screenshot beside the text; `gallery` shows 2 to 7 screens in a row, and screens of different shapes are fine.
+- **Check them first**: do not use pictures that show real customer data, personal details, tokens or internal addresses. Showship looks at each image, but you know what is sensitive.
+- If you edit `report.json` by hand, give each image as a path relative to it, for example `"image": "images/booking.png"`; `lint_report.js` fails on a missing file.
+
 ### Task tracker & people
 
 ```text
@@ -520,7 +537,7 @@ Also on the website: [Slide templates reference](https://showship.github.io/docs
 | `tracker`         | developer task track: done/open, progress, focus         | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-tracker.png)         |
 | `table`           | next period's plan with owners and status                | ![](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/slide-next-steps.png)      |
 
-Also: `timeline`, `rings` (doughnut charts), `workstreams`, `rows` (with generated hub-and-spoke illustrations or screenshots), `gallery` (UI screenshots), `activity` (team throughput chart). Every field is described in [`skill/references/templates.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/templates.md) and defined as a JSON Schema in [`skill/references/report.schema.json`](https://github.com/Soe-Moe/showship/blob/master/skill/references/report.schema.json). `lint_report.js` checks `report.json` against it (wrong or missing fields, bad values, text too long for its slot, typos with a "did you mean" hint), and editors that support JSON Schema give autocomplete.
+Also: `timeline`, `rings` (doughnut charts), `workstreams`, `rows` (with generated hub-and-spoke illustrations or screenshots), `gallery` (UI screenshots), `activity` (team throughput chart). Pictures are optional and only added on request: see [Screenshots and photos](#screenshots-and-photos). Every field is described in [`skill/references/templates.md`](https://github.com/Soe-Moe/showship/blob/master/skill/references/templates.md) and defined as a JSON Schema in [`skill/references/report.schema.json`](https://github.com/Soe-Moe/showship/blob/master/skill/references/report.schema.json). `lint_report.js` checks `report.json` against it (wrong or missing fields, bad values, text too long for its slot, typos with a "did you mean" hint), and editors that support JSON Schema give autocomplete.
 
 You can also build a deck directly:
 

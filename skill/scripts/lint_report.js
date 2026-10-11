@@ -87,6 +87,22 @@ for (const { path: p, level, message } of validate(r, schema)) {
   else { checks++; console.log(`CHECK ${where}: ${message}`); }
   shown.add(where);
 }
+// Images the deck will embed: the file must exist next to report.json and be a type the builder can read.
+{
+  const dir = path.dirname(path.resolve(file)), IMG_OK = /\.(png|jpe?g|gif|webp|avif|tiff?|svg|bmp)$/i;
+  const checkImg = (p, v) => {
+    if (typeof v !== "string" || !v) return;
+    const full = path.resolve(dir, v.replace(/^~/, require("os").homedir()));
+    if (/^https?:/i.test(v)) { fixes++; console.log(`FIX   ${p}: "${v}" is a web address; download the image into the report folder and use the file path`); }
+    else if (!fs.existsSync(full)) { fixes++; console.log(`FIX   ${p}: image file not found: ${v} (paths are relative to report.json)`); }
+    else if (!IMG_OK.test(v)) { fixes++; console.log(`FIX   ${p}: ${v} is not a PNG, JPG, GIF, WebP or SVG file (convert HEIC photos to JPG)`); }
+  };
+  (r.slides || []).forEach((sl, i) => {
+    checkImg(`slides[${i}].image`, sl.image);
+    (sl.images || []).forEach((v, k) => checkImg(`slides[${i}].images[${k}]`, v));
+    (sl.tasks || []).forEach((t, k) => checkImg(`slides[${i}].tasks[${k}].image`, t.image));
+  });
+}
 for (const [p, text] of strings) {
   const officialName = /\.phases\[\d+\]\.name$/.test(p) || /\.current$/.test(p);
   for (const [re, level, hint] of RULES) {

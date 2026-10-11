@@ -108,7 +108,7 @@ Left: dark hero card with a big metric. Right: 3–5 chevron steps.
 
 ## `gallery` — screenshot strip
 
-2–7 screenshots of the same aspect ratio, with step labels.
+2–7 screenshots or photos with step labels. Different shapes are fine: each is padded to the first one's shape (never stretched or cropped). A file that is missing or unreadable is skipped with a warning; with fewer than two usable images the slide is left out.
 
 ```json
 { "type": "gallery", "eyebrow": "...", "title": "...",
@@ -158,7 +158,7 @@ Two columns: Blockers & Risks (amber) and Decisions Needed (dark). 0–4 items e
 
 ## `task_detail` — tasks written out in full (from the tracker's subtasks, drafts and reviews)
 
-Use it after a project's overview slides, and after `tracker`, so a reader can recall what each task was. 1 to 3 tasks per slide; one task gets the whole width (summary left, steps right), two or three become columns. Each task: `title` (50), `owner` (30), `state` + `status` word (22), `summary` (200, what it is for and what happened this period, in plain language) and up to 5 `points` (64 each: subtasks or steps, each with its own `state`; default `done`). Optional `project` (sets the colour in the Showship, Paper and Ember designs) and `footnote` (140). Three columns are tight: give each task about 4 points and 140 characters of summary, or use two tasks per slide, and split the rest onto another slide. Plan the slides per project (repo): up to 3 tasks fit one slide; with more, split them across slides of 2 or 3 tasks with the same `project` and "part 1 of 2" in the eyebrow; a single large task gets its own slide; small tasks of one product share a slide. The builder warns when a column will run past its panel.
+Use it after a project's overview slides, and after `tracker`, so a reader can recall what each task was. 1 to 3 tasks per slide; one task gets the whole width (summary left, steps right), two or three become columns. Each task: `title` (50), `owner` (30), `state` + `status` word (22), `summary` (200, what it is for and what happened this period, in plain language) and up to 5 `points` (64 each: subtasks or steps, each with its own `state`; default `done`). Optional `image` (a screenshot or photo of the task, a path relative to report.json) with a short `caption` (60): one task shows it large beside the steps, two or three show a thumbnail under the summary (which takes room from the steps). Optional `project` (sets the colour in the Showship, Paper and Ember designs) and `footnote` (140). Three columns are tight: give each task about 4 points and 140 characters of summary, or use two tasks per slide, and split the rest onto another slide. Plan the slides per project (repo): up to 3 tasks fit one slide; with more, split them across slides of 2 or 3 tasks with the same `project` and "part 1 of 2" in the eyebrow; a single large task gets its own slide; small tasks of one product share a slide. The builder warns when a column will run past its panel.
 
 ```json
 { "type": "task_detail", "eyebrow": "ClinicBook · Patient App", "title": "ClinicBook: What Was Done on Each Task",

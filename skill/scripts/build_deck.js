@@ -2468,16 +2468,29 @@ function taskDetailBody(s, d, L) {
     s.addText(t.title, { x: x + pad, y: top + 0.58, w: lw, h: th, fontFace: F.H, fontSize: tfs, bold: true, color: L.text(), valign: "top", margin: 0 });
     let y = top + 0.58 + th + 0.05;
     if (t.owner) { s.addText(`Owner: ${t.owner}`, { x: x + pad, y, w: lw, h: 0.25, fontFace: F.B, fontSize: 11, color: L.gray(), margin: 0, valign: "middle" }); y += 0.3; }
+    // optional screenshot or photo of the task: a thumbnail between the summary and the steps, or a large picture beside the words
+    const hasImg = !!t.image, cap = hasImg && t.caption ? 0.3 : 0;
+    let ih = 0, iw = 0;
+    if (hasImg) { const box = wide ? { w: pw, h: 2.6 } : { w: lw, h: 1.3 }; iw = Math.min(box.w, box.h / t.imageAspect); ih = iw * t.imageAspect; }
     const pts = t.points || [], pfs = wide ? 13 : 11, pstep = (p) => lines(p.text, pfs, pw - 0.27, 0.5) * pfs * 1.2 / 72 + 0.06;
-    const ptsH = pts.reduce((a, p) => a + pstep(p), 0) + (pts.length ? 0.3 : 0);
+    const ptsH = pts.reduce((a, p) => a + pstep(p), 0) + (pts.length ? 0.3 : 0) + (!wide && hasImg ? ih + cap + 0.15 : 0);
     let sfs = wide ? 13 : 12, sh = lines(t.summary, sfs, lw, 0.5) * sfs * 1.3 / 72;
     if (!wide && y + sh + 0.15 + ptsH > top + h) { sfs = 11; sh = lines(t.summary, sfs, lw, 0.5) * sfs * 1.3 / 72; }
-    if (!wide && y + sh + 0.15 + ptsH > top + h + 0.02) console.warn(`Warning: task_detail "${d.title}", task "${t.title}": too much text for ${n} columns, it will run past the panel. Use fewer tasks on this slide, fewer points, or shorter text.`);
+    if (!wide && y + sh + 0.15 + ptsH > top + h + 0.02) console.warn(`Warning: task_detail "${d.title}", task "${t.title}": too much text for ${n} columns, it will run past the panel. Use fewer tasks on this slide, fewer points, no image, or shorter text.`);
     s.addText(t.summary || "", { x: x + pad, y, w: lw, h: wide ? h - (y - top) - 0.2 : sh, fontFace: F.B, fontSize: sfs, color: L.softText(), valign: "top", margin: 0, lineSpacingMultiple: 1.1 });
-    let py = wide ? top + 0.2 : y + sh + 0.15;
+    y += sh + 0.15;
+    let py = wide ? top + 0.2 : y;
+    if (hasImg) {
+      const ix = wide ? px : x + pad, iy = wide ? py : y;
+      s.addImage({ path: t.image, x: ix, y: iy, w: iw, h: ih, altText: t.caption || t.title });
+      s.addShape("rect", { x: ix, y: iy, w: iw, h: ih, fill: { type: "none" }, line: { color: L.rule(), width: 0.75 } });
+      if (t.caption) s.addText(t.caption, { x: ix, y: iy + ih + 0.04, w: wide ? pw : lw, h: 0.26, fontFace: F.B, fontSize: 11, italic: true, color: L.gray(), margin: 0, valign: "middle" });
+      py = iy + ih + cap + 0.15;
+    }
     if (pts.length) { s.addText("Details", { x: px, y: py, w: pw, h: 0.25, fontFace: F.B, fontSize: 11, bold: true, color: L.gray(), margin: 0, valign: "middle" }); py += 0.3; }
+    const wideStep = Math.min(0.8, (top + h - 0.15 - py) / Math.max(pts.length, 1));
     pts.forEach((p) => {
-      const state = p.state || "done", c = state === "blocked" ? C.AMBER : state === "next" ? C.GRAY : col, solid = state === "done" || state === "blocked", st2 = wide ? Math.min(0.8, (h - 0.9) / pts.length) : pstep(p);
+      const state = p.state || "done", c = state === "blocked" ? C.AMBER : state === "next" ? C.GRAY : col, solid = state === "done" || state === "blocked", st2 = wide ? wideStep : pstep(p);
       s.addShape("ellipse", { x: px, y: py + 0.06, w: 0.13, h: 0.13, fill: solid ? { color: c } : { type: "none" }, line: solid ? { type: "none" } : { color: c, width: 1.5 } });
       s.addText(p.text, { x: px + 0.27, y: py, w: pw - 0.27, h: st2, fontFace: F.B, fontSize: pfs, color: state === "next" ? L.gray() : L.text(), valign: "top", margin: 0 });
       py += st2;
@@ -2491,7 +2504,7 @@ const TD_CARD = {
   col: () => C.LIME,
   panel: (s, x, y, w, h) => card(s, x, y, w, h),
   tag: (s, state, text, x, y) => pill(s, text || st(state).label, x, y, state),
-  text: () => C.DARK, softText: () => C.BODY, gray: () => C.BODY,
+  text: () => C.DARK, softText: () => C.BODY, gray: () => C.BODY, rule: () => C.GRID,
 };
 function tdLook(base, over) { const L = Object.assign({}, base, over); F.H = F.H; F.B = F.B; return L; }
 T.task_detail = async (pres, d) => { const L = tdLook(TD_CARD, {}); taskDetailBody(await L.slide(pres, d), d, L); };
@@ -2515,9 +2528,69 @@ TP.task_detail = async (pres, d) => {
 TEM.task_detail = async (pres, d) => {
   const L = tdLook(TD_CARD, { slide: (p, dd) => emberSlide(p, dd.eyebrow || "Task details", dd.title || "Task details", tdCol({}, dd)), col: tdCol,
     panel: (s, x, y, w, h) => ePanel(s, x, y, w, h),
-    tag: (s, state, text, x, y, w, col) => eTag(s, state, text, x, y, w, col), text: eText, softText: () => C.BODY, gray: () => C.GRAY });
+    tag: (s, state, text, x, y, w, col) => eTag(s, state, text, x, y, w, col), text: eText, softText: () => C.BODY, gray: () => C.GRAY, rule: eRule });
   taskDetailBody(await L.slide(pres, d), d, L);
 };
+
+// ---------- Images (screenshots and photos the user provides) ----------
+// Every image named in report.json (rows.image, gallery.images, task_detail tasks[].image) is checked and normalised before
+// any template sees it: the file must exist, phone photos are rotated upright, the format becomes PNG or JPEG (PowerPoint
+// cannot show WebP, AVIF or TIFF), and oversized originals are scaled down so the deck stays small. A gallery whose images
+// differ in shape is padded to one shape so nothing is stretched. Problems are reported and the image is skipped, never fatal.
+const IMG_EXT = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".tif", ".tiff", ".svg", ".bmp"]);
+const IMG_MAX = 1800;
+let IMG_N = 0;
+async function prepareImage(src) {
+  const full = path.resolve(expandHome(src));
+  if (/^https?:/i.test(String(src))) { console.warn(`Warning: image "${src}" is a web address; download it into the report folder and use that file. Skipped.`); return null; }
+  if (!fs.existsSync(full)) { console.warn(`Warning: image not found: ${src} (paths are relative to report.json). Skipped.`); return null; }
+  const ext = path.extname(full).toLowerCase();
+  if (!IMG_EXT.has(ext)) { console.warn(`Warning: image "${src}" is not a supported type (use PNG, JPG, GIF, WebP, SVG; convert HEIC photos to JPG first). Skipped.`); return null; }
+  try {
+    const photo = [".jpg", ".jpeg", ".avif", ".tif", ".tiff"].includes(ext);
+    let pipe = sharp(full, ext === ".svg" ? { density: 192 } : {}).rotate().resize({ width: IMG_MAX, height: IMG_MAX, fit: "inside", withoutEnlargement: ext !== ".svg" });
+    pipe = photo ? pipe.flatten({ background: "#ffffff" }).jpeg({ quality: 86 }) : pipe.png();
+    const { data, info } = await pipe.toBuffer({ resolveWithObject: true });
+    const out = path.join(CACHE, `img_${++IMG_N}${photo ? ".jpg" : ".png"}`);
+    fs.writeFileSync(out, data);
+    return { path: out, w: info.width, h: info.height, buf: data, photo };
+  } catch (e) { console.warn(`Warning: could not read image ${src} (${e.message}). Skipped.`); return null; }
+}
+// pad an image with transparency to the given height/width ratio (centred, never cropped or stretched)
+async function padToAspect(img, aspect) {
+  const a = img.h / img.w;
+  if (Math.abs(a - aspect) / aspect < 0.03) return img;
+  const w = a > aspect ? Math.round(img.h / aspect) : img.w, h = a > aspect ? img.h : Math.round(img.w * aspect);
+  const buf = await sharp({ create: { width: w, height: h, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([{ input: img.buf, left: Math.round((w - img.w) / 2), top: Math.round((h - img.h) / 2) }]).png().toBuffer();
+  const out = path.join(CACHE, `img_${++IMG_N}.png`);
+  fs.writeFileSync(out, buf);
+  return { path: out, w, h, buf, photo: false };
+}
+async function normalizeImages(r) {
+  const keep = [];
+  for (const sl of r.slides) {
+    if (sl.type === "rows" && sl.image) {
+      const im = await prepareImage(sl.image);
+      if (im) sl.image = im.path; else delete sl.image;
+    } else if (sl.type === "gallery") {
+      const names = sl.images || [], labels = sl.labels || [], got = [];
+      for (let i = 0; i < names.length; i++) { const im = await prepareImage(names[i]); if (im) got.push({ im, label: labels[i] }); }
+      if (got.length < 2) { console.warn(`Warning: gallery "${sl.title}" has ${got.length} usable image(s); a gallery needs at least 2, so the slide is left out.`); continue; }
+      const aspect = got[0].im.h / got[0].im.w;
+      for (const g of got) g.im = await padToAspect(g.im, aspect);
+      sl.images = got.map((g) => g.im.path); sl.labels = got.map((g) => g.label);
+    } else if (sl.type === "task_detail") {
+      for (const t of sl.tasks || []) {
+        if (!t.image) continue;
+        const im = await prepareImage(t.image);
+        if (im) { t.image = im.path; t.imageAspect = im.h / im.w; } else delete t.image;
+      }
+    }
+    keep.push(sl);
+  }
+  r.slides = keep;
+}
 
 // ---------- Main ----------
 (async () => {
@@ -2534,6 +2607,7 @@ TEM.task_detail = async (pres, d) => {
   warnMissingFonts([F.H, F.B]);
   LOGO = await prepareLogo(r.logo);
   process.chdir(path.dirname(path.resolve(inFile))); // relative image paths resolve against the JSON
+  await normalizeImages(r);
   r.company = r.company || "";
   r.presenter = r.presenter || "";
   r.eyebrow = r.eyebrow || "Progress report";

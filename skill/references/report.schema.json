@@ -671,7 +671,7 @@
         },
         "image": {
           "type": "string",
-          "description": "Screenshot path, relative to report.json."
+          "description": "Screenshot or photo, a path relative to report.json (PNG, JPG, GIF, WebP or SVG; photos are rotated upright and scaled down automatically)."
         },
         "illustration": {
           "type": "object",
@@ -725,7 +725,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Screenshot paths, relative to report.json. All the same aspect ratio.",
+          "description": "Screenshot or photo paths, relative to report.json. Different shapes are fine: each is padded to the first one's shape, never stretched.",
           "minItems": 2,
           "maxItems": 7
         },
@@ -1487,6 +1487,15 @@
                     }
                   }
                 }
+              },
+              "image": {
+                "type": "string",
+                "description": "Optional screenshot or photo of this task, a path relative to report.json (PNG, JPG, GIF, WebP or SVG). Shown as a thumbnail, or large when the slide has one task."
+              },
+              "caption": {
+                "type": "string",
+                "maxLength": 60,
+                "description": "Optional short caption under the image."
               }
             }
           }
