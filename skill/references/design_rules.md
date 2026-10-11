@@ -74,5 +74,5 @@ node scripts/check_deck.js  <dir>/<name>.pptx --png                             
 ## 8. Changing a template
 
 - Change a style by editing its definition in `STYLES` and its layout functions. Do not patch the generated `.pptx` or rewrite the script with a one-off helper.
-- After any template change, build the example in all six styles and run `check_deck.js` on each, then add a long-text case (labels at their character limits) and run it again. A template that only works with short example text is not finished.
+- After any template change, build the example in every style and run `check_deck.js` on each, then add a long-text case (labels at their character limits) and run it again. A template that only works with short example text is not finished.
 - A new slide type needs: its definition in `references/report.schema.json` (fields, counts, `maxLength` limits) and its description in `references/templates.md`, an implementation for every style, and an entry in the example report.

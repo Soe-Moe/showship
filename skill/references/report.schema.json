@@ -52,6 +52,7 @@
       "enum": [
         "showship",
         "paper",
+        "ember",
         "classic",
         "modern",
         "corporate",

@@ -58,6 +58,18 @@ const STYLES = {
     // project colours are a categorical legend; coral is not among them because it means risk
     projectColors: ["6C4CF5", "10A6A0", "E0A21B", "2F7CF6"],
   },
+  ember: {
+    label: "Ember: graphite night deck, one amber accent, flat panels, big serif figures",
+    // DARK = slide background (theme.dark recolours the whole deck), LIME = amber accent, AMBER = risk only (coral),
+    // TEXT = warm white. Surfaces and rules are derived from DARK, so a custom dark colour keeps its contrast.
+    palette: { DARK: "12161C", LIME: "F2B134", LIGHT_LIME: "FFD98A", AMBER: "FF7A6B", CARD: "1B2129", BODY: "B9BFC9", TRACK: "2A323D", GRID: "2F3844", BG: "12161C", GRAY: "929AA8", ON_ACCENT: "12161C", ON_WARN: "12161C", ON_DARK: "F2B134", TEXT: "F4F0E8" },
+    inks: { done: "F2B134", progress: "FFD98A", blocked: "FF7A6B", next: "929AA8" },
+    fonts: { head: "Georgia", body: "Arial" },
+    card: { radius: 0, shadow: null, border: null },
+    pillRadius: 0, pillChar: 0.095, header: "classic", bookend: "ember", footer: false, layouts: "ember",
+    // categorical project colours, all light enough to read on graphite; coral is left out because it means risk
+    projectColors: ["F2B134", "5CC8D7", "A99BFF", "9BD17A"],
+  },
   modern: {
     label: "Modern — dark bookends, lime accent, serif headings",
     palette: { DARK: "141412", LIME: "A8CC3A", LIGHT_LIME: "D6E6A0", AMBER: "E0A33A", CARD: "F6F7F1", BODY: "58584F", TRACK: "E6E8DF", GRID: "E3E5DC", BG: "FFFFFF", ON_ACCENT: "141412", ON_WARN: "141412" },
@@ -2016,6 +2028,429 @@ TP.tracker = async (pres, d) => {
   if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.55, w: 11.93, h: 0.28, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
 };
 
+// ---------- Ember layouts (graphite night deck) ----------
+// Direction: a dark deck for rooms where the projector is the brightest thing. Slides sit on graphite, content groups
+// live on flat lighter panels (no shadow, no border, square corners), one amber accent marks the focal point,
+// coral is reserved for risk. Figures are set in Georgia. A big slide number in the header band is the repeated motif.
+// Dials: ENERGY 2 / RHYTHM 3 / MOTION 1. Every slide type has its own composition.
+const TEM = {};
+const eText = () => C.TEXT || "F4F0E8";
+const eCard = () => tint(C.DARK, 0.07);   // panel surface
+const eTrk = () => tint(C.DARK, 0.15);    // empty part of a bar
+const eRule = () => tint(C.DARK, 0.22);   // hairlines and dashed trails
+// lighten a colour until it reads as text on the given surface (WCAG AA 4.5:1)
+function eInk(col, bg) { bg = bg || C.DARK; let c = col, t = 0; while (contrast(c, bg) < 4.5 && t < 0.9) { t += 0.05; c = tint(col, t); } return c; }
+function ePanel(s, x, y, w, h, fill) { s.addShape("rect", { x, y, w, h, fill: { color: fill || eCard() }, line: { type: "none" } }); }
+function eBar(s, x, y, w, pct, col, h = 0.1) {
+  const p = Math.max(0, Math.min(100, pct || 0));
+  s.addShape("rect", { x, y, w, h, fill: { color: eTrk() }, line: { type: "none" } });
+  if (p) s.addShape("rect", { x, y, w: w * p / 100, h, fill: { color: col }, line: { type: "none" } });
+}
+// status tag: solid = done, coral solid = risk, outline = in progress, grey outline = not started. Always a word.
+function eTag(s, state, text, x, y, w, col, align = "left") {
+  const label = sentence(text || st(state).label), tw = Math.min(w, 0.3 + label.length * 0.088), bx = align === "right" ? x + w - tw : x;
+  const risk = state === "blocked", solid = state === "done" || risk, c = risk ? C.AMBER : state === "next" ? C.GRAY : eInk(col, eCard());
+  s.addShape("rect", { x: bx, y, w: tw, h: 0.3, fill: solid ? { color: c } : { type: "none" }, line: solid ? { type: "none" } : { color: c, width: 1 } });
+  s.addText(label, { x: bx, y, w: tw, h: 0.3, fontFace: F.B, fontSize: 11, bold: true, color: solid ? C.DARK : c, align: "center", valign: "middle", margin: 0 });
+  return tw;
+}
+function eDesc(desc) {
+  if (typeof desc === "string") return [{ text: desc, options: { color: C.BODY } }];
+  const runs = [];
+  (desc || []).forEach((d, i) => {
+    const last = i === desc.length - 1;
+    if (typeof d === "string") runs.push({ text: d, options: { color: C.BODY, breakLine: !last, paraSpaceAfter: 5 } });
+    else {
+      runs.push({ text: d.label + ":  ", options: { bold: true, color: eText() } });
+      runs.push({ text: d.text, options: { color: C.BODY, breakLine: !last, paraSpaceAfter: 4 } });
+    }
+  });
+  return runs;
+}
+
+async function emberSlide(pres, eyebrow, title, col) {
+  const s = pres.addSlide();
+  SLIDE_NO++;
+  s.background = { color: C.DARK };
+  s.addShape("rect", { x: 0, y: 0, w: 13.333, h: 1.62, fill: { color: eCard() }, line: { type: "none" } });
+  s.addShape("rect", { x: 0, y: 1.62, w: 13.333, h: 0.04, fill: { color: C.LIME }, line: { type: "none" } });
+  s.addText(sentence(eyebrow || ""), { x: 0.7, y: 0.4, w: 9.5, h: 0.3, fontFace: F.B, fontSize: 12, bold: true, color: eInk(col || C.LIME, eCard()), margin: 0, valign: "middle" });
+  s.addText(String(SLIDE_NO).padStart(2, "0"), { x: 11.13, y: 0.3, w: 1.5, h: 0.5, fontFace: F.H, fontSize: 28, italic: true, color: C.GRAY, align: "right", margin: 0, valign: "middle" });
+  s.addText(title || "", { x: 0.7, y: 0.8, w: 11.93, h: 0.7, fontFace: F.H, fontSize: 26, color: eText(), margin: 0, valign: "middle", fit: "shrink" });
+  s.addText(FOOTER_TEXT, { x: 0.7, y: 7.05, w: 7, h: 0.26, fontFace: F.B, fontSize: 11, color: C.GRAY, margin: 0, valign: "middle" });
+  if (STYLE.signature !== false) {
+    s.addImage({ path: await paperArt("mark"), x: 10.62, y: 7.07, w: 0.22, h: 0.22 });
+    s.addText([{ text: "Shipped with ", options: { color: C.GRAY } }, { text: "Showship", options: { color: eText(), bold: true } }],
+      { x: 10.9, y: 7.05, w: 1.73, h: 0.26, fontFace: F.H, fontSize: 11, margin: 0, valign: "middle" });
+  }
+  return s;
+}
+
+// cover and closing: progress bars on the right start part-filled and end full, so the deck ends on "done"
+async function emberBookend(pres, r, kind) {
+  const s = pres.addSlide();
+  s.background = { color: C.DARK };
+  const bars = [100, 82, 66, 52, 38, 24], bx = 8.6, bw = 4.03, bh = 0.3;
+  bars.forEach((p, i) => {
+    const y = 1.2 + i * 0.78;
+    s.addShape("rect", { x: bx, y, w: bw, h: bh, fill: { color: eTrk() }, line: { type: "none" } });
+    s.addShape("rect", { x: bx, y, w: bw * (kind === "closing" ? 1 : p / 100), h: bh, fill: { color: i === 0 ? C.LIME : C.BODY }, line: { type: "none" } });
+  });
+  if (LOGO) { let lw = 0.62, lh = lw * LOGO.aspect; if (lh > 0.62) { lh = 0.62; lw = lh / LOGO.aspect; } s.addImage({ path: LOGO.path, x: 0.7, y: 0.62, w: lw, h: lh }); }
+  s.addText(r.company, { x: LOGO ? 1.5 : 0.7, y: 0.62, w: 6, h: 0.62, fontFace: F.B, fontSize: 13, bold: true, color: eText(), valign: "middle", margin: 0 });
+  if (kind === "title") {
+    s.addText(sentence(r.eyebrow), { x: 0.7, y: 2.45, w: 7, h: 0.4, fontFace: F.B, fontSize: 15, bold: true, color: eInk(C.LIME), margin: 0 });
+    s.addText(r.title, { x: 0.7, y: 2.9, w: 7.4, h: 2.3, fontFace: F.H, fontSize: 44, color: eText(), lineSpacingMultiple: 1.0, margin: 0, valign: "top", fit: "shrink" });
+  } else {
+    s.addText("Thank you", { x: 0.7, y: 2.7, w: 7, h: 1.2, fontFace: F.H, fontSize: 60, color: eText(), margin: 0 });
+    s.addText("Questions and discussion", { x: 0.7, y: 3.9, w: 7, h: 0.6, fontFace: F.H, fontSize: 22, italic: true, color: eInk(C.LIME), margin: 0 });
+  }
+  s.addShape("line", { x: 0.7, y: 5.95, w: 6.6, h: 0, line: { color: eRule(), width: 1 } });
+  const presenter = kind === "title" ? r.presenter : (r.closingPresenter || r.presenter);
+  [["Presenter", presenter, 0.7], ["Date", r.date, 4.2]].forEach(([k, v, x]) => {
+    s.addText(k, { x, y: 6.1, w: 3.2, h: 0.28, fontFace: F.B, fontSize: 11, color: C.GRAY, margin: 0 });
+    s.addText(v || "", { x, y: 6.38, w: 3.4, h: 0.4, fontFace: F.H, fontSize: 15, bold: true, color: eText(), margin: 0 });
+  });
+  if (STYLE.signature !== false && kind === "title") {
+    s.addText([{ text: "Shipped with ", options: { color: C.GRAY } }, { text: "Showship", options: { color: eText(), bold: true } }],
+      { x: 0.7, y: 6.95, w: 3, h: 0.3, fontFace: F.H, fontSize: 11, margin: 0, valign: "middle" });
+  }
+}
+
+// dashboard: the first card is the hero panel with a giant figure, the rest stack beside it, key update as a labelled strip
+TEM.dashboard = async (pres, d) => {
+  d.cards.forEach((c) => projColor(c.label, c.color));
+  const s = await emberSlide(pres, d.eyebrow || "Executive summary", d.title || "At a glance");
+  const cards = d.cards, n = cards.length, top = 1.95, h = d.keyUpdate ? 3.85 : 4.9, hw = n > 1 ? 5.2 : 11.93;
+  const hero = cards[0], hc = projColor(hero.label, hero.color), off = h - 3.85, len = String(hero.metric).length;
+  ePanel(s, 0.7, top, hw, h);
+  s.addText(hero.label, { x: 1.0, y: top + 0.25, w: hw - 0.6, h: 0.3, fontFace: F.B, fontSize: 12, bold: true, color: eInk(hc, eCard()), margin: 0, valign: "middle" });
+  if (n === 1) {
+    // a single card gets the whole width: the figure on the left, the words on the right
+    s.addText(String(hero.metric), { x: 1.0, y: top + 0.7, w: 5.6, h: h - 1.2, fontFace: F.H, fontSize: len <= 3 ? 120 : len <= 5 ? 96 : len <= 8 ? 64 : 48, bold: true, color: eInk(hc, eCard()), margin: 0, valign: "middle" });
+    s.addText(hero.headline, { x: 7.2, y: top + 0.9, w: 5.1, h: 1.0, fontFace: F.H, fontSize: 22, bold: true, color: eText(), margin: 0, valign: "top" });
+    eTag(s, hero.state, hero.status, 7.2, top + 2.0, 5.1, hc);
+    s.addText(hero.desc || "", { x: 7.2, y: top + 2.5, w: 5.1, h: h - 3.0, fontFace: F.B, fontSize: 14, color: C.BODY, margin: 0, valign: "top", lineSpacingMultiple: 1.2 });
+  } else {
+    s.addText(String(hero.metric), { x: 1.0, y: top + 0.6, w: hw - 0.6, h: 1.25 + off, fontFace: F.H, fontSize: len <= 3 ? 96 : len <= 5 ? 72 : len <= 8 ? 54 : 40, bold: true, color: eInk(hc, eCard()), margin: 0, valign: "middle" });
+    const long = String(hero.headline).length > 26;
+    s.addText(hero.headline, { x: 1.0, y: top + 1.9 + off, w: hw - 0.6, h: 0.55, fontFace: F.H, fontSize: long ? 15 : 18, bold: true, color: eText(), margin: 0, valign: "top" });
+    eTag(s, hero.state, hero.status, 1.0, top + 2.5 + off, hw - 0.6, hc);
+    s.addText(hero.desc || "", { x: 1.0, y: top + 2.9 + off, w: hw - 0.6, h: 0.8, fontFace: F.B, fontSize: 12, color: C.BODY, margin: 0, valign: "top", lineSpacingMultiple: 1.15 });
+  }
+  const m = n - 1, rx = 0.7 + hw + 0.3, rw = 12.63 - rx, gap = 0.2, ph = m ? (h - (m - 1) * gap) / m : 0;
+  cards.slice(1).forEach((c, i) => {
+    const y = top + i * (ph + gap), col = projColor(c.label, c.color), ml = String(c.metric).length;
+    ePanel(s, rx, y, rw, ph);
+    s.addText(String(c.metric), { x: rx + 0.25, y: y + 0.1, w: 1.65, h: Math.min(0.75, ph * 0.5), fontFace: F.H, fontSize: ml <= 4 ? 34 : 24, bold: true, color: eInk(col, eCard()), margin: 0, valign: "middle" });
+    eTag(s, c.state, c.status, rx + 0.25, y + ph - 0.4, 1.65, col);
+    const tx = rx + 2.0, tw = rw - 2.0 - 0.2, tight = ph < 1.3;
+    s.addText(c.label, { x: tx, y: y + 0.08, w: tw, h: 0.26, fontFace: F.B, fontSize: 11, bold: true, color: eInk(col, eCard()), margin: 0, valign: "middle" });
+    s.addText(c.headline, { x: tx, y: y + 0.34, w: tw, h: 0.3, fontFace: F.H, fontSize: tight ? 13 : 14, bold: true, color: eText(), margin: 0, valign: "middle" });
+    s.addText(c.desc || "", { x: tx, y: y + 0.66, w: tw, h: ph - 0.72, fontFace: F.B, fontSize: tight ? 11 : 11.5, color: C.BODY, margin: 0, valign: "top", lineSpacingMultiple: 1.1 });
+  });
+  if (d.keyUpdate) {
+    const y = top + h + 0.25;
+    s.addShape("rect", { x: 0.7, y, w: 1.9, h: 0.8, fill: { color: C.LIME }, line: { type: "none" } });
+    s.addText("Key update", { x: 0.7, y, w: 1.9, h: 0.8, fontFace: F.B, fontSize: 13, bold: true, color: C.ON_ACCENT, align: "center", valign: "middle", margin: 0 });
+    ePanel(s, 2.6, y, 10.03, 0.8);
+    s.addText(d.keyUpdate, { x: 2.85, y, w: 9.55, h: 0.8, fontFace: F.B, fontSize: 13.5, color: eText(), valign: "middle", margin: 0 });
+  }
+};
+
+// timeline: the trail runs across the middle, steps hang above and below it in turn
+TEM.timeline = async (pres, d) => {
+  const col = projFor([d.title, d.eyebrow]);
+  const s = await emberSlide(pres, d.eyebrow, d.title, col);
+  if (d.badge) eTag(s, d.badge.state || "done", d.badge.text, 9.63, 1.95, 3.0, col, "right");
+  if (d.impact) s.addText(d.impact, { x: 0.7, y: 1.95, w: 8.6, h: 0.95, fontFace: F.H, fontSize: 17, color: eText(), valign: "top", margin: 0, lineSpacingMultiple: 1.12 });
+  const steps = d.steps, n = steps.length, X0 = 1.0, X1 = 12.33, sw = (X1 - X0) / Math.max(n - 1, 1), Y = 4.75, nr = 0.15;
+  let last = -1; steps.forEach((p, i) => { if (p.state === "done" || p.state === "progress") last = i; });
+  s.addShape("line", { x: X0, y: Y, w: X1 - X0, h: 0, line: { color: eRule(), width: 2.5, dashType: "dash" } });
+  if (last > 0) s.addShape("line", { x: X0, y: Y, w: last * sw, h: 0, line: { color: C.LIME, width: 3 } });
+  const bw = Math.min(3.4, sw - 0.2);
+  steps.forEach((p, i) => {
+    const cx = X0 + i * sw, above = i % 2 === 0, risk = p.state === "blocked", on = p.state === "done";
+    const c = risk ? C.AMBER : p.state === "next" ? C.GRAY : C.LIME;
+    const flip = cx + 0.14 + bw > 12.63, tx = flip ? cx - 0.14 - bw : cx + 0.14, al = flip ? "right" : "left";
+    const by = above ? Y - 1.75 : Y + 0.3;
+    s.addShape("line", { x: cx, y: above ? Y - 1.75 : Y + nr, w: 0, h: 1.75 - nr, line: { color: eRule(), width: 1 } });
+    s.addShape("rect", { x: cx - nr, y: Y - nr, w: 2 * nr, h: 2 * nr, fill: on || risk ? { color: c } : { color: C.DARK }, line: on || risk ? { type: "none" } : { color: c, width: 2 } });
+    s.addText(sentence(p.tag || ""), { x: tx, y: by, w: bw, h: 0.26, fontFace: F.B, fontSize: 11, bold: true, color: risk ? C.AMBER : C.GRAY, align: al, margin: 0, valign: "middle" });
+    s.addText(p.title, { x: tx, y: by + 0.28, w: bw, h: 0.55, fontFace: F.H, fontSize: 14, bold: true, color: eText(), align: al, margin: 0, valign: "top" });
+    s.addText(p.desc || "", { x: tx, y: by + 0.85, w: bw, h: 0.65, fontFace: F.B, fontSize: 11, color: C.BODY, align: al, valign: "top", margin: 0, lineSpacingMultiple: 1.1 });
+  });
+};
+
+// rings: each track is a vertical pillar filled from the bottom; the combined figure is the amber one
+TEM.rings = async (pres, d) => {
+  const col = projFor([d.eyebrow, d.title]);
+  const s = await emberSlide(pres, d.eyebrow, d.title, col);
+  const rings = d.rings || [], stats = d.stats || [], li = Math.max(0, rings.findIndex((r) => r.dark));
+  const top = 1.95, ph = 4.5, pw = stats.length ? 6.8 : 11.93, n = Math.max(rings.length, 1), cw = pw / n;
+  ePanel(s, 0.7, top, pw, ph);
+  rings.forEach((r, i) => {
+    const cx = 0.7 + cw * i + cw / 2, lead = i === li, c = lead ? C.LIME : C.BODY, pl = Math.min(1.2, cw - 0.6);
+    s.addText(`${r.pct}%`, { x: cx - cw / 2 + 0.1, y: top + 0.2, w: cw - 0.2, h: 0.65, fontFace: F.H, fontSize: 34, bold: true, color: lead ? eInk(C.LIME, eCard()) : eText(), align: "center", margin: 0, valign: "middle" });
+    const py = top + 0.95, pH = 2.0, p = Math.max(0, Math.min(100, r.pct || 0));
+    s.addShape("rect", { x: cx - pl / 2, y: py, w: pl, h: pH, fill: { color: eTrk() }, line: { type: "none" } });
+    if (p) s.addShape("rect", { x: cx - pl / 2, y: py + pH * (1 - p / 100), w: pl, h: pH * p / 100, fill: { color: c }, line: { type: "none" } });
+    s.addText(r.label, { x: cx - cw / 2 + 0.1, y: top + 3.05, w: cw - 0.2, h: 0.5, fontFace: F.H, fontSize: 13, bold: true, color: eText(), align: "center", margin: 0, valign: "top" });
+    s.addText(r.sub || "", { x: cx - cw / 2 + 0.1, y: top + 3.58, w: cw - 0.2, h: 0.8, fontFace: F.B, fontSize: 11, color: C.GRAY, align: "center", margin: 0, valign: "top" });
+  });
+  if (stats.length) {
+    const sx = 7.9, sw = 12.63 - sx, rh = Math.min(1.1, ph / stats.length);
+    stats.forEach((k, i) => {
+      const y = top + i * rh, on = k.state === "done", risk = k.state === "blocked", c = risk ? C.AMBER : k.state === "next" ? C.GRAY : C.LIME;
+      if (i) s.addShape("line", { x: sx, y, w: sw, h: 0, line: { color: eRule(), width: 0.75 } });
+      s.addShape("rect", { x: sx, y: y + rh / 2 - 0.08, w: 0.16, h: 0.16, fill: on || risk ? { color: c } : { type: "none" }, line: on || risk ? { type: "none" } : { color: c, width: 1.5 } });
+      s.addText(String(k.value), { x: sx + 0.4, y, w: 1.5, h: rh, fontFace: F.H, fontSize: 30, bold: true, color: eText(), margin: 0, valign: "middle" });
+      s.addText(k.label, { x: sx + 2.0, y, w: sw - 2.0, h: rh, fontFace: F.B, fontSize: 13, color: C.BODY, margin: 0, valign: "middle" });
+    });
+  }
+  if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.55, w: 11.93, h: 0.3, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
+};
+
+// phase_bars: one panel per track, every phase a block that fills left to right
+TEM.phase_bars = async (pres, d) => {
+  const base = d.color ? projColor("", d.color) : projFor([d.project, d.eyebrow, d.title]);
+  const s = await emberSlide(pres, d.eyebrow, d.title, base);
+  const tracks = d.tracks, n = tracks.length, top = 1.9, gap = 0.15, tall = n === 1, th = tall ? 3.95 : (5.05 - gap) / n;
+  tracks.forEach((t, i) => {
+    const y = top + i * (th + gap), c = t.color ? projColor("", t.color) : (i === 0 ? base : tint(base, 0.35 * i)), ci = eInk(c, eCard());
+    ePanel(s, 0.7, y, 11.93, th);
+    const avg = Math.round(t.phases.reduce((a, p) => a + (p.pct || 0), 0) / t.phases.length);
+    s.addText(t.title, { x: 1.0, y: y + 0.1, w: 7.5, h: 0.38, fontFace: F.H, fontSize: 18, bold: true, color: eText(), margin: 0, valign: "middle" });
+    if (t.owner) s.addText(`Owner: ${t.owner}`, { x: 1.0, y: y + 0.48, w: 7.5, h: 0.24, fontFace: F.B, fontSize: 11, color: C.GRAY, margin: 0, valign: "middle" });
+    s.addText([{ text: `${avg}%`, options: { fontSize: 30, bold: true, color: ci } }, { text: "  of the track", options: { fontSize: 11, color: C.GRAY } }],
+      { x: 8.6, y: y + 0.08, w: 3.75, h: 0.66, fontFace: F.H, align: "right", valign: "middle", margin: 0 });
+    const ph = t.phases, g = 0.1, sw = (11.33 - (ph.length - 1) * g) / ph.length, ty = y + 0.8, tH = tall ? 1.7 : 0.4;
+    ph.forEach((p, k) => {
+      const x = 1.0 + k * (sw + g), pct = Math.max(0, Math.min(100, p.pct || 0));
+      s.addShape("rect", { x, y: ty, w: sw, h: tH, fill: { color: eTrk() }, line: { type: "none" } });
+      if (pct) s.addShape("rect", { x, y: ty, w: sw * pct / 100, h: tH, fill: { color: c }, line: { type: "none" } });
+      s.addText(pct ? `${pct}%` : "Not started", { x, y: ty + tH + 0.03, w: sw, h: 0.26, fontFace: F.H, fontSize: pct ? 13 : 11, bold: !!pct, italic: !pct, color: pct ? ci : C.GRAY, margin: 0, valign: "middle" });
+      s.addText(p.name, { x, y: ty + tH + 0.3, w: sw - 0.05, h: 0.58, fontFace: F.B, fontSize: 11, color: pct ? eText() : C.GRAY, margin: 0, valign: "top" });
+    });
+    if (t.note) s.addText(t.note, { x: 1.0, y: y + th - 0.3, w: 11.33, h: 0.24, fontFace: F.B, fontSize: 11, italic: true, color: C.BODY, margin: 0, valign: "middle" });
+  });
+};
+
+// workstreams: the finished workstream as a hero panel, the next one as a connected vertical path
+TEM.workstreams = async (pres, d) => {
+  const col = projFor([d.eyebrow, d.title]), h = d.hero, f = d.flow, ci = eInk(col, eCard());
+  const s = await emberSlide(pres, d.eyebrow, d.title, col);
+  ePanel(s, 0.7, 1.95, 4.9, 4.9);
+  s.addText(h.label || "Workstream 1", { x: 1.0, y: 2.2, w: 4.3, h: 0.3, fontFace: F.B, fontSize: 12, bold: true, color: C.GRAY, margin: 0, valign: "middle" });
+  s.addText(String(h.metric), { x: 1.0, y: 2.55, w: 4.3, h: 1.4, fontFace: F.H, fontSize: 80, bold: true, color: ci, margin: 0, valign: "middle" });
+  s.addText(h.title, { x: 1.0, y: 4.0, w: 4.3, h: 0.6, fontFace: F.H, fontSize: 17, bold: true, color: eText(), margin: 0, valign: "top" });
+  eTag(s, h.state || "done", h.status, 1.0, 4.72, 4.3, col);
+  s.addText(h.desc || "", { x: 1.0, y: 5.18, w: 4.3, h: 1.5, fontFace: F.B, fontSize: 12, color: C.BODY, valign: "top", margin: 0, lineSpacingMultiple: 1.15 });
+  const rx = 6.1, rw = 12.63 - rx;
+  s.addText(f.label || "Workstream 2", { x: rx, y: 1.95, w: 3, h: 0.3, fontFace: F.B, fontSize: 12, bold: true, color: C.GRAY, margin: 0, valign: "middle" });
+  eTag(s, f.state || "progress", f.status, rx + rw - 2.4, 1.95, 2.4, col, "right");
+  s.addText(f.title, { x: rx, y: 2.3, w: rw, h: 0.5, fontFace: F.H, fontSize: 19, bold: true, color: eText(), margin: 0, valign: "middle" });
+  const steps = f.steps, y0 = 3.05, avail = (f.next ? 6.0 : 6.8) - y0, rh = Math.min(1.0, avail / steps.length);
+  s.addShape("line", { x: rx + 0.11, y: y0 + 0.2, w: 0, h: rh * (steps.length - 1), line: { color: eRule(), width: 1.5 } });
+  steps.forEach((p, i) => {
+    const y = y0 + i * rh, on = p.state === "done", risk = p.state === "blocked", c = risk ? C.AMBER : p.state === "next" ? C.GRAY : C.LIME;
+    s.addShape("rect", { x: rx, y: y + 0.09, w: 0.22, h: 0.22, fill: on || risk ? { color: c } : { color: C.DARK }, line: on || risk ? { type: "none" } : { color: c, width: 1.75 } });
+    s.addText(p.title, { x: rx + 0.5, y: y + 0.04, w: rw - 2.8, h: 0.32, fontFace: F.H, fontSize: 14, bold: true, color: p.state === "next" ? C.BODY : eText(), margin: 0, valign: "middle" });
+    s.addText(p.desc || "", { x: rx + 0.5, y: y + 0.38, w: rw - 2.8, h: rh - 0.42, fontFace: F.B, fontSize: 11, color: C.BODY, margin: 0, valign: "top" });
+    eTag(s, p.state, { done: "Done", progress: "In progress", next: "Next", blocked: "Blocked" }[p.state], rx + rw - 2.1, y + 0.05, 2.1, col, "right");
+  });
+  if (f.next) {
+    ePanel(s, rx, 6.15, rw, 0.7);
+    s.addText([{ text: "Next:  ", options: { bold: true, color: eInk(C.LIME, eCard()) } }, { text: f.next, options: { color: eText() } }],
+      { x: rx + 0.25, y: 6.15, w: rw - 0.5, h: 0.7, fontFace: F.B, fontSize: 12.5, margin: 0, valign: "middle" });
+  }
+};
+
+// rows: one full-width band per point, a large numeral in the first cell; a screenshot sits beside them
+TEM.rows = async (pres, d) => {
+  const col = projFor([d.eyebrow, d.title], C.LIME), ci = eInk(col, eCard());
+  const s = await emberSlide(pres, d.eyebrow, d.title, col);
+  let img = null, aspect = 1;
+  if (d.image) { img = path.resolve(d.image); const m = await sharp(img).metadata(); aspect = m.height / m.width; }
+  const n = d.rows.length, aw = img ? 6.8 : 11.93, gap = 0.2, rh = (4.9 - (n - 1) * gap) / n;
+  if (img) {
+    const colX = 7.8, colW = 12.63 - colX; let fw = colW - 0.3, fh = fw * aspect;
+    if (fh > 4.6) { fh = 4.6; fw = fh / aspect; }
+    ePanel(s, colX, 1.95, colW, fh + 0.3);
+    s.addImage({ path: img, x: colX + (colW - fw) / 2, y: 2.1, w: fw, h: fh });
+  }
+  d.rows.forEach((r, i) => {
+    const y = 1.95 + i * (rh + gap);
+    ePanel(s, 0.7, y, aw, rh);
+    s.addText(String(i + 1).padStart(2, "0"), { x: 0.9, y, w: 1.2, h: rh, fontFace: F.H, fontSize: 40, bold: true, color: ci, margin: 0, valign: "middle" });
+    s.addText(r.header, { x: 2.2, y: y + 0.14, w: aw - 1.7, h: 0.4, fontFace: F.H, fontSize: 16, bold: true, color: eText(), margin: 0, valign: "middle" });
+    s.addText(eDesc(r.desc), { x: 2.2, y: y + 0.58, w: aw - 1.7, h: rh - 0.7, fontFace: F.B, fontSize: 12, valign: "top", margin: 0, lineSpacingMultiple: 1.15 });
+  });
+};
+
+// table: a filled header row and banded rows; the project name carries the project colour
+TEM.table = async (pres, d) => {
+  const s = await emberSlide(pres, d.eyebrow || "Looking ahead", d.title || "Next steps");
+  const cols = [{ k: "Project / track", w: 3.0 }, { k: "Owner", w: 1.9 }, { k: "Next focus", w: 4.33 }, { k: "Status", w: 2.7 }];
+  let x = 0.7; const xs = cols.map((c) => { const v = x; x += c.w; return v; });
+  ePanel(s, 0.7, 1.95, 11.93, 0.5, tint(C.DARK, 0.12));
+  cols.forEach((c, i) => s.addText(c.k, { x: xs[i] + 0.2, y: 1.95, w: c.w - 0.4, h: 0.5, fontFace: F.B, fontSize: 11, bold: true, color: C.BODY, margin: 0, valign: "middle", align: i === 3 ? "right" : "left" }));
+  const n = d.rows.length, rh = Math.min(1.0, 4.35 / n);
+  d.rows.forEach((r, i) => {
+    const y = 2.45 + i * rh, c = projFor([r.project]), bg = i % 2 === 0 ? eCard() : C.DARK;
+    ePanel(s, 0.7, y, 11.93, rh, bg);
+    s.addText(r.project, { x: xs[0] + 0.2, y, w: cols[0].w - 0.45, h: rh, fontFace: F.H, fontSize: 13, bold: true, color: eInk(c, bg), margin: 0, valign: "middle" });
+    s.addText(r.owner || "", { x: xs[1] + 0.2, y, w: cols[1].w - 0.45, h: rh, fontFace: F.B, fontSize: 11.5, color: C.BODY, margin: 0, valign: "middle" });
+    s.addText(r.focus, { x: xs[2] + 0.2, y, w: cols[2].w - 0.5, h: rh, fontFace: F.B, fontSize: 11.5, color: eText(), margin: 0, valign: "middle" });
+    eTag(s, r.state, r.current, xs[3], y + rh / 2 - 0.15, cols[3].w - 0.2, c, "right");
+  });
+};
+
+// gallery: each screenshot sits on its own panel with a numbered caption bar
+TEM.gallery = async (pres, d) => {
+  const col = projFor([d.eyebrow, d.title], C.LIME), ci = eInk(col, eCard());
+  const s = await emberSlide(pres, d.eyebrow, d.title, col);
+  const imgs = d.images.map((p) => path.resolve(p));
+  const metas = await Promise.all(imgs.map((p) => sharp(p).metadata()));
+  const aspect = metas[0].height / metas[0].width, n = imgs.length, gap = n > 4 ? 0.2 : 0.3, pad = 0.1, cap = 0.5;
+  let fw = (11.93 - (n - 1) * gap) / n - 2 * pad, fh = fw * aspect;
+  if (fh > 3.9) { fh = 3.9; fw = fh / aspect; }
+  const pw = fw + 2 * pad, x0 = 0.7 + (11.93 - (n * pw + (n - 1) * gap)) / 2, fy = 2.0;
+  imgs.forEach((p, i) => {
+    const x = x0 + i * (pw + gap);
+    ePanel(s, x, fy, pw, fh + 2 * pad + cap);
+    s.addImage({ path: p, x: x + pad, y: fy + pad, w: fw, h: fh });
+    s.addText([{ text: `${i + 1}  `, options: { bold: true, color: ci } }, { text: (d.labels && d.labels[i]) || `Step ${i + 1}`, options: { color: eText() } }],
+      { x: x + pad + 0.05, y: fy + fh + 2 * pad, w: fw - 0.1, h: cap, fontFace: F.H, fontSize: n > 4 ? 10.5 : 12, margin: 0, valign: "middle" });
+  });
+};
+
+// activity: figures as a row of panels on top, the chart below across the full width
+TEM.activity = async (pres, d) => {
+  const s = await emberSlide(pres, d.eyebrow || "Engineering activity", d.title || "Team delivery activity");
+  const kpis = d.kpis || [], gap = 0.2, kw = kpis.length ? (11.93 - (kpis.length - 1) * gap) / kpis.length : 0, ky = 1.95, kh = 1.15;
+  kpis.forEach((k, i) => {
+    const x = 0.7 + i * (kw + gap);
+    ePanel(s, x, ky, kw, kh);
+    s.addText(String(k.value), { x: x + 0.25, y: ky + 0.08, w: kw - 0.5, h: 0.65, fontFace: F.H, fontSize: 34, bold: true, color: i === 0 ? eInk(C.LIME, eCard()) : eText(), margin: 0, valign: "middle" });
+    s.addText(k.label, { x: x + 0.25, y: ky + 0.74, w: kw - 0.5, h: 0.3, fontFace: F.B, fontSize: 12, color: C.BODY, margin: 0, valign: "middle" });
+  });
+  const cy = kpis.length ? ky + kh + 0.2 : 1.9, ch = 6.85 - (d.note ? 0.4 : 0) - cy;
+  const labels = d.people.map((p) => p.name);
+  const data = d.series.map((name, i) => ({ name, labels, values: d.people.map((p) => p.values[i] || 0) }));
+  s.addChart(pres.charts.BAR, data, {
+    x: 0.7, y: cy, w: 11.93, h: ch, barDir: "col", barGrouping: "clustered", barGapWidthPct: 70,
+    chartColors: [C.LIME, C.BODY, "5CC8D7", "6B7482"].slice(0, d.series.length),
+    catAxisLabelFontFace: F.H, catAxisLabelFontSize: 11, catAxisLabelColor: eText(), catAxisLineShow: true,
+    valAxisHidden: true, valGridLine: { style: "none" },
+    showValue: true, dataLabelFontFace: F.H, dataLabelFontSize: 10.5, dataLabelFontBold: true, dataLabelColor: eText(), dataLabelPosition: "outEnd",
+    showLegend: true, legendPos: "t", legendFontSize: 10.5, legendFontFace: F.H, legendColor: eText(),
+  });
+  if (d.note) s.addText(d.note, { x: 0.7, y: 6.5, w: 11.93, h: 0.3, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
+};
+
+// review_insights: the figures stand in a left column, each finding is its own band with a status tag
+TEM.review_insights = async (pres, d) => {
+  const s = await emberSlide(pres, d.eyebrow || "Quality and code review", d.title || "Code review insights");
+  const stats = d.stats || [], sw = 3.2, f = d.findings || [], fgap = 0.15, noteH = d.note ? 0.4 : 0;
+  const rh = Math.min(1.35, (4.9 - noteH - (f.length - 1) * fgap) / Math.max(f.length, 1)), fTotal = f.length * rh + (f.length - 1) * fgap;
+  const sh = (fTotal - 0.2 * (stats.length - 1)) / Math.max(stats.length, 1);
+  stats.forEach((k, i) => {
+    const y = 1.95 + i * (sh + 0.2);
+    ePanel(s, 0.7, y, sw, sh);
+    const vs = sh < 1.2 ? 28 : sh < 1.5 ? 34 : (i === 0 ? 44 : 36);
+    s.addText(String(k.value), { x: 0.95, y: y + 0.06, w: sw - 0.5, h: sh * 0.5, fontFace: F.H, fontSize: vs, bold: true, color: i === 0 ? eInk(C.LIME, eCard()) : eText(), margin: 0, valign: "middle" });
+    s.addText(k.label, { x: 0.95, y: y + sh * 0.55, w: sw - 0.5, h: sh * 0.4, fontFace: F.B, fontSize: sh < 1.2 ? 11 : 11.5, color: C.BODY, margin: 0, valign: "top" });
+  });
+  const fx = 4.2, fw = 12.63 - fx, top = 1.95, gap = fgap;
+  const lbl = { done: "Resolved", progress: "In progress", blocked: "Open risk", next: "Planned" };
+  f.forEach((it, i) => {
+    const y = top + i * (rh + gap);
+    ePanel(s, fx, y, fw, rh);
+    const cm = rh < 1.0;   // five findings: area and text sit closer together
+    s.addText(it.area || "", { x: fx + 0.25, y: y + (cm ? 0.06 : 0.12), w: fw - 2.6, h: 0.3, fontFace: F.H, fontSize: 13, bold: true, color: eText(), margin: 0, valign: "middle" });
+    s.addText(it.text, { x: fx + 0.25, y: y + (cm ? 0.36 : 0.45), w: fw - 0.5, h: rh - (cm ? 0.4 : 0.55), fontFace: F.B, fontSize: cm ? 11 : 12, color: C.BODY, margin: 0, valign: "top", lineSpacingMultiple: 1.05 });
+    eTag(s, it.state, it.status || lbl[it.state], fx + fw - 2.35, y + (cm ? 0.06 : 0.12), 2.1, C.LIME, "right");
+  });
+  if (d.note) s.addText(d.note, { x: fx, y: top + fTotal + 0.1, w: fw, h: 0.3, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
+};
+
+// attention: two panels; the risk panel is topped with a coral bar, the decisions panel with the amber accent
+TEM.attention = async (pres, d) => {
+  const s = await emberSlide(pres, d.eyebrow || "Needs attention", d.title || "Blockers and decisions needed", C.AMBER);
+  const gap = 0.3, cw = (11.93 - gap) / 2, top = 1.95, tw = cw - 1.15;
+  const cols = [
+    { x: 0.7, head: d.blockersTitle || "Blockers and risks", items: d.blockers || [], c: C.AMBER, empty: d.noBlockers || "No open blockers." },
+    { x: 0.7 + cw + gap, head: d.decisionsTitle || "Decisions needed", items: d.decisions || [], c: C.LIME, empty: "No decisions needed." },
+  ];
+  // items stack by their estimated text height (type steps down when they would not fit); both panels share one height
+  const lines = (t, pt, k) => Math.max(1, Math.ceil(String(t || "").length * pt * k / 72 / tw));
+  const heights = (items, fs) => items.map((it) => lines(it.title, fs[0], 0.58) * fs[0] * 1.25 / 72 + (it.text ? lines(it.text, fs[1], 0.5) * fs[1] * 1.3 / 72 : 0) + (it.meta ? lines(it.meta, fs[2], 0.5) * fs[2] * 1.3 / 72 : 0) + 0.3);
+  const sum = (a) => a.reduce((x, y) => x + y, 0), avail = 4.9 - 1.0;
+  cols.forEach((col) => {
+    col.fs = [15, 12, 11]; col.hs = heights(col.items, col.fs);
+    if (sum(col.hs) > avail) { col.fs = [13, 11, 11]; col.hs = heights(col.items, col.fs); }
+  });
+  const ph = Math.min(4.9, 1.0 + Math.max(sum(cols[0].hs), sum(cols[1].hs), 0.9) + 0.1);
+  cols.forEach((col) => {
+    ePanel(s, col.x, top, cw, ph);
+    s.addShape("rect", { x: col.x, y: top, w: cw, h: 0.08, fill: { color: col.c }, line: { type: "none" } });
+    s.addText([{ text: col.head, options: { bold: true, color: eText() } }, { text: `   ${col.items.length}`, options: { color: C.GRAY } }],
+      { x: col.x + 0.3, y: top + 0.25, w: cw - 0.6, h: 0.45, fontFace: F.H, fontSize: 17, margin: 0, valign: "middle" });
+    if (!col.items.length) { s.addText(col.empty, { x: col.x + 0.3, y: top + 0.95, w: cw - 0.6, h: 0.5, fontFace: F.H, fontSize: 14, italic: true, color: C.GRAY, margin: 0 }); return; }
+    let y = top + 0.9;
+    col.items.forEach((it, i) => {
+      if (i) s.addShape("line", { x: col.x + 0.3, y: y - 0.1, w: cw - 0.6, h: 0, line: { color: eRule(), width: 0.75 } });
+      s.addText(String(i + 1), { x: col.x + 0.3, y, w: 0.45, h: 0.5, fontFace: F.H, fontSize: 24, bold: true, color: eInk(col.c, eCard()), margin: 0, valign: "top" });
+      const runs = [{ text: it.title, options: { bold: true, fontSize: col.fs[0], color: eText(), breakLine: true } }];
+      if (it.text) runs.push({ text: it.text, options: { fontSize: col.fs[1], color: C.BODY, breakLine: !!it.meta } });
+      if (it.meta) runs.push({ text: it.meta, options: { fontSize: col.fs[2], italic: true, color: C.GRAY } });
+      s.addText(runs, { x: col.x + 0.85, y, w: tw, h: col.hs[i] - 0.15, fontFace: F.H, valign: "top", margin: 0, lineSpacingMultiple: 1.1, paraSpaceAfter: 3 });
+      y += col.hs[i];
+    });
+  });
+};
+
+// tracker: up to three developers as full-width bands, four as a 2 x 2 grid of panels
+TEM.tracker = async (pres, d) => {
+  const s = await emberSlide(pres, d.eyebrow || "Team and task tracker", d.title || "Developer task track");
+  const devs = d.devs || [], n = devs.length, bottom = d.footnote ? 6.55 : 6.85, grid = n === 4, gap = 0.2;
+  const cols = grid ? 2 : 1, rows = Math.ceil(n / cols), pw = (11.93 - (cols - 1) * gap) / cols, ph = (bottom - 1.95 - (rows - 1) * gap) / Math.max(rows, 1);
+  devs.forEach((v, i) => {
+    const x = 0.7 + (i % cols) * (pw + gap), y = 1.95 + Math.floor(i / cols) * (ph + gap), c = projFor([v.project]), ci = eInk(c, eCard());
+    ePanel(s, x, y, pw, ph);
+    const items = v.items || [], half = Math.ceil(items.length / 2);
+    if (grid) {
+      s.addText(v.name, { x: x + 0.25, y: y + 0.08, w: pw - 0.5, h: 0.36, fontFace: F.H, fontSize: 15, bold: true, color: eText(), margin: 0, valign: "middle" });
+      s.addText(v.project || "", { x: x + 0.25, y: y + 0.44, w: pw - 1.8, h: 0.26, fontFace: F.B, fontSize: 11, bold: true, color: ci, margin: 0, valign: "middle" });
+      s.addText(`${v.pct ?? 0}%`, { x: x + pw - 1.45, y: y + 0.4, w: 1.2, h: 0.36, fontFace: F.H, fontSize: 20, bold: true, color: ci, align: "right", margin: 0, valign: "middle" });
+      eBar(s, x + 0.25, y + 0.8, pw - 0.5, v.pct, c, 0.08);
+      const iw = (pw - 0.5) / 2, ih = Math.min(0.4, (ph - 1.05) / Math.max(half, 1));
+      items.forEach((it, k) => {
+        const cx = x + 0.25 + Math.floor(k / half) * iw, cyy = y + 0.98 + (k % half) * ih, on = it.state === "done";
+        s.addShape("rect", { x: cx, y: cyy + 0.07, w: 0.12, h: 0.12, fill: on ? { color: c } : { type: "none" }, line: on ? { type: "none" } : { color: it.state === "next" ? C.GRAY : c, width: 1.25 } });
+        s.addText(it.text, { x: cx + 0.22, y: cyy, w: iw - 0.4, h: ih, fontFace: F.B, fontSize: 11, color: it.state === "next" ? C.GRAY : eText(), margin: 0, valign: "top" });
+      });
+    } else {
+      const two = (v.name || "").length > 26, nh = two ? 0.5 : 0.32;
+      s.addText(v.name, { x: x + 0.25, y: y + 0.1, w: 3.6, h: nh, fontFace: F.H, fontSize: two ? 13 : 15, bold: true, color: eText(), margin: 0, valign: "top" });
+      s.addText(v.project || "", { x: x + 0.25, y: y + 0.12 + nh, w: 3.6, h: 0.24, fontFace: F.B, fontSize: 11, bold: true, color: ci, margin: 0, valign: "middle", fit: "shrink" });
+      s.addText(v.focus || "", { x: x + 0.25, y: y + 0.4 + nh, w: 3.6, h: ph - 0.45 - nh, fontFace: F.B, fontSize: 11, italic: true, color: C.BODY, margin: 0, valign: "top" });
+      const mx = x + 4.2, mw = 2.3;
+      s.addText(`${v.pct ?? 0}%`, { x: mx, y: y + 0.1, w: mw, h: 0.6, fontFace: F.H, fontSize: 28, bold: true, color: ci, margin: 0, valign: "middle" });
+      s.addText(`${v.done ?? 0} done, ${v.open ?? 0} open`, { x: mx, y: y + 0.72, w: mw, h: 0.28, fontFace: F.B, fontSize: 11, color: C.BODY, margin: 0, valign: "middle" });
+      eBar(s, mx, y + ph - 0.3, mw, v.pct, c, 0.08);
+      const ix = x + 6.85, iw = (x + pw - ix - 0.25) / 2, ih = Math.min(0.4, (ph - 0.3) / Math.max(half, 1));
+      items.forEach((it, k) => {
+        const cx = ix + Math.floor(k / half) * iw, cyy = y + 0.15 + (k % half) * ih, on = it.state === "done";
+        s.addShape("rect", { x: cx, y: cyy + 0.07, w: 0.12, h: 0.12, fill: on ? { color: c } : { type: "none" }, line: on ? { type: "none" } : { color: it.state === "next" ? C.GRAY : c, width: 1.25 } });
+        s.addText(it.text, { x: cx + 0.22, y: cyy, w: iw - 0.35, h: ih, fontFace: F.B, fontSize: 11, color: it.state === "next" ? C.GRAY : eText(), margin: 0, valign: "top" });
+      });
+    }
+  });
+  if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.62, w: 11.93, h: 0.28, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
+};
+
 // ---------- Main ----------
 (async () => {
   const [, , inFile, outFile] = process.argv;
@@ -2047,16 +2482,16 @@ TP.tracker = async (pres, d) => {
   const pres = new pptxgen();
   pres.layout = "LAYOUT_WIDE";
   if (r.signature !== undefined) STYLE.signature = r.signature; else if (cfg.signature !== undefined) STYLE.signature = cfg.signature;
-  if (STYLE.bookend === "signature") await sigBookend(pres, r, "title"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "title"); else bookend(pres, r, "title");
+  if (STYLE.bookend === "signature") await sigBookend(pres, r, "title"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "title"); else if (STYLE.bookend === "ember") await emberBookend(pres, r, "title"); else bookend(pres, r, "title");
   SLIDE_NO = 1;
   FOOTER_TEXT = [r.company, r.date].filter(Boolean).join("  ·  ");
   for (let i = 0; i < r.slides.length; i++) {
     const sl = r.slides[i];
     if (!T[sl.type]) throw new Error(`Unknown slide type "${sl.type}" (slide ${i + 2})`);
-    const tpl = (STYLE.layouts === "editorial" && TE[sl.type]) || (STYLE.layouts === "signature" && TS[sl.type]) || (STYLE.layouts === "paper" && TP[sl.type]) || T[sl.type];
+    const tpl = (STYLE.layouts === "editorial" && TE[sl.type]) || (STYLE.layouts === "signature" && TS[sl.type]) || (STYLE.layouts === "paper" && TP[sl.type]) || (STYLE.layouts === "ember" && TEM[sl.type]) || T[sl.type];
     await tpl(pres, sl, i);
   }
-  if (STYLE.bookend === "signature") await sigBookend(pres, r, "closing"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "closing"); else bookend(pres, r, "closing");
+  if (STYLE.bookend === "signature") await sigBookend(pres, r, "closing"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "closing"); else if (STYLE.bookend === "ember") await emberBookend(pres, r, "closing"); else bookend(pres, r, "closing");
   await pres.writeFile({ fileName: outPath });
   console.log(`Wrote ${outFile} (${r.slides.length + 2} slides)`);
 })().catch((e) => { console.error(e.message); process.exit(1); });
