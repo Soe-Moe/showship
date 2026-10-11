@@ -192,7 +192,7 @@ One card per person (2–4). `done` / `open` = task counts for the week from the
 
 ## `table` — next steps / owners
 
-Usually the last content slide. 3–6 rows.
+Usually the last content slide. 3–6 rows. Every row is work for the next period, so its `state` is `next` or `progress` and its status word is Planned, Not started or In progress, never Completed or Live. Rows come from the user, the tracker or open work in the drafts, not from invention. `lint_report.js` fails a row marked done, and any status word that disagrees with its `state`.
 
 ```json
 { "type": "table", "eyebrow": "Looking Ahead", "title": "Next Steps & Focus Areas",

@@ -87,6 +87,32 @@ for (const { path: p, level, message } of validate(r, schema)) {
   else { checks++; console.log(`CHECK ${where}: ${message}`); }
   shown.add(where);
 }
+// A status word must agree with the slide's state, and a plan row is future work. Models copy a "Completed" or "On track"
+// label onto the wrong state or onto a plan row, so this is checked here rather than left to the instructions.
+{
+  const WORD = [[/^(completed?|done|released|approved|verified|resolved|delivered|live|shipped)\b/i, "done"], [/^(on track|in progress|in review|ongoing|started|under way)\b/i, "progress"],
+    [/^(blocked|at risk|delayed|stalled)\b/i, "blocked"], [/^(not started|planned|planning|next|to do|upcoming|queued)\b/i, "next"]];
+  const readState = (t) => { const m = WORD.find(([re]) => re.test(String(t).trim())); return m ? m[1] : null; };
+  const walkStates = (node, p) => {
+    if (Array.isArray(node)) { node.forEach((v, i) => walkStates(v, `${p}[${i}]`)); return; }
+    if (!node || typeof node !== "object") return;
+    const label = node.status || node.current;
+    if (typeof node.state === "string" && typeof label === "string") {
+      const word = readState(label);
+      if (word && word !== node.state) { fixes++; console.log(`FIX   ${p}: the status "${label}" reads as ${word}, but state is "${node.state}". Make them agree (a card at 100% is Completed, not On track).`); }
+    }
+    for (const [k, v] of Object.entries(node)) if (v && typeof v === "object") walkStates(v, `${p}.${k}`);
+  };
+  walkStates(r.slides || [], "slides");
+  (r.slides || []).forEach((sl, i) => {
+    if (sl.type !== "table") return;
+    (sl.rows || []).forEach((row, k) => {
+      if (row.state === "done" || readState(row.current || "") === "done") {
+        fixes++; console.log(`FIX   slides[${i}].rows[${k}]: "${row.project}" is in the next period's plan but is marked done. A plan row is future or ongoing work (state next or progress; status Planned, Not started or In progress). If it is finished, it belongs on an earlier slide.`);
+      }
+    });
+  });
+}
 // Images the deck will embed: the file must exist next to report.json and be a type the builder can read.
 {
   const dir = path.dirname(path.resolve(file)), IMG_OK = /\.(png|jpe?g|gif|webp|avif|tiff?|svg|bmp)$/i;

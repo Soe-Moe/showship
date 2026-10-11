@@ -483,8 +483,8 @@
           "project": "App Store Release",
           "owner": "Maya Lin @Maya",
           "focus": "Invite the first 20 clinic staff to TestFlight.",
-          "current": "DONE",
-          "state": "done"
+          "current": "NOT STARTED",
+          "state": "next"
         }
       ]
     }

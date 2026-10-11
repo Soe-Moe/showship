@@ -2663,5 +2663,6 @@ async function normalizeImages(r) {
   }
   if (STYLE.bookend === "signature") await sigBookend(pres, r, "closing"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "closing"); else if (STYLE.bookend === "ember") await emberBookend(pres, r, "closing"); else bookend(pres, r, "closing");
   await pres.writeFile({ fileName: outPath });
+  fs.rmSync(outPath.replace(/\.pptx$/i, "-qa"), { recursive: true, force: true }); // a rebuilt deck has not been checked yet: drop the old check images
   console.log(`Wrote ${outFile} (${r.slides.length + 2} slides)`);
 })().catch((e) => { console.error(e.message); process.exit(1); });
