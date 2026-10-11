@@ -25,7 +25,7 @@ https://github.com/user-attachments/assets/29e9b05b-637f-4db9-9bdb-6ad82487b57e
 
 Showship is an Agent Skill (a `SKILL.md` folder) for anyone who has to report what they built — **team leads** reporting the whole team to management, and **individuals** (developers, freelancers, contractors, founders) reporting their own work to a manager, tech lead or client. Run it in each repo you touched; your AI coding agent reads the commits, PRs, reviews and replies plus the tasks from your tracker (Jira, Linear, Asana, ClickUp, Lark, or any tool through MCP), translates them into plain business language (or keeps it technical for engineers), and builds a polished slide deck — with charts, owners, progress, blockers and the plan for next period.
 
-Works with **Claude Code**, plus **Codex** and **Antigravity** _(experimental)_ and other agents that read `SKILL.md` folders.
+Works with **Claude Code** and **Antigravity**, plus **Codex** _(experimental)_ and other agents that read `SKILL.md` folders.
 
 ```bash
 npx showship
@@ -35,7 +35,7 @@ npx showship
 > **Use `npx`, not `npm i`.** Showship isn't a library you import — `npx showship` runs the installer, which copies the skill into your agent's skills folder (`~/.claude/skills/showship`, …). Prefer a global command? `npm i -g showship`, then run `showship`.
 
 > [!NOTE]
-> **Beta.** Slide templates, config keys and installer options may still change between releases. The Jira, Linear, Asana and ClickUp integrations and the Codex / Antigravity installs have not yet been tested against many real setups. Please [open an issue](https://github.com/Soe-Moe/showship/issues) with feedback or bugs.
+> **Beta.** Slide templates, config keys and installer options may still change between releases. The Jira, Linear, Asana and ClickUp integrations and the Codex install have not yet been tested against many real setups. Please [open an issue](https://github.com/Soe-Moe/showship/issues) with feedback or bugs.
 
 ![Example deck](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/preview-grid.png)
 
@@ -125,7 +125,7 @@ The installer asks a few questions (↑/↓ to choose, Enter to confirm, ← or 
 ? Which agent do you want to install for?
 ❯ Claude Code   ~/.claude/skills
   Codex         ~/.codex/skills · experimental
-  Antigravity   ~/.gemini/config/skills · experimental
+  Antigravity   ~/.gemini/config/skills
   Other agents  ~/.agents/skills — shared folder read by several agents · experimental
 
 ? Where do you want to install it?
@@ -167,7 +167,7 @@ Then it copies the skill, records your choices in `config.json` (keeping anythin
 | ----------------------------- | ---------------------------------- | --------------------------- |
 | Claude Code                   | `~/.claude/skills/showship`        | `./.claude/skills/showship` |
 | Codex _(experimental)_        | `~/.codex/skills/showship`         | `./.agents/skills/showship` |
-| Antigravity _(experimental)_  | `~/.gemini/config/skills/showship` | `./.agents/skills/showship` |
+| Antigravity                   | `~/.gemini/config/skills/showship` | `./.agents/skills/showship` |
 | Other agents _(experimental)_ | `~/.agents/skills/showship`        | `./.agents/skills/showship` |
 
 **Without prompts** (CI, scripts, or if you already know what you want):

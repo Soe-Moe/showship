@@ -2451,52 +2451,80 @@ TEM.tracker = async (pres, d) => {
   if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.62, w: 11.93, h: 0.28, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
 };
 
+// ---------- Text measuring ----------
+// Arial advance widths (1/1000 em) for ASCII; used to count wrapped lines of body text without rendering. Other body fonts are
+// narrower or close, so the estimate errs on the tall side.
+const ARIAL_W = (() => {
+  const t = {}; const set = (chars, w) => { for (const c of chars) t[c] = w; };
+  set(" .,:;/!|", 278); set("fjt", 278); set("il", 222); set("rI", 333); set("-()[]`", 333); set("ckvxyzsJ", 500); set("'", 191); set("\"", 355);
+  set("abdeghnopqu0123456789?_#$L", 556); set("FTZ", 611); set("ABEKPSVXY&", 667); set("CDHNRUw", 722); set("GOQ", 778);
+  set("m", 833); set("M", 833); set("W", 944); set("%", 889); set("+<=>~", 584); set("@", 1015); set("*", 389); set("\\", 278);
+  return t;
+})();
+function textWidth(text, pt, bold) { let w = 0; for (const c of String(text)) w += ARIAL_W[c] || 600; return w / 1000 * pt / 72 * (bold ? 1.06 : 1); }
+// number of lines `text` takes in a box `width` inches wide (greedy word wrap, 3% safety margin)
+function wrapLines(text, pt, width, bold) {
+  const max = width * 0.97; let n = 1, cur = 0; const space = textWidth(" ", pt, bold);
+  for (const word of String(text || "").split(/\s+/).filter(Boolean)) {
+    const w = textWidth(word, pt, bold);
+    if (cur && cur + space + w > max) { n++; cur = w; } else cur = cur ? cur + space + w : w;
+  }
+  return n;
+}
+
 // ---------- task_detail: tasks written out in full (every style) ----------
 // One column per task (1 to 3): status, title, owner, a plain-language summary, then the subtasks or steps with their own
 // state. One task gets the whole width: the words on the left, the steps on the right. The body is shared; each style
 // supplies its slide chrome, panel, status tag and colours through a "look".
 function taskDetailBody(s, d, L) {
-  const tasks = d.tasks || [], n = tasks.length, top = 1.95, bottom = d.footnote ? 6.5 : 6.85, h = bottom - top, gap = 0.3;
+  const tasks = d.tasks || [], n = tasks.length, top = 1.95, bottom = d.footnote ? 6.5 : 6.85, hMax = bottom - top, gap = 0.3;
   const cw = n === 1 ? 11.93 : (11.93 - (n - 1) * gap) / n, wide = n === 1, pad = 0.25;
-  // text height estimate: characters x point size x average glyph width, over the box width, times line height
-  const lines = (t, pt, w, k) => Math.max(1, Math.ceil(String(t || "").length * pt * k / 72 / w));
-  tasks.forEach((t, i) => {
-    const x = 0.7 + i * (cw + gap), col = L.col(t, d), lw = wide ? 4.9 : cw - 2 * pad, px = wide ? x + pad + lw + 0.5 : x + pad, pw = wide ? cw - 2 * pad - lw - 0.5 : lw;
-    L.panel(s, x, top, cw, h, col, i);
-    L.tag(s, t.state, t.status, x + pad, top + 0.2, lw, col);
-    const tfs = wide ? 18 : 15, th = lines(t.title, tfs, lw, 0.6) * tfs * 1.25 / 72;
-    s.addText(t.title, { x: x + pad, y: top + 0.58, w: lw, h: th, fontFace: F.H, fontSize: tfs, bold: true, color: L.text(), valign: "top", margin: 0 });
-    let y = top + 0.58 + th + 0.05;
-    if (t.owner) { s.addText(`Owner: ${t.owner}`, { x: x + pad, y, w: lw, h: 0.25, fontFace: F.B, fontSize: 11, color: L.gray(), margin: 0, valign: "middle" }); y += 0.3; }
-    // optional screenshot or photo of the task: a thumbnail between the summary and the steps, or a large picture beside the words
+  // title height estimate for the heading face: characters x point size x average glyph width, over the box width
+  const tlines = (t, pt, w) => Math.max(1, Math.ceil(String(t || "").length * pt * 0.6 / 72 / w));
+  // first pass: how tall is each task's content, so the panels can be sized to it instead of leaving them half empty
+  const plans = tasks.map((t) => {
+    const lw = wide ? 4.9 : cw - 2 * pad, pw = wide ? cw - 2 * pad - lw - 0.5 : lw, tfs = wide ? 18 : 15;
+    const th = tlines(t.title, tfs, lw) * tfs * 1.25 / 72, y = 0.58 + th + 0.05 + (t.owner ? 0.3 : 0);
     const hasImg = !!t.image, cap = hasImg && t.caption ? 0.3 : 0;
     let ih = 0, iw = 0;
     if (hasImg) { const box = wide ? { w: pw, h: 2.6 } : { w: lw, h: 1.3 }; iw = Math.min(box.w, box.h / t.imageAspect); ih = iw * t.imageAspect; }
-    const pts = t.points || [], pfs = wide ? 13 : 11, pstep = (p) => lines(p.text, pfs, pw - 0.27, 0.5) * pfs * 1.2 / 72 + 0.06;
-    const ptsH = pts.reduce((a, p) => a + pstep(p), 0) + (pts.length ? 0.3 : 0) + (!wide && hasImg ? ih + cap + 0.15 : 0);
-    let sfs = wide ? 13 : 12, sh = lines(t.summary, sfs, lw, 0.5) * sfs * 1.3 / 72;
-    if (!wide && y + sh + 0.15 + ptsH > top + h) { sfs = 11; sh = lines(t.summary, sfs, lw, 0.5) * sfs * 1.3 / 72; }
-    if (!wide && y + sh + 0.15 + ptsH > top + h + 0.02) console.warn(`Warning: task_detail "${d.title}", task "${t.title}": too much text for ${n} columns, it will run past the panel. Use fewer tasks on this slide, fewer points, no image, or shorter text.`);
-    s.addText(t.summary || "", { x: x + pad, y, w: lw, h: wide ? h - (y - top) - 0.2 : sh, fontFace: F.B, fontSize: sfs, color: L.softText(), valign: "top", margin: 0, lineSpacingMultiple: 1.1 });
-    y += sh + 0.15;
+    const pts = t.points || [], pfs = wide ? 13 : 11, pstep = (p) => wrapLines(p.text, pfs, pw - 0.27) * pfs * 1.2 / 72 + (wide ? 0.18 : 0.06);
+    const ptsH = pts.reduce((a, p) => a + pstep(p), 0) + (pts.length ? 0.3 : 0);
+    let sfs = wide ? 13 : 12, sh = wrapLines(t.summary, sfs, lw) * sfs * 1.3 / 72;
+    if (!wide && y + sh + 0.15 + ptsH + (hasImg ? ih + cap + 0.15 : 0) > hMax) { sfs = 11; sh = wrapLines(t.summary, sfs, lw) * sfs * 1.3 / 72; }
+    const left = y + sh, right = wide ? 0.2 + (hasImg ? ih + cap + 0.15 : 0) + ptsH : y + sh + 0.15 + (hasImg ? ih + cap + 0.15 : 0) + ptsH;
+    return { lw, pw, tfs, th, y, hasImg, cap, ih, iw, pts, pfs, pstep, sfs, sh, need: Math.max(left, right) };
+  });
+  const need = Math.max(...plans.map((q) => q.need)), h = Math.min(hMax, Math.max(wide ? 3.4 : 2.6, need + 0.3));
+  plans.forEach((q, i) => {
+    if (!wide && q.need > hMax + 0.02) console.warn(`Warning: task_detail "${d.title}", task "${tasks[i].title}": too much text for ${n} columns, it will run past the panel. Use fewer tasks on this slide, fewer points, no image, or shorter text.`);
+  });
+  tasks.forEach((t, i) => {
+    const q = plans[i], x = 0.7 + i * (cw + gap), col = L.col(t, d), px = wide ? x + pad + q.lw + 0.5 : x + pad;
+    L.panel(s, x, top, cw, h, col, i);
+    L.tag(s, t.state, t.status, x + pad, top + 0.2, q.lw, col);
+    s.addText(t.title, { x: x + pad, y: top + 0.58, w: q.lw, h: q.th, fontFace: F.H, fontSize: q.tfs, bold: true, color: L.text(), valign: "top", margin: 0 });
+    let y = top + 0.58 + q.th + 0.05;
+    if (t.owner) { s.addText(`Owner: ${t.owner}`, { x: x + pad, y, w: q.lw, h: 0.25, fontFace: F.B, fontSize: 11, color: L.gray(), margin: 0, valign: "middle" }); y += 0.3; }
+    s.addText(t.summary || "", { x: x + pad, y, w: q.lw, h: wide ? Math.max(q.sh, 0.4) + 0.1 : q.sh, fontFace: F.B, fontSize: q.sfs, color: L.softText(), valign: "top", margin: 0, lineSpacingMultiple: 1.1 });
+    y += q.sh + 0.15;
     let py = wide ? top + 0.2 : y;
-    if (hasImg) {
+    if (q.hasImg) {
       const ix = wide ? px : x + pad, iy = wide ? py : y;
-      s.addImage({ path: t.image, x: ix, y: iy, w: iw, h: ih, altText: t.caption || t.title });
-      s.addShape("rect", { x: ix, y: iy, w: iw, h: ih, fill: { type: "none" }, line: { color: L.rule(), width: 0.75 } });
-      if (t.caption) s.addText(t.caption, { x: ix, y: iy + ih + 0.04, w: wide ? pw : lw, h: 0.26, fontFace: F.B, fontSize: 11, italic: true, color: L.gray(), margin: 0, valign: "middle" });
-      py = iy + ih + cap + 0.15;
+      s.addImage({ path: t.image, x: ix, y: iy, w: q.iw, h: q.ih, altText: t.caption || t.title });
+      s.addShape("rect", { x: ix, y: iy, w: q.iw, h: q.ih, fill: { type: "none" }, line: { color: L.rule(), width: 0.75 } });
+      if (t.caption) s.addText(t.caption, { x: ix, y: iy + q.ih + 0.04, w: wide ? q.pw : q.lw, h: 0.26, fontFace: F.B, fontSize: 11, italic: true, color: L.gray(), margin: 0, valign: "middle" });
+      py = iy + q.ih + q.cap + 0.15;
     }
-    if (pts.length) { s.addText("Details", { x: px, y: py, w: pw, h: 0.25, fontFace: F.B, fontSize: 11, bold: true, color: L.gray(), margin: 0, valign: "middle" }); py += 0.3; }
-    const wideStep = Math.min(0.8, (top + h - 0.15 - py) / Math.max(pts.length, 1));
-    pts.forEach((p) => {
-      const state = p.state || "done", c = state === "blocked" ? C.AMBER : state === "next" ? C.GRAY : col, solid = state === "done" || state === "blocked", st2 = wide ? wideStep : pstep(p);
+    if (q.pts.length) { s.addText("Details", { x: px, y: py, w: q.pw, h: 0.25, fontFace: F.B, fontSize: 11, bold: true, color: L.gray(), margin: 0, valign: "middle" }); py += 0.3; }
+    q.pts.forEach((p) => {
+      const state = p.state || "done", c = state === "blocked" ? C.AMBER : state === "next" ? C.GRAY : col, solid = state === "done" || state === "blocked", st2 = q.pstep(p);
       s.addShape("ellipse", { x: px, y: py + 0.06, w: 0.13, h: 0.13, fill: solid ? { color: c } : { type: "none" }, line: solid ? { type: "none" } : { color: c, width: 1.5 } });
-      s.addText(p.text, { x: px + 0.27, y: py, w: pw - 0.27, h: st2, fontFace: F.B, fontSize: pfs, color: state === "next" ? L.gray() : L.text(), valign: "top", margin: 0 });
+      s.addText(p.text, { x: px + 0.27, y: py, w: q.pw - 0.27, h: st2, fontFace: F.B, fontSize: q.pfs, color: state === "next" ? L.gray() : L.text(), valign: "top", margin: 0 });
       py += st2;
     });
   });
-  if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.55, w: 11.93, h: 0.3, fontFace: F.B, fontSize: 11, italic: true, color: L.gray(), margin: 0 });
+  if (d.footnote) s.addText(d.footnote, { x: 0.7, y: Math.min(top + h + 0.15, 6.55), w: 11.93, h: 0.3, fontFace: F.B, fontSize: 11, italic: true, color: L.gray(), margin: 0 });
 }
 const tdCol = (t, d) => projFor([t.project, d.project, d.eyebrow, d.title], C.LIME);
 const TD_CARD = {

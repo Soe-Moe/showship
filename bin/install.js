@@ -45,7 +45,7 @@ const AGENTS = [
   {
     id: "antigravity",
     label: "Antigravity",
-    hint: "~/.gemini/config/skills · experimental",
+    hint: "~/.gemini/config/skills",
     globalDir: path.join(HOME, ".gemini", "config", "skills"),
     projectDir: (cwd) => path.join(cwd, ".agents", "skills"),
     run: "antigravity",
