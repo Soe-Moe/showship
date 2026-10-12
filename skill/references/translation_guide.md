@@ -13,6 +13,12 @@ Business readers want to know **what capability now exists, for whom, and why it
 7. **No numbers you can't back up.** Commit counts and lines changed are not progress percentages; don't present them as such.
 8. **Detail beats a headline when people need to remember it.** A task slide that only says "Booking Calendar, 40%" is forgotten by Friday. For each task that matters, say what it is for, what was done in the period, what is left and what is waiting on whom, using its subtasks as the concrete steps ("Doctors can set their weekly hours", "Free time slots update when someone books"). Translate each step into what a person can now do. Keep every real step; group the technical ones instead of dropping them.
 
+9. **Facts first, then the reading of them.** Keep what happened (merged, 212 tests pass) apart from what you conclude (ready to release) and from what you recommend (release after the fix). Do not bend, round up or leave out findings to suit the story. Lead with the findings that support a recommendation, but do not hide the ones that cut against it.
+10. **Say who did what.** A sentence with no actor leaves the reader to guess it. "The reminder was sent twice" does not say who or what sent it; "The system sent the same reminder twice" does. Prefer active verbs and name the subject (the system, the clinic, the team) unless the actor truly does not matter.
+11. **Short words, short sentences.** One word beats three ("use", not "make use of"; "now", not "at this point in time"). Aim for sentences under about 20 words, with one idea each. Ask of each phrase: is there a shorter or stronger word?
+12. **Spell out abbreviations on first use** ("user acceptance testing (UAT)"), then use the same form everywhere. Jargon is technical language in the wrong place: a term that saves the CTO a sentence can lose the client. Match the reader's vocabulary, not the writer's.
+13. **Consistent house style.** Same names for the same things on every slide (project, phase, person), the same status words, the same date format, one spelling variant (British or American). The deck is a picture of the team's professionalism.
+
 ## Common translations
 
 | Commit pattern | Business wording |
@@ -137,3 +143,15 @@ Draft output:
 - Doctor Availability: Completed (lead to confirm)
 - Booking Calendar: In progress — % needed
 ```
+
+## Final review checklist
+
+Run this on the finished deck, reading it as the person who knows least. Writers miss their own slips, so ask another person who has not seen the drafts to proofread when you can.
+
+- **Purpose.** Does the deck do what the purpose sentence says? Does every slide earn its place?
+- **Summary.** Does the dashboard still match the slides after the last edits? Could someone who read only that slide know the one thing that matters?
+- **Facts.** Do the numbers add up and trace to a draft, `tasks.md` or an answer? Are abbreviations, names and status words the same everywhere?
+- **Ambiguity.** Is it clear who did what in every sentence? Would a reader fill a gap with the wrong picture? ("The payment was taken" leaves open who paid whom.)
+- **Findings versus recommendations.** Are conclusions (what the evidence shows) kept apart from recommendations and decisions needed (what to do next)? Is each recommendation backed by evidence on an earlier slide?
+- **Face to face.** Would you say each line to the audience's faces? If not, change it or leave it out.
+- **Tone.** Does it sound like the team's own voice, plain and professional, and not glossy?

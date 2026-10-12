@@ -141,5 +141,42 @@ for (const [p, text] of strings) {
     console.log(`${tag} ${p}: "${m[0]}" → ${hint}\n       in: ${text.length > 140 ? text.slice(0, 140) + "…" : text}`);
   }
 }
+// Plain-English habits that make a report hard to read (see references/translation_guide.md). Warnings only:
+// they apply to every audience, because wordy and actor-less sentences cost an engineer time too.
+{
+  const WORDY = [
+    [/\bin order to\b/i, "'to'"], [/\ba (large |good )?number of\b/i, "'many' or the actual number"], [/\bat this point in time\b/i, "'now'"],
+    [/\bdue to the fact that\b/i, "'because'"], [/\bmake use of\b|\butili[sz]e\b/i, "'use'"], [/\bleverag(e|ed|ing)\b/i, "'use'"],
+    [/\bfacilitat(e|ed|ing)\b/i, "'help' or say what it allows"], [/\bin the event that\b/i, "'if'"], [/\bprior to\b/i, "'before'"],
+    [/\bwith regard(s)? to\b/i, "'about'"], [/\bsubsequent(ly)?\b/i, "'later' / 'then'"],
+  ];
+  const PASSIVE = /\b(was|were|is|are|been|be)\s+(taken|done|made|given|sent|handled|addressed|raised|applied|carried out|performed|conducted|dealt with)\b(?!\s+by\b)/;
+  const ACRONYM_OK = new Set(["PM", "PMS", "CTO", "CEO", "COO", "CFO", "UI", "UX", "QA", "SMS", "PDF", "ID", "OK", "FAQ", "MMK", "USD", "EUR", "US", "UK", "AI", "HR", "PR", "PRS", "API", "APIS", "UAT", "JSON", "CI", "ORM", "SOA", "GD", "UUID", "ULID", "PHP", "SQL", "LEAD"]);
+  const defined = new Set();
+  for (const [, t] of strings) for (const m of t.matchAll(/\(([A-Z]{2,6})\)|\b([A-Z]{2,6})\s*\(/g)) defined.add(m[1] || m[2]);
+  const seenAcronym = new Set();
+  for (const [p, text] of strings) {
+    const officialName = /\.phases\[\d+\]\.name$/.test(p) || /\.current$/.test(p);
+    const show = () => `\n       in: ${text.length > 140 ? text.slice(0, 140) + "…" : text}`;
+    for (const [re, say] of WORDY) {
+      const m = text.match(re);
+      if (m) { checks++; console.log(`CHECK ${p}: "${m[0]}" → ${say}${show()}`); }
+    }
+    const pm = text.match(PASSIVE);
+    if (pm) { checks++; console.log(`CHECK ${p}: "${pm[0]}" leaves out who did it → name the actor ('the system sent…', 'the team applied…')${show()}`); }
+    for (const sentence of text.split(/(?<=[.!?])\s+/)) {
+      const words = sentence.trim().split(/\s+/).filter(Boolean).length;
+      if (words > 25) { checks++; console.log(`CHECK ${p}: a ${words}-word sentence → split it, one idea each (aim for 20 words or fewer)${show()}`); break; }
+    }
+    if (audience === "business" && !officialName && text !== text.toUpperCase()) {
+      for (const m of text.matchAll(/\b[A-Z]{2,6}\b/g)) {
+        const a = m[0];
+        if (ACRONYM_OK.has(a) || defined.has(a) || seenAcronym.has(a)) continue;
+        seenAcronym.add(a);
+        checks++; console.log(`CHECK ${p}: "${a}" is never spelled out in this deck → write it in full once, e.g. "Full Name (${a})", or use plain words${show()}`);
+      }
+    }
+  }
+}
 console.log(`\n${fixes} to fix, ${checks} to check.`);
 process.exit(fixes > 0 ? 1 : 0);
