@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://showship.github.io/docs/
+    about: Install, configuration, slide templates and troubleshooting.

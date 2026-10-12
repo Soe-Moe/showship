@@ -1,0 +1,67 @@
+name: Bug report
+description: Something in Showship does not work as expected
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. Do not paste tokens, customer data or private repository content. For a security problem, follow the [Security Policy](https://github.com/Soe-Moe/showship/blob/master/SECURITY.md) instead of opening an issue.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you ran, what you expected and what you got. Paste the error text if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Ran `npx showship ...`
+        2. Asked the agent to ...
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Showship version
+      description: The `VERSION` file in the installed skill folder, or `npm view showship version`.
+      placeholder: 0.1.0-beta.18
+    validations:
+      required: true
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Agent
+      options:
+        - Claude Code
+        - Codex
+        - Antigravity
+        - Running the scripts directly
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node version and OS
+      placeholder: Node 20.11, macOS 15
+  - type: dropdown
+    id: area
+    attributes:
+      label: Where did it go wrong
+      multiple: true
+      options:
+        - Installer
+        - Collecting commits or pull requests
+        - Task tracker (Jira, Linear, Asana, ClickUp, Lark, MCP)
+        - report.json or the language check
+        - Deck layout or design
+        - Layout check (LibreOffice)
+        - Documentation or website
+        - Not sure
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else
+      description: A screenshot of the slide, the relevant part of `report.json` (with private details removed), or the output of the failing script.
