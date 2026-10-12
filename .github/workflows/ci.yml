@@ -1,0 +1,52 @@
+# Builds the example report in every style and lints it, and smoke-tests the installer.
+# The render check (check_deck.js) needs LibreOffice and fonts, so it stays a manual step.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Install deck builder dependencies
+        working-directory: skill/scripts
+        run: npm install --no-audit --no-fund
+
+      - name: Lint and build the example report in every style
+        working-directory: skill/scripts
+        run: |
+          mkdir -p "$RUNNER_TEMP/decks"
+          for style in classic showship paper ember modern corporate vivid; do
+            echo "::group::$style"
+            node -e "const r=require('../examples/report.example.json'); r.style='$style'; require('fs').writeFileSync(process.env.RUNNER_TEMP+'/decks/$style.json', JSON.stringify(r))"
+            node lint_report.js "$RUNNER_TEMP/decks/$style.json"
+            node build_deck.js "$RUNNER_TEMP/decks/$style.json" "$RUNNER_TEMP/decks/$style.pptx"
+            echo "::endgroup::"
+          done
+
+  installer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+
+      - name: Run the installer into a temporary folder
+        run: |
+          node bin/install.js --yes --dir "$RUNNER_TEMP/skills" --skip-deps
+          test -f "$RUNNER_TEMP/skills/SKILL.md"
