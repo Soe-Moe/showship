@@ -1,0 +1,18 @@
+version: 2
+updates:
+  # Deck builder dependencies. The installer runs `npm install` here on users' machines.
+  - package-ecosystem: npm
+    directory: /skill/scripts
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    ignore:
+      # react and react-dom only render icons to SVG; stay on 18 until pptxgenjs and react-icons need more.
+      - dependency-name: react
+        update-types: [version-update:semver-major]
+      - dependency-name: react-dom
+        update-types: [version-update:semver-major]
+    groups:
+      react:
+        patterns: [react, react-dom, react-icons]
