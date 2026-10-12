@@ -16,3 +16,13 @@ updates:
     groups:
       react:
         patterns: [react, react-dom, react-icons]
+
+  # Workflow actions in .github/workflows.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: [dependencies]
+    groups:
+      actions:
+        patterns: ["*"]
