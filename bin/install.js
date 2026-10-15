@@ -109,6 +109,7 @@ const STYLES = [
   { id: "showship",  label: "Showship",  hint: "signature · colour-coded projects · gauges · ship-trail ribbons" },
   { id: "paper",     label: "Paper",     hint: "printed annual report · paper and ink · one colour per project" },
   { id: "ember",     label: "Ember",     hint: "dark graphite slides · amber accent · flat panels · big serif figures" },
+  { id: "summit",    label: "Summit",    hint: "executive brief for the CEO · ink and teal · figures first · decisions before risks" },
 ];
 
 const args = process.argv.slice(2);

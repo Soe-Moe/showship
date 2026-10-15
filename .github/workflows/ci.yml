@@ -29,7 +29,7 @@ jobs:
         working-directory: skill/scripts
         run: |
           mkdir -p "$RUNNER_TEMP/decks"
-          for style in classic showship paper ember modern corporate vivid; do
+          for style in classic showship paper ember summit modern corporate vivid; do
             echo "::group::$style"
             node -e "const r=require('../examples/report.example.json'); r.style='$style'; require('fs').writeFileSync(process.env.RUNNER_TEMP+'/decks/$style.json', JSON.stringify(r))"
             node lint_report.js "$RUNNER_TEMP/decks/$style.json"

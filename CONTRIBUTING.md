@@ -45,7 +45,7 @@ CI builds and lints the example report in every style and smoke-tests the instal
 ## What not to commit
 
 - A real `skill/config.json`. It holds personal settings and is git-ignored.
-- Generated decks (`*.pptx`). The only tracked ones are the seven `docs/example-deck*.pptx`, one per style, and they are refreshed by `make_previews.js`.
+- Generated decks (`*.pptx`). The only tracked ones are the eight `docs/example-deck*.pptx`, one per style, and they are refreshed by `make_previews.js`.
 - `node_modules`.
 - Real customer data, names, tokens or internal addresses in examples or screenshots.
 

@@ -70,6 +70,15 @@ const STYLES = {
     // categorical project colours, all light enough to read on graphite; coral is left out because it means risk
     projectColors: ["F2B134", "5CC8D7", "A99BFF", "9BD17A"],
   },
+  summit: {
+    label: "Summit: executive brief for the CEO or boss, ink and one teal accent, figures first, decisions before risks",
+    // DARK = ink, LIME = teal (the one accent), AMBER = risk only (brick red), ON_DARK = light teal for text on ink
+    palette: { DARK: "10202F", LIME: "0A6E78", LIGHT_LIME: "CDE5E8", AMBER: "B93A1E", CARD: "FFFFFF", BODY: "3B4A58", TRACK: "E1E7EB", GRID: "CFD7DD", BG: "F4F6F8", GRAY: "5B6773", ON_ACCENT: "FFFFFF", ON_WARN: "FFFFFF", ON_DARK: "8FD8DF" },
+    inks: { done: "0A6E78", progress: "3F6A85", blocked: "B93A1E", next: "5B6773" },
+    fonts: { head: "Cambria", body: "Arial" },
+    card: { radius: 0, shadow: null, border: "CFD7DD" },
+    pillRadius: 0, pillChar: 0.095, header: "summit", bookend: "summit", footer: false, layouts: "summit",
+  },
   modern: {
     label: "Modern — dark bookends, lime accent, serif headings",
     palette: { DARK: "141412", LIME: "A8CC3A", LIGHT_LIME: "D6E6A0", AMBER: "E0A33A", CARD: "F6F7F1", BODY: "58584F", TRACK: "E6E8DF", GRID: "E3E5DC", BG: "FFFFFF", ON_ACCENT: "141412", ON_WARN: "141412" },
@@ -188,6 +197,10 @@ function header(s, eyebrow, title, size) {
     s.addText(t, { x: 0.7, y: 0.68, w: 11.9, h: 0.7, fontFace: F.H, fontSize: Math.min(size || 28, 28), bold: true, color: "FFFFFF", margin: 0, fit: "shrink" });
     return;
   }
+  if (STYLE.header === "summit") {
+    summitFrame(s, eb, t, Math.min(size || 28, 28));
+    return;
+  }
   if (STYLE.header === "editorial") {
     s.addShape("line", { x: 0.7, y: 0.42, w: 11.93, h: 0, line: { color: C.DARK, width: 2 } });
     s.addText(eb, { x: 0.7, y: 0.56, w: 11.9, h: 0.28, fontFace: F.B, fontSize: 11, bold: true, color: C.GRAY, margin: 0 });
@@ -213,7 +226,7 @@ function header(s, eyebrow, title, size) {
 }
 
 // New content slide with the style's background and footer.
-let SLIDE_NO = 0, FOOTER_TEXT = "";
+let SLIDE_NO = 0, SLIDE_TOTAL = 0, FOOTER_TEXT = "";
 function newSlide(pres) {
   const s = pres.addSlide();
   SLIDE_NO++;
@@ -686,7 +699,8 @@ T.review_insights = async (pres, d) => {
     const y = rowsTop + i * (rh + gap);
     s.addShape("rect", { x: rx + 0.25, y: y + 0.08, w: 0.07, h: rh - 0.16, fill: { color: st(it.state).fill }, line: { type: "none" } });
     s.addText((it.area || ""), { x: rx + 0.45, y: y + 0.04, w: rw - 2.5, h: 0.28, fontFace: F.B, fontSize: 11, bold: true, color: C.BODY, margin: 0 });
-    s.addText(it.text, { x: rx + 0.45, y: y + 0.32, w: rw - 2.4, h: rh - 0.36, fontFace: F.B, fontSize: f.length > 4 ? 11.5 : 12.5, color: C.DARK, valign: "top", margin: 0, lineSpacingMultiple: 1.15, fit: "shrink" });
+    const chip = it.status || lbl[it.state] || "", chipW = chip ? 0.24 + chip.length * (STYLE.pillChar || 0.085) : 0;
+    s.addText(it.text, { x: rx + 0.45, y: y + 0.32, w: Math.min(rw - 0.7, rw - 0.45 - chipW - 0.5), h: rh - 0.36, fontFace: F.B, fontSize: f.length > 4 ? 11.5 : 12.5, color: C.DARK, valign: "top", margin: 0, lineSpacingMultiple: 1.15, fit: "shrink" });
     const pt = it.status || lbl[it.state] || "";
     if (pt) { const pw = 0.24 + pt.length * (STYLE.pillChar || 0.085); pill(s, pt, rx + rw - pw - 0.25, y + 0.06, it.state); }
   });
@@ -761,7 +775,7 @@ T.tracker = async (pres, d) => {
       s.addText(it.text, { x: ix + 0.24, y, w: iw - 0.24, h: ih, fontFace: F.B, fontSize: 11, color: C.DARK, valign: "top", margin: 0, lineSpacingMultiple: 1.05, fit: "shrink" });
     });
   });
-  if (d.footnote) s.addText(d.footnote, { x: 0.7, y: 6.9, w: 11.93, h: 0.3, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
+  if (d.footnote) s.addText(d.footnote, { x: 0.7, y: STYLE.header === "summit" ? 6.82 : 6.9, w: 11.93, h: STYLE.header === "summit" ? 0.26 : 0.3, fontFace: F.B, fontSize: 11, italic: true, color: C.GRAY, margin: 0 });
 };
 
 // ---------- Classic (editorial) layouts ----------
@@ -2560,6 +2574,158 @@ TEM.task_detail = async (pres, d) => {
   taskDetailBody(await L.slide(pres, d), d, L);
 };
 
+// ---------- Summit layouts (executive brief) ----------
+// Direction: a team lead reporting to the CEO or boss, who reads the numbers first and decides in a few minutes.
+// So: figures lead, one teal accent marks the focal figure, brick red is for risk only, decisions come before blockers,
+// flat white panels with a hairline border, no shadow, square corners. Cambria for headings and figures (a serif reads as
+// authority from the back of a room), Arial for body. An ink strip with a short teal block across the top is the repeated
+// motif, and every slide carries "page of total" so the boss can say "go back to slide 4".
+// Dials: ENERGY 1 / RHYTHM 2 / MOTION 1. Slide types without a Summit layout use the shared card layouts (T) in this look.
+const TSU = {};
+const SU_SOFT = "AEBBC6"; // secondary text on ink (9.5:1)
+
+function summitFrame(s, eyebrow, title, size) {
+  s.addShape("rect", { x: 0, y: 0, w: 13.333, h: 0.12, fill: { color: C.DARK }, line: { type: "none" } });
+  s.addShape("rect", { x: 0.7, y: 0, w: 1.1, h: 0.12, fill: { color: C.LIME }, line: { type: "none" } });
+  s.addText(sentence(eyebrow || ""), { x: 0.7, y: 0.42, w: 11.9, h: 0.3, fontFace: F.B, fontSize: 12, bold: true, color: ink(C.LIME), margin: 0, valign: "middle" });
+  s.addText(title || "", { x: 0.7, y: 0.74, w: 11.93, h: 0.74, fontFace: F.H, fontSize: size || 28, bold: true, color: C.DARK, margin: 0, valign: "middle", fit: "shrink" });
+  s.addShape("line", { x: 0.7, y: 1.62, w: 11.93, h: 0, line: { color: C.DARK, width: 1 } });
+  s.addText(FOOTER_TEXT, { x: 0.7, y: 7.1, w: 7, h: 0.26, fontFace: F.B, fontSize: 11, color: C.GRAY, margin: 0, valign: "middle" });
+  if (SLIDE_TOTAL) s.addText(`${SLIDE_NO} / ${SLIDE_TOTAL}`, { x: 11.63, y: 7.1, w: 1.0, h: 0.26, fontFace: F.B, fontSize: 11, bold: true, color: C.DARK, align: "right", margin: 0, valign: "middle" });
+  if (STYLE.signature !== false) {
+    s.addImage({ path: path.join(CACHE, "paper_mark.png"), x: 9.4, y: 7.12, w: 0.22, h: 0.22 });
+    s.addText([{ text: "Shipped with ", options: { color: C.GRAY } }, { text: "Showship", options: { color: C.DARK, bold: true } }],
+      { x: 9.68, y: 7.1, w: 1.8, h: 0.26, fontFace: F.H, fontSize: 11, margin: 0, valign: "middle" });
+  }
+}
+async function summitSlide(pres, eyebrow, title, size) {
+  const s = newSlide(pres);
+  summitFrame(s, eyebrow, title, size);
+  return s;
+}
+// status: a square marker plus a sentence-case word. Solid = done, ring = in progress, red = risk, grey ring = not started
+function suStatus(s, state, text, x, y, w) {
+  const label = sentence(text || st(state).label), risk = state === "blocked", solid = state === "done" || risk;
+  const c = st(state).ink;
+  s.addShape("rect", { x, y: y + 0.075, w: 0.14, h: 0.14, fill: solid ? { color: c } : { type: "none" }, line: solid ? { type: "none" } : { color: c, width: 1.5 } });
+  s.addText(label, { x: x + 0.24, y, w: Math.max(w - 0.24, 0.5), h: 0.29, fontFace: F.B, fontSize: 12, bold: true, color: ink(c), margin: 0, valign: "middle" });
+}
+
+// cover and closing: ink slide, stairs rising to the right (progress toward the top), the top step in teal
+async function summitBookend(pres, r, kind) {
+  const s = pres.addSlide();
+  s.background = { color: C.DARK };
+  const heights = [1.6, 2.5, 3.4, 4.3, 5.2], sw = 0.62, g = 0.12, x0 = 12.633 - (heights.length * sw + (heights.length - 1) * g);
+  heights.forEach((h, i) => {
+    const top = i === heights.length - 1;
+    s.addShape("rect", { x: x0 + i * (sw + g), y: 7.5 - h, w: sw, h, fill: { color: top ? C.LIME : tint(C.DARK, 0.08 + 0.05 * i) }, line: { type: "none" } });
+  });
+  if (LOGO) { let lw = 0.62, lh = lw * LOGO.aspect; if (lh > 0.62) { lh = 0.62; lw = lh / LOGO.aspect; } s.addImage({ path: LOGO.path, x: 0.7, y: 0.62, w: lw, h: lh }); }
+  s.addText(r.company, { x: LOGO ? 1.5 : 0.7, y: 0.62, w: 6, h: 0.62, fontFace: F.B, fontSize: 13, bold: true, color: "FFFFFF", valign: "middle", margin: 0 });
+  s.addShape("rect", { x: 0.7, y: 2.3, w: 1.1, h: 0.07, fill: { color: C.LIME }, line: { type: "none" } });
+  if (kind === "title") {
+    s.addText(sentence(r.eyebrow), { x: 0.7, y: 2.5, w: 7.8, h: 0.4, fontFace: F.B, fontSize: 15, bold: true, color: C.ON_DARK, margin: 0 });
+    s.addText(r.title, { x: 0.7, y: 2.95, w: 7.8, h: 2.3, fontFace: F.H, fontSize: 44, bold: true, color: "FFFFFF", lineSpacingMultiple: 1.0, margin: 0, valign: "top", fit: "shrink" });
+  } else {
+    s.addText("Thank you", { x: 0.7, y: 2.5, w: 7.8, h: 1.2, fontFace: F.H, fontSize: 56, bold: true, color: "FFFFFF", margin: 0 });
+    s.addText("Questions and discussion", { x: 0.7, y: 3.75, w: 7.8, h: 0.6, fontFace: F.H, fontSize: 22, italic: true, color: C.ON_DARK, margin: 0 });
+  }
+  s.addShape("line", { x: 0.7, y: 5.95, w: 7.8, h: 0, line: { color: tint(C.DARK, 0.25), width: 1 } });
+  const presenter = kind === "title" ? r.presenter : (r.closingPresenter || r.presenter);
+  [["Presenter", presenter, 0.7], ["Date", r.date, 4.7]].forEach(([k, v, x]) => {
+    s.addText(k, { x, y: 6.1, w: 3.6, h: 0.28, fontFace: F.B, fontSize: 11, color: SU_SOFT, margin: 0 });
+    s.addText(v || "", { x, y: 6.38, w: 3.8, h: 0.4, fontFace: F.H, fontSize: 15, bold: true, color: "FFFFFF", margin: 0 });
+  });
+  if (STYLE.signature !== false && kind === "title") {
+    s.addText([{ text: "Shipped with ", options: { color: SU_SOFT } }, { text: "Showship", options: { color: "FFFFFF", bold: true } }],
+      { x: 0.7, y: 6.95, w: 3, h: 0.3, fontFace: F.H, fontSize: 11, margin: 0, valign: "middle" });
+  }
+}
+
+// dashboard: a scoreboard. One panel, one column per project, the figure first; the first figure is the teal one.
+// The key update is the bottom line, set on an ink strip.
+TSU.dashboard = async (pres, d) => {
+  const s = await summitSlide(pres, d.eyebrow || "Executive summary", d.title || "At a glance", 30);
+  const cards = d.cards, n = cards.length, top = 1.95, h = d.keyUpdate ? 4.17 : 4.9, cw = 11.93 / n, iw = cw - 0.6, off = (h - 4.17) * 0.6;
+  s.addShape("rect", { x: 0.7, y: top, w: 11.93, h, fill: { color: C.CARD }, line: { color: C.GRID, width: 0.75 } });
+  // one figure size for the row so the figures line up; sized so the longest still fits its column
+  const fit = (c) => iw * 72 / (Math.max(String(c.metric).length, 1) * 0.6);
+  const fs = Math.max(30, Math.min(60, ...cards.map(fit)));
+  cards.forEach((c, i) => {
+    const x = 0.7 + i * cw, ix = x + 0.3;
+    if (i) s.addShape("line", { x, y: top + 0.3, w: 0, h: h - 0.6, line: { color: C.GRID, width: 0.75 } });
+    s.addText(c.label, { x: ix, y: top + 0.28, w: iw, h: 0.3, fontFace: F.B, fontSize: 11, bold: true, color: C.BODY, margin: 0, valign: "middle" });
+    s.addText(String(c.metric), { x: ix, y: top + 0.62, w: iw, h: 1.0 + off, fontFace: F.H, fontSize: fs, bold: true, color: i === 0 ? ink(C.LIME, C.CARD) : C.DARK, margin: 0, valign: "middle" });
+    suStatus(s, c.state, c.status, ix, top + 1.7 + off, iw);
+    s.addText(c.headline, { x: ix, y: top + 2.1 + off, w: iw, h: 0.72, fontFace: F.H, fontSize: 16, bold: true, color: C.DARK, margin: 0, valign: "top" });
+    s.addText(c.desc || "", { x: ix, y: top + 2.85 + off, w: iw, h: h - 2.95 - off, fontFace: F.B, fontSize: 12, color: C.BODY, margin: 0, valign: "top", lineSpacingMultiple: 1.15 });
+  });
+  if (d.keyUpdate) {
+    const y = top + h + 0.15;
+    s.addShape("rect", { x: 0.7, y, w: 11.93, h: 0.58, fill: { color: C.DARK }, line: { type: "none" } });
+    s.addText("Key update", { x: 0.95, y, w: 1.6, h: 0.58, fontFace: F.B, fontSize: 12, bold: true, color: C.ON_DARK, margin: 0, valign: "middle" });
+    s.addText(d.keyUpdate, { x: 2.6, y, w: 9.8, h: 0.58, fontFace: F.B, fontSize: 13, color: "FFFFFF", margin: 0, valign: "middle" });
+  }
+};
+
+// attention: decisions come first and get the wider column, because the boss is there to decide; risks sit beside them.
+// No boxes: a heavy rule, a heading with a count, numbered items between hairlines.
+TSU.attention = async (pres, d) => {
+  const s = await summitSlide(pres, d.eyebrow || "Needs attention", d.title || "Decisions and blockers", 28);
+  const top = 1.95, gap = 0.5, lw = 6.5, rw = 11.93 - lw - gap, avail = 6.85 - top - 0.85;
+  const cols = [
+    { x: 0.7, w: lw, head: d.decisionsTitle || "Decisions needed", items: d.decisions || [], c: C.LIME, empty: "No decisions needed." },
+    { x: 0.7 + lw + gap, w: rw, head: d.blockersTitle || "Blockers and risks", items: d.blockers || [], c: C.AMBER, empty: d.noBlockers || "No open blockers." },
+  ];
+  // item heights come from measured line counts; type steps down once if a column would run past the slide
+  const heights = (col, f) => col.items.map((it) => {
+    const tw = col.w - 0.8;
+    return wrapLines(it.title, f[0], tw, true) * f[0] * 1.22 / 72 + (it.text ? 0.04 + wrapLines(it.text, f[1], tw) * f[1] * 1.25 / 72 : 0) + (it.meta ? 0.03 + wrapLines(it.meta, f[2], tw) * f[2] * 1.25 / 72 : 0) + f[3];
+  });
+  const sum = (a) => a.reduce((x, y) => x + y, 0);
+  // both columns share one type step so the sizes match side by side
+  const steps = [[15, 12, 11, 0.3], [13, 11.5, 11, 0.28], [12, 11, 11, 0.22]];
+  const step = steps.find((f) => cols.every((col) => sum(heights(col, f)) <= avail)) || steps[steps.length - 1];
+  cols.forEach((col) => {
+    col.f = step; col.hs = heights(col, step);
+    if (sum(col.hs) > avail + 0.02) console.warn(`Warning: attention "${d.title}", "${col.head}": too much text, it will run past the slide. Shorten the items or move some to another slide.`);
+  });
+  cols.forEach((col) => {
+    s.addShape("line", { x: col.x, y: top, w: col.w, h: 0, line: { color: ink(col.c), width: 3 } });
+    s.addText([{ text: col.head, options: { bold: true, color: C.DARK } }, { text: `   ${col.items.length}`, options: { color: C.GRAY } }],
+      { x: col.x, y: top + 0.12, w: col.w, h: 0.5, fontFace: F.H, fontSize: 18, margin: 0, valign: "middle" });
+    if (!col.items.length) { s.addText(col.empty, { x: col.x, y: top + 0.85, w: col.w, h: 0.4, fontFace: F.H, fontSize: 14, italic: true, color: C.BODY, margin: 0 }); return; }
+    let y = top + 0.85;
+    col.items.forEach((it, i) => {
+      if (i) s.addShape("line", { x: col.x, y: y - 0.1, w: col.w, h: 0, line: { color: C.GRID, width: 0.75 } });
+      s.addText(String(i + 1), { x: col.x, y, w: 0.5, h: 0.45, fontFace: F.H, fontSize: 24, bold: true, color: ink(col.c), margin: 0, valign: "top" });
+      const runs = [{ text: it.title, options: { bold: true, fontSize: col.f[0], color: C.DARK, breakLine: true } }];
+      if (it.text) runs.push({ text: it.text, options: { fontSize: col.f[1], color: C.BODY, breakLine: !!it.meta } });
+      if (it.meta) runs.push({ text: it.meta, options: { fontSize: col.f[2], italic: true, color: C.GRAY } });
+      s.addText(runs, { x: col.x + 0.8, y, w: col.w - 0.8, h: col.hs[i] - 0.2, fontFace: F.B, valign: "top", margin: 0, lineSpacingMultiple: 1.1, paraSpaceAfter: 3 });
+      y += col.hs[i];
+    });
+  });
+};
+
+// table: ink header row, hairlines between rows, status as marker plus word instead of a coloured cell
+TSU.table = async (pres, d) => {
+  const s = await summitSlide(pres, d.eyebrow || "Looking ahead", d.title || "Next steps and focus areas", 30);
+  const cols = [{ k: "Project or track", w: 2.9 }, { k: "Owner", w: 2.0 }, { k: "Next focus", w: 4.83 }, { k: "Status", w: 2.2 }];
+  let x = 0.7; const xs = cols.map((c) => { const v = x; x += c.w; return v; });
+  s.addShape("rect", { x: 0.7, y: 1.95, w: 11.93, h: 0.5, fill: { color: C.DARK }, line: { type: "none" } });
+  cols.forEach((c, i) => s.addText(c.k, { x: xs[i] + 0.2, y: 1.95, w: c.w - 0.4, h: 0.5, fontFace: F.B, fontSize: 11, bold: true, color: "FFFFFF", margin: 0, valign: "middle" }));
+  const n = d.rows.length, rh = Math.min(0.95, 4.35 / n), fs = rh < 0.8 ? 11.5 : 12;
+  d.rows.forEach((r, i) => {
+    const y = 2.45 + i * rh;
+    s.addShape("line", { x: 0.7, y: y + rh, w: 11.93, h: 0, line: { color: C.GRID, width: 0.75 } });
+    s.addText(r.project, { x: xs[0] + 0.2, y, w: cols[0].w - 0.4, h: rh, fontFace: F.H, fontSize: 14, bold: true, color: C.DARK, margin: 0, valign: "middle" });
+    s.addText(r.owner || "", { x: xs[1] + 0.2, y, w: cols[1].w - 0.4, h: rh, fontFace: F.B, fontSize: fs, color: C.BODY, margin: 0, valign: "middle" });
+    s.addText(r.focus, { x: xs[2] + 0.2, y, w: cols[2].w - 0.4, h: rh, fontFace: F.B, fontSize: fs, color: C.DARK, margin: 0, valign: "middle" });
+    suStatus(s, r.state, r.current, xs[3] + 0.2, y + rh / 2 - 0.145, cols[3].w - 0.3);
+  });
+};
+
 // ---------- Images (screenshots and photos the user provides) ----------
 // Every image named in report.json (rows.image, gallery.images, task_detail tasks[].image) is checked and normalised before
 // any template sees it: the file must exist, phone photos are rotated upright, the format becomes PNG or JPEG (PowerPoint
@@ -2652,16 +2818,18 @@ async function normalizeImages(r) {
   const pres = new pptxgen();
   pres.layout = "LAYOUT_WIDE";
   if (r.signature !== undefined) STYLE.signature = r.signature; else if (cfg.signature !== undefined) STYLE.signature = cfg.signature;
-  if (STYLE.bookend === "signature") await sigBookend(pres, r, "title"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "title"); else if (STYLE.bookend === "ember") await emberBookend(pres, r, "title"); else bookend(pres, r, "title");
+  if (STYLE.bookend === "signature") await sigBookend(pres, r, "title"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "title"); else if (STYLE.bookend === "ember") await emberBookend(pres, r, "title"); else if (STYLE.bookend === "summit") await summitBookend(pres, r, "title"); else bookend(pres, r, "title");
   SLIDE_NO = 1;
+  SLIDE_TOTAL = r.slides.length + 2;
+  if (STYLE.layouts === "summit") await paperArt("mark");
   FOOTER_TEXT = [r.company, r.date].filter(Boolean).join("  ·  ");
   for (let i = 0; i < r.slides.length; i++) {
     const sl = r.slides[i];
     if (!T[sl.type]) throw new Error(`Unknown slide type "${sl.type}" (slide ${i + 2})`);
-    const tpl = (STYLE.layouts === "editorial" && TE[sl.type]) || (STYLE.layouts === "signature" && TS[sl.type]) || (STYLE.layouts === "paper" && TP[sl.type]) || (STYLE.layouts === "ember" && TEM[sl.type]) || T[sl.type];
+    const tpl = (STYLE.layouts === "editorial" && TE[sl.type]) || (STYLE.layouts === "signature" && TS[sl.type]) || (STYLE.layouts === "paper" && TP[sl.type]) || (STYLE.layouts === "ember" && TEM[sl.type]) || (STYLE.layouts === "summit" && TSU[sl.type]) || T[sl.type];
     await tpl(pres, sl, i);
   }
-  if (STYLE.bookend === "signature") await sigBookend(pres, r, "closing"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "closing"); else if (STYLE.bookend === "ember") await emberBookend(pres, r, "closing"); else bookend(pres, r, "closing");
+  if (STYLE.bookend === "signature") await sigBookend(pres, r, "closing"); else if (STYLE.bookend === "paper") await paperBookend(pres, r, "closing"); else if (STYLE.bookend === "ember") await emberBookend(pres, r, "closing"); else if (STYLE.bookend === "summit") await summitBookend(pres, r, "closing"); else bookend(pres, r, "closing");
   await pres.writeFile({ fileName: outPath });
   fs.rmSync(outPath.replace(/\.pptx$/i, "-qa"), { recursive: true, force: true }); // a rebuilt deck has not been checked yet: drop the old check images
   console.log(`Wrote ${outFile} (${r.slides.length + 2} slides)`);

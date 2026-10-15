@@ -6,7 +6,7 @@
  * Usage: node make_previews.js [docs-dir]      (default: <repo>/docs)
  *
  * Needs LibreOffice (soffice) and poppler (pdftoppm). Writes:
- *   example-deck.pptx (classic), example-deck-showship.pptx, example-deck-paper.pptx, example-deck-ember.pptx, example-deck-modern.pptx, example-deck-corporate.pptx, example-deck-vivid.pptx
+ *   example-deck.pptx (classic), example-deck-showship.pptx, example-deck-paper.pptx, example-deck-ember.pptx, example-deck-summit.pptx, example-deck-modern.pptx, example-deck-corporate.pptx, example-deck-vivid.pptx
  *   style-<name>.png      title + dashboard + phase bars strip, one per style
  *   <name>-grid.png       every slide in one sheet (every style); preview-grid.png = showship
  *   slide-*.png           single slides used in the README template table (showship)
@@ -24,8 +24,8 @@ const REPORT = require(path.join(REPO, "skill", "examples", "report.example.json
 const { renderPdf } = require("./render_pdf");
 const BG = { r: 235, g: 235, b: 230 };
 const W = 650, H = 366, PAD = 12;
-const STYLES = ["showship", "paper", "ember", "classic", "modern", "corporate", "vivid"];
-const EXAMPLE_DECK = { classic: "example-deck.pptx", showship: "example-deck-showship.pptx", paper: "example-deck-paper.pptx", ember: "example-deck-ember.pptx", modern: "example-deck-modern.pptx", corporate: "example-deck-corporate.pptx", vivid: "example-deck-vivid.pptx" };
+const STYLES = ["showship", "paper", "ember", "summit", "classic", "modern", "corporate", "vivid"];
+const EXAMPLE_DECK = { classic: "example-deck.pptx", showship: "example-deck-showship.pptx", paper: "example-deck-paper.pptx", ember: "example-deck-ember.pptx", summit: "example-deck-summit.pptx", modern: "example-deck-modern.pptx", corporate: "example-deck-corporate.pptx", vivid: "example-deck-vivid.pptx" };
 
 const work = fs.mkdtempSync(path.join(os.tmpdir(), "showship-prev-"));
 fs.mkdirSync(DOCS, { recursive: true });

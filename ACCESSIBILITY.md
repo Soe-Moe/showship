@@ -13,7 +13,7 @@ What the design rules require of every style (see [`skill/references/design_rule
 - Colour never carries meaning alone. Status is shown as colour plus a word (Completed, At risk, Blocked).
 - Text is sized to fit its box. It does not rely on auto-shrink, which some programs ignore.
 - Every deck is rendered and checked for text that crosses the margins or collides before it is delivered.
-- Seven designs are available. The `classic` design is black and white, and `ember` is a dark design for bright rooms.
+- Eight designs are available. The `classic` design is black and white, `ember` is a dark design for bright rooms, and `summit` is a calm ink-and-white design with status shown by a word as well as a marker.
 
 Known limitations:
 

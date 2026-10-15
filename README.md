@@ -76,7 +76,7 @@ The installer asks these questions; you can change them in `config.json` at any 
 - **Plain language by default, technical when you want it** — set `audience` to `business` or `engineering`. A built-in jargon check (`lint_report.js`) flags terms like _endpoint, schema, payload, JSON, 500 error, N+1_ and suggests business wording before the deck is built. It also warns about wordy phrases, passive sentences with no actor, sentences over 25 words and abbreviations that are never spelled out.
 - **Never invents numbers** — percentages, owners, dates and blockers come from your data or from you. The agent asks one consolidated question for anything GitHub can't tell it.
 - **13 slide templates, chosen to fit the data** — KPI dashboard, milestone timeline, doughnut progress, phase bar charts, workstreams, icon rows with generated illustrations, screenshot gallery, code-review insights, blockers & decisions, developer task tracker, task details written out in full, team activity chart, next-steps table. Consecutive slides never reuse the same layout.
-- **7 deck designs** — the colourful _Showship_ signature style, plus _Paper_, _Ember_, _Classic_, _Modern_, _Corporate_ and _Vivid_; every slide type works in all seven.
+- **8 deck designs** — the colourful _Showship_ signature style, plus _Paper_, _Ember_, _Summit_ (for reports to the CEO), _Classic_, _Modern_, _Corporate_ and _Vivid_; every slide type works in all eight.
 - **Checks its own layout** — after the build the deck is rendered and every slide is checked for text crossing the margins or colliding, and text that is too long for its slot is caught before the build.
 - **Your branding** — company name, logo (auto-trimmed) and colour overrides from one config file.
 - **Works across changing repos** — collect per repo, build once. The set of repos can change every period.
@@ -159,6 +159,7 @@ The installer asks a few questions (↑/↓ to choose, Enter to confirm, ← or 
   Showship      signature · colour-coded projects · gauges · ship-trail ribbons
   Paper         printed annual report · paper and ink · one colour per project
   Ember         dark graphite slides · amber accent · flat panels · big serif figures
+  Summit        executive brief for the CEO · ink and teal · figures first · decisions before risks
 ```
 
 Then it copies the skill, records your choices in `config.json` (keeping anything already there), installs the deck builder's dependencies, checks for `git`, `gh` and LibreOffice, and prints the setup steps for the tracker you picked.
@@ -185,7 +186,7 @@ npx showship --yes --period sprint --tasks jira --style corporate
 | `--period <p>`           | `weekly`, `biweekly`, `sprint`, `monthly`, `custom`                |
 | `--tasks <tool>`         | task tracker: `none`, `lark`, `jira`, `linear`, `asana`, `clickup`, `mcp` |
 | `--mcp-server <name>`    | with `--tasks mcp`: the MCP server to read tasks from (plus `--mcp-name`, `--mcp-lists "A, B"`, `--mcp-instructions "…"`) |
-| `--style <name>`         | deck design: `showship`, `paper`, `ember`, `classic`, `modern`, `corporate`, `vivid` |
+| `--style <name>`         | deck design: `showship`, `paper`, `ember`, `summit`, `classic`, `modern`, `corporate`, `vivid` |
 | `--role <role>`          | `lead` (whole team) or `member` (your own work)                    |
 | `--audience <a>`         | `business` (plain language) or `engineering`                       |
 | `--dir <path>`           | install into a custom skill folder                                 |
@@ -364,7 +365,7 @@ Also on the website: [Configuration reference](https://showship.github.io/docs/c
   "presenter": "Maya Lin @Maya", // title slide
   "closingPresenter": "Maya Lin", // closing slide
   "logo": "~/Pictures/acme-logo.png", // SVG/PNG/JPG; borders trimmed automatically; false = none
-  "style": "corporate", // deck design: showship | paper | ember | classic | modern | corporate | vivid
+  "style": "corporate", // deck design: showship | paper | ember | summit | classic | modern | corporate | vivid
   "updateCheck": true, // true (default) = the agent tells you once per session when a newer Showship exists; false = never check
   "theme": {
     "dark": "141412",
@@ -490,7 +491,7 @@ Standing instructions (people to exclude, how to count progress, environments) c
 
 Also on the website: [Deck designs gallery](https://showship.github.io/designs/).
 
-Seven designs, chosen to read well in a business meeting. Every slide type works in every style, from the same `report.json`.
+Eight designs, chosen to read well in a business meeting. Every slide type works in every style, from the same `report.json`.
 
 **Showship**: the signature style. Every project gets its own colour, carried from the dashboard to the phase tracks, task tracker and next-steps table, so the audience can follow a project by colour alone. Semicircle gauges, pill-track phase charts, a waffle of done/open tasks, a milestone trail for timelines, and the ship-trail ribbons on title slides. Uses the free [Poppins](https://fonts.google.com/specimen/Poppins) font (PowerPoint substitutes it if it isn't installed). A small "Shipped with Showship" mark sits in the footer; turn it off with `"signature": false` in `config.json` or `report.json`.
 ![Showship](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/style-showship.png)
@@ -506,6 +507,11 @@ Seven designs, chosen to read well in a business meeting. Every slide type works
 ![Ember](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/style-ember.png)
 
 <sub>All Ember slides: [preview](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/ember-grid.png) · [example deck](https://github.com/Soe-Moe/showship/raw/master/docs/example-deck-ember.pptx)</sub>
+
+**Summit**: the executive brief, for a team lead reporting to the CEO or the boss. Set for a reader who wants the numbers first and has a few minutes to decide. Ink and white with one teal accent for the focal figure and brick red kept for risks only. The dashboard is a scoreboard (one panel, one figure per project, the key update as a "bottom line" strip), the attention slide puts decisions before blockers and gives them the wider column, and the next-steps table marks status with a word instead of a coloured cell. Every slide carries "page of total" so the boss can say "go back to slide 4", and a short teal block on an ink strip is the repeated mark. Slide types without a Summit layout (timelines, phase bars, task details and the rest) use the shared card layouts in the Summit look. Uses Cambria and Arial, which ship with Microsoft Office.
+![Summit](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/style-summit.png)
+
+<sub>All Summit slides: [preview](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/summit-grid.png) · [example deck](https://github.com/Soe-Moe/showship/raw/master/docs/example-deck-summit.pptx)</sub>
 
 **Classic** — black & white editorial with its own layouts: no boxes, a lede column for the key message, large serif figures, numbered entries, a vertical timeline, phase lists instead of bar charts, heavy and hairline rules, one deep green accent
 ![Classic](https://raw.githubusercontent.com/Soe-Moe/showship/master/docs/style-classic.png)
@@ -599,7 +605,7 @@ Also on the website: [Troubleshooting guide](https://showship.github.io/docs/tro
 | Jira returns HTTP 401/403                                 | check `JIRA_EMAIL` matches the token's account and that you can see the projects in the browser                                                                                  |
 | The agent doesn't pick up the skill (Codex / Antigravity) | check the folder in the [install table](#install), restart the agent, and ask it "what skills are available?" — then [open an issue](https://github.com/Soe-Moe/showship/issues) |
 | `npm audit` warning about `image-size`                    | the package pins a patched version via `overrides`; delete `node_modules` and `package-lock.json` in `scripts/` and run `npm install` again                                      |
-| Fonts look different                                      | Showship and Paper use Poppins + Arial, Ember, Classic and Vivid use Georgia + Arial, Modern uses Cambria + Calibri, Corporate uses Arial; install the one your style needs or PowerPoint substitutes it |
+| Fonts look different                                      | Showship and Paper use Poppins + Arial, Ember, Classic and Vivid use Georgia + Arial, Summit uses Cambria + Arial, Modern uses Cambria + Calibri, Corporate uses Arial; install the one your style needs or PowerPoint substitutes it |
 | `sharp` fails to install                                  | `cd <skills folder>/showship/scripts && npm rebuild sharp`                                                                                                                       |
 
 ## Repository layout
